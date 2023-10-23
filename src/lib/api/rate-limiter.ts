@@ -10,6 +10,7 @@ export async function applyRateLimit(req: NextRequest) {
     ip: req.ip || null,
     method: req.method,
     url: req.url,
+    body: await req.json(),
   };
 
   await requests.insertOne(reqData);
