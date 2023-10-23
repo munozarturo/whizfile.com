@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Receive a transfer",
+  description: "Receive a transfer.",
+};
+
 export default function ReceiveTransferId(context: {
   params: { transferId: string };
 }) {
