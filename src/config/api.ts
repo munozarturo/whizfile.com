@@ -3,4 +3,7 @@ export const ApiConfig = {
     allowedRequests: 10,
     perTime: 60000,
   },
+  fileUpload: {
+    maxUploadSize: 1000000,
+  },
 };

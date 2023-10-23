@@ -20,3 +20,28 @@ export async function GET(req: NextRequest) {
 
   return Response.json({ message: "Hello world" }, { status: 200 });
 }
+
+export async function POST(req: NextRequest) {
+  const data = await req.formData();
+
+  const file: File | null = data.get("file") as unknown as File;
+
+  if (!file) {
+    return Response.json({ message: "no file" }, { status: 200 });
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const s3 = new S3();
+
+  await s3
+    .putObject({
+      Body: buffer,
+      Bucket: "whizfile-com-transfers",
+      Key: file.name,
+    })
+    .promise();
+
+  return Response.json({ message: "ok" }, { status: 200 });
+}
