@@ -31,5 +31,5 @@ export async function rateLimit(req: NextRequest): Promise<boolean> {
     time: { $gte: currentTime - perTime },
   });
 
-  return allowedRequests > requestsByIp;
+  return requestsByIp > allowedRequests;
 }
