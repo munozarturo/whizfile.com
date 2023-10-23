@@ -33,36 +33,38 @@ export default function Home() {
   };
 
   return (
-    <section className="py-24">
-      <div className="container">
-        <h1 className="text-3xl font-bold">Upload Files</h1>
-        <form onSubmit={onSubmit}>
-          <input
-            type="text"
-            name="transferId"
-            placeholder="Enter transferId"
-            onChange={(e) => setTransferId(e.target.value)}
-          />
-          <input
-            type="text"
-            name="title"
-            placeholder="Enter title"
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <textarea
-            name="message"
-            placeholder="Enter message"
-            onChange={(e) => setMessage(e.target.value)}
-          ></textarea>
+    <main className="w-full h-full ">
+      <section className="py-24">
+        <div className="container">
+          <h1 className="text-3xl font-bold">Upload Files</h1>
+          <form onSubmit={onSubmit}>
+            <input
+              type="text"
+              name="transferId"
+              placeholder="Enter transferId"
+              onChange={(e) => setTransferId(e.target.value)}
+            />
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter title"
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <textarea
+              name="message"
+              placeholder="Enter message"
+              onChange={(e) => setMessage(e.target.value)}
+            ></textarea>
 
-          <input
-            type="file"
-            name="file"
-            onChange={(e) => setFile(e.target.files?.[0])}
-          />
-          <input type="submit" value="upload" />
-        </form>
-      </div>
-    </section>
+            <input
+              type="file"
+              name="file"
+              onChange={(e) => setFile(e.target.files?.[0])}
+            />
+            <input type="submit" value="upload" />
+          </form>
+        </div>
+      </section>
+    </main>
   );
 }
