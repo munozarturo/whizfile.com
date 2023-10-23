@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "aws-sdk": "^2.1478.0",
     "clsx": "^2.0.0",
     "cva": "^0.0.0",
     "mongodb": "^6.2.0",

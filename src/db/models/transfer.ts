@@ -1,9 +1,8 @@
 import { ObjectId } from "mongodb";
 
-export default class Request {
+export default class Transfer {
   constructor(
     public transferId: string,
-    public source: string,
     public createdAt: number,
     public status: string,
     public title: string,

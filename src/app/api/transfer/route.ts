@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const client = await connectToDatabase();
     const db = client.db("main");
-    const transfers = db.collection("transfer");
+    const transfers = db.collection("transfers");
 
     // generate unique transfer id
     const generateTransferId = () =>
