@@ -1,16 +1,20 @@
 import { rateLimit } from "@/lib/api/rate-limiter";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
   context: { params: { transferId: string } }
 ) {
-  rateLimit(req);
+  if (await rateLimit(req)) {
+    return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
+  }
 }
 
 export async function DELETE(
   req: NextRequest,
   context: { params: { transferId: string } }
 ) {
-  rateLimit(req);
+  if (await rateLimit(req)) {
+    return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
+  }
 }

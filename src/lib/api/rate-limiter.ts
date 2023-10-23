@@ -1,7 +1,8 @@
 import { connectToDatabase } from "@/db/mongo";
 import { NextRequest } from "next/server";
+import { ApiConfig } from "@/config/api";
 
-export async function rateLimit(req: NextRequest) {
+export async function rateLimit(req: NextRequest): Promise<boolean> {
   const client = await connectToDatabase();
   const db = client.db("main");
   const requests = db.collection("requests");
@@ -12,11 +13,22 @@ export async function rateLimit(req: NextRequest) {
     ip = forwardedFor.split(",").at(0) ?? "Unknown";
   }
 
+  const currentTime = Date.now();
+
   const reqData = {
     ip: ip,
+    time: currentTime,
     method: req.method,
     url: req.url,
   };
 
   await requests.insertOne(reqData);
+
+  const { allowedRequests, perTime } = ApiConfig.rateLimit;
+  const requestsByIp = await requests.countDocuments({
+    ip: ip,
+    time: { $gte: currentTime - perTime },
+  });
+
+  return allowedRequests > requestsByIp;
 }
