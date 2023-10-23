@@ -87,6 +87,58 @@ export async function DELETE(
     const client = await connectToDatabase();
     const db = client.db("main");
     const transfers = db.collection("transfers");
+
+    const doc: unknown = await transfers.findOne(
+      {
+        transferId: input.transferId,
+      },
+      { projection: { _id: 0 } }
+    );
+
+    if (doc === null) {
+      return Response.json(
+        {
+          message: "Requested transfer does not exist.",
+          data: { transferId: input.transferId },
+        },
+        { status: 404 }
+      );
+    }
+
+    const queryResult = doc as Transfer;
+
+    if (queryResult.status === "expired") {
+      return Response.json(
+        {
+          message: "Requested transfer has expired.",
+          data: { transferId: input.transferId },
+        },
+        { status: 410 }
+      );
+    }
+
+    if (queryResult.status === "deleted") {
+      return Response.json(
+        {
+          message: "Requested transfer has been deleted.",
+          data: { transferId: input.transferId },
+        },
+        { status: 410 }
+      );
+    }
+
+    await transfers.updateOne(
+      { transferId: queryResult.transferId },
+      { $set: { status: "deleted" } }
+    );
+
+    return Response.json(
+      {
+        message: "Succesfully deleted transfer.",
+        data: { transferId: queryResult.transferId },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.log(error);
 
