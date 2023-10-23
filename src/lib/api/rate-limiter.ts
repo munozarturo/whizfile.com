@@ -1,6 +1,7 @@
 import { connectToDatabase } from "@/db/mongo";
 import { NextRequest } from "next/server";
 import { ApiConfig } from "@/config/api";
+import Request from "@/db/models/request";
 
 export async function rateLimit(req: NextRequest): Promise<boolean> {
   const client = await connectToDatabase();
@@ -15,14 +16,14 @@ export async function rateLimit(req: NextRequest): Promise<boolean> {
 
   const currentTime = Date.now();
 
-  const reqData = {
+  const request: Request = {
     ip: ip,
     time: currentTime,
     method: req.method,
     url: req.url,
   };
 
-  await requests.insertOne(reqData);
+  await requests.insertOne(request);
 
   const { allowedRequests, perTime } = ApiConfig.rateLimit;
   const requestsByIp = await requests.countDocuments({
