@@ -26,7 +26,7 @@ export default function Send() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <h2>uh oh! it looks like you're lost...</h2>
+          <h2>uh oh! it looks like you&apos;re lost...</h2>
         </CardContent>
         <CardFooter>
           <Link
