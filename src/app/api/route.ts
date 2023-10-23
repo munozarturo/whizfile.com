@@ -35,13 +35,29 @@ export async function POST(req: NextRequest) {
 
   const s3 = new S3();
 
-  await s3
+  const resp = await s3
     .putObject({
       Body: buffer,
       Bucket: "whizfile-com-transfers",
-      Key: file.name,
+      Key: data.get("transferId") as unknown as string,
     })
     .promise();
 
-  return Response.json({ message: "ok" }, { status: 200 });
+  console.log({
+    transferId: data.get("transferId"),
+    title: data.get("title"),
+    message: data.get("message"),
+  });
+
+  return Response.json(
+    {
+      message: "ok",
+      data: {
+        transferId: data.get("transferId"),
+        title: data.get("title"),
+        message: data.get("message"),
+      },
+    },
+    { status: 200 }
+  );
 }
