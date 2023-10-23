@@ -8,6 +8,8 @@ export async function GET(
   if (await rateLimit(req)) {
     return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
   }
+
+  const { transferId } = context.params;
 }
 
 export async function DELETE(
@@ -17,4 +19,6 @@ export async function DELETE(
   if (await rateLimit(req)) {
     return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
   }
+
+  const { transferId } = context.params;
 }
