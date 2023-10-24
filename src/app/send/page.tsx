@@ -50,7 +50,7 @@ export default function Send() {
               <input
                 type="submit"
                 value="get a link"
-                className="h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
               />
             </CardContent>
           </div>
