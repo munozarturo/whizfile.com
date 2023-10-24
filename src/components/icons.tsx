@@ -50,10 +50,34 @@ export const Icons = {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M12 4.5C7.85786 4.5 4.5 7.85786 4.5 12V24C4.5 28.1421 7.85786 31.5 12 31.5H24C28.1421 31.5 31.5 28.1421 31.5 24V12C31.5 7.85786 28.1421 4.5 24 4.5H12ZM18 9.00021C19.2426 9.00021 20.25 10.0076 20.25 11.2502V15.7491H24.75C25.9926 15.7491 27 16.7565 27 17.9991C27 19.2418 25.9926 20.2491 24.75 20.2491H20.25V24.7502C20.25 25.9928 19.2426 27.0002 18 27.0002C16.7574 27.0002 15.75 25.9928 15.75 24.7502V20.2491H11.25C10.0074 20.2491 9 19.2418 9 17.9991C9 16.7565 10.0074 15.7491 11.25 15.7491H15.75V11.2502C15.75 10.0076 16.7574 9.00021 18 9.00021Z"
         fill={props.fill || "white"}
+      />
+    </svg>
+  ),
+  cross: (props: LucideProps) => (
+    <svg
+      width={props.width || "36"}
+      height={props.height || "36"}
+      viewBox="0 0 36 36"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M27 9L9 27"
+        stroke={props.fill || "white"}
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M9 9L27 27"
+        stroke={props.fill || "white"}
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
     </svg>
   ),

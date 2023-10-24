@@ -10,13 +10,16 @@ import {
 } from "@/components/ui/card";
 import * as React from "react";
 import { useState } from "react";
+import DropZone from "@/components/ui/dropzone";
 
 export default function Send() {
   const [file, setFile] = useState<File>();
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {};
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
 
   return (
     <main className="w-full h-full flex flex-row justify-center items-center">
@@ -51,14 +54,8 @@ export default function Send() {
               />
             </CardContent>
           </div>
-          <div className="w-1/2 h-full bg-red-500">
-            <CardContent>
-              <input
-                type="file"
-                name="file"
-                onChange={(e) => setFile(e.target.files?.[0])}
-              />
-            </CardContent>
+          <div className="w-1/2 h-full flex flex-row items-center justify-center py-6 pr-6">
+            <DropZone className="w-full h-full " />
           </div>
         </form>
       </Card>

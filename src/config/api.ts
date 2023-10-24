@@ -4,6 +4,6 @@ export const ApiConfig = {
     perTime: 60000,
   },
   fileUpload: {
-    maxUploadSize: 1000000,
+    maxUploadSize: 5e7,
   },
 };
