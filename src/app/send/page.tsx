@@ -30,9 +30,13 @@ export default function Send() {
   const [files, setFiles] = useState<File[]>([]);
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [sentTransferId, setSentTransferId] = useState<string | null>(null);
+  const [transferError, setTransferError] = useState<boolean>(false);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    console.log("submitted");
 
     const file: Blob = await createZip(files);
 
@@ -42,54 +46,73 @@ export default function Send() {
     formData.append("title", title);
     formData.append("message", message);
 
-    const response = await fetch("/api/transfer", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("/api/transfer", {
+        method: "POST",
+        body: formData,
+      });
+
+      const responseData = await response.json();
+      const transferId: string = responseData.data.transferId;
+
+      setSentTransferId(transferId);
+    } catch {
+      setTransferError(true);
+    }
   };
 
   return (
     <main className="w-full h-full flex flex-row justify-center items-center">
-      <Card className="w-3/5 h-3/4 flex flex-row">
-        <form onSubmit={onSubmit} className="w-full h-full flex flex-row">
-          <div className="w-1/2 h-full flex flex-col">
-            <CardHeader className="h-fit w-full">
-              <CardTitle as="h1" className="text-primary text-center">
-                send
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="h-full w-full flex flex-col space-y-2">
-              <div className="flex flex-col">
+      {sentTransferId == null && (
+        <Card className="w-3/5 h-3/4 flex flex-row">
+          <form onSubmit={onSubmit} className="w-full h-full flex flex-row">
+            <div className="w-1/2 h-full flex flex-col">
+              <CardHeader className="h-fit w-full">
+                <CardTitle as="h1" className="text-primary text-center">
+                  send
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="h-full w-full flex flex-col space-y-2">
+                <div className="flex flex-col">
+                  <input
+                    className="text-primary text-xl font-semibold outline-none"
+                    type="text"
+                    name="title"
+                    placeholder="your title"
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+                <textarea
+                  className="h-full text-primary outline-none"
+                  name="message"
+                  placeholder="your message"
+                  onChange={(e) => setMessage(e.target.value)}
+                ></textarea>
                 <input
-                  className="text-primary text-xl font-semibold outline-none"
-                  type="text"
-                  name="title"
-                  placeholder="your title"
-                  onChange={(e) => setTitle(e.target.value)}
+                  type="submit"
+                  value="get a link"
+                  className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                 />
-              </div>
-              <textarea
-                className="h-full text-primary outline-none"
-                name="message"
-                placeholder="your message"
-                onChange={(e) => setMessage(e.target.value)}
-              ></textarea>
-              <input
-                type="submit"
-                value="get a link"
-                className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+              </CardContent>
+            </div>
+            <div className="w-1/2 h-full flex flex-row items-center justify-center py-6 pr-6">
+              <DropZone
+                className="w-full h-full"
+                files={files}
+                setFiles={setFiles}
               />
-            </CardContent>
-          </div>
-          <div className="w-1/2 h-full flex flex-row items-center justify-center py-6 pr-6">
-            <DropZone
-              className="w-full h-full"
-              files={files}
-              setFiles={setFiles}
-            />
-          </div>
-        </form>
-      </Card>
+            </div>
+          </form>
+        </Card>
+      )}
+      {sentTransferId != null && (
+        <Card className="w-3/5 h-3/4 flex flex-row">{sentTransferId}</Card>
+      )}
+      {transferError && (
+        <div className="error-message">
+          There was an error processing your transfer.
+        </div>
+      )}
     </main>
   );
 }

@@ -5,10 +5,6 @@ import * as z from "zod";
 import { connectToDatabase } from "@/db/mongo";
 import { S3 } from "aws-sdk";
 
-interface TransferData {
-  transferId: string;
-}
-
 export async function POST(req: NextRequest) {
   if (await rateLimit(req)) {
     return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
