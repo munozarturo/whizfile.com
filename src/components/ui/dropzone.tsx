@@ -7,10 +7,12 @@ import { ApiConfig } from "@/config/api";
 
 const DropZone = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const [files, setFiles] = useState<File[]>([]);
-
+  {
+    className?: string;
+    files: File[];
+    setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  }
+>(({ className, files, setFiles, ...props }, ref) => {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const combinedFiles = [...files, ...acceptedFiles];

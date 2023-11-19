@@ -11,14 +11,41 @@ import {
 import * as React from "react";
 import { useState } from "react";
 import DropZone from "@/components/ui/dropzone";
+import JSZip from "jszip";
+
+async function createZip(files: File[]): Promise<Blob> {
+  const zip = new JSZip();
+
+  // Add each file to the zip
+  files.forEach((file) => {
+    zip.file(file.name, file);
+  });
+
+  // Generate the zip file
+  const content: Blob = await zip.generateAsync({ type: "blob" });
+  return content;
+}
 
 export default function Send() {
-  const [file, setFile] = useState<File>();
+  const [files, setFiles] = useState<File[]>([]);
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const file: Blob = await createZip(files);
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("title", title);
+    formData.append("message", message);
+
+    const response = await fetch("/api/transfer", {
+      method: "POST",
+      body: formData,
+    });
   };
 
   return (
@@ -55,7 +82,11 @@ export default function Send() {
             </CardContent>
           </div>
           <div className="w-1/2 h-full flex flex-row items-center justify-center py-6 pr-6">
-            <DropZone className="w-full h-full " />
+            <DropZone
+              className="w-full h-full"
+              files={files}
+              setFiles={setFiles}
+            />
           </div>
         </form>
       </Card>

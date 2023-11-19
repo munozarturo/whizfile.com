@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { transferUploadSchema } from "@/lib/validations/transfer";
 import * as z from "zod";
 import { connectToDatabase } from "@/db/mongo";
+import { S3 } from "aws-sdk";
 
 interface TransferData {
   transferId: string;
@@ -14,11 +15,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const input = transferUploadSchema.parse(await req.json());
+    const data = await req.formData();
+
+    const input = transferUploadSchema.parse({
+      title: data.get("title"),
+      message: data.get("message"),
+      file: data.get("file"),
+    });
 
     const client = await connectToDatabase();
     const db = client.db("main");
     const transfers = db.collection("transfers");
+
+    const s3 = new S3();
 
     // generate unique transfer id
     const generateTransferId = () =>
@@ -44,6 +53,16 @@ export async function POST(req: NextRequest) {
       title: input.title,
       message: input.message,
     };
+
+    const buffer: Buffer = Buffer.from(await input.file.arrayBuffer());
+
+    await s3
+      .putObject({
+        Body: buffer,
+        Bucket: "whizfile-com-transfers",
+        Key: `${transferId}.zip`,
+      })
+      .promise();
 
     await transfers.insertOne(transferData);
 

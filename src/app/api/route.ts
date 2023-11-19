@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const data = await req.formData();
 
-  const file: File | null = data.get("file") as unknown as File;
+  const file: Blob | null = data.get("file") as unknown as Blob;
 
   if (!file) {
     return Response.json({ message: "no file" }, { status: 200 });
@@ -39,12 +39,12 @@ export async function POST(req: NextRequest) {
     .putObject({
       Body: buffer,
       Bucket: "whizfile-com-transfers",
-      Key: data.get("transferId") as unknown as string,
+      Key: "someId.zip",
     })
     .promise();
 
   console.log({
-    transferId: data.get("transferId"),
+    transferId: "someId",
     title: data.get("title"),
     message: data.get("message"),
   });
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     {
       message: "ok",
       data: {
-        transferId: data.get("transferId"),
+        transferId: "someId",
         title: data.get("title"),
         message: data.get("message"),
       },
