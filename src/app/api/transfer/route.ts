@@ -5,70 +5,16 @@ import * as z from "zod";
 import { connectToDatabase } from "@/db/mongo";
 import { S3 } from "aws-sdk";
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+  context: { params: { transferId: string } }
+) {
   if (await rateLimit(req)) {
     return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
   }
 
   try {
-    const data = await req.formData();
-
-    const input = transferUploadSchema.parse({
-      title: data.get("title"),
-      message: data.get("message"),
-      file: data.get("file"),
-    });
-
-    const client = await connectToDatabase();
-    const db = client.db("main");
-    const transfers = db.collection("transfers");
-
-    const s3 = new S3();
-
-    // generate unique transfer id
-    const generateTransferId = () =>
-      Array.from({ length: 6 })
-        .map(
-          () =>
-            "0123456789abcdefghijklmnopqrstuvwxyz"[
-              Math.floor(Math.random() * 36)
-            ]
-        )
-        .join("");
-
-    let transferId: string = generateTransferId();
-
-    while ((await transfers.countDocuments({ transferId: transferId })) > 0) {
-      transferId = generateTransferId();
-    }
-
-    const transferData = {
-      transferId: transferId,
-      createdAt: Date.now(),
-      status: "active",
-      title: input.title,
-      message: input.message,
-    };
-
-    const buffer: Buffer = Buffer.from(await input.file.arrayBuffer());
-
-    await s3
-      .putObject({
-        Body: buffer,
-        Bucket: "whizfile-com-transfers",
-        Key: `${transferId}.zip`,
-      })
-      .promise();
-
-    await transfers.insertOne(transferData);
-
-    return Response.json(
-      {
-        message: "Succesfully uploaded transfer.",
-        data: { transferId: transferId },
-      },
-      { status: 200 }
-    );
+    return Response.json({message: "Hello API"}, { status: 200 });
   } catch (error) {
     console.log(error);
 
