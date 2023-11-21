@@ -4,6 +4,14 @@ const sha256HashSchema = z.string().regex(/^[a-f0-9]{64}$/i, {
     message: "Invalid SHA-256 hash",
 });
 
+const oneTimeCodeSchema = z.string().regex(/^[a-zA-Z0-9]{16}$/i, {
+    message: "Invalid One Time Upload Code",
+});
+
+const transferIdSchema = z.string().regex(/^[a-zA-Z0-9]{6}$/i, {
+    message: "Invalid transfer ID",
+});
+
 const blobOrFileSchema = z.custom(
     (input) => input instanceof Blob || input instanceof File,
     {
@@ -18,15 +26,12 @@ export const sendTransferSchema = z.object({
 
 export const fileUploadSchema = z.object({
     file: blobOrFileSchema,
+    transferId: transferIdSchema,
+    oneTimeCode: oneTimeCodeSchema,
 });
 
 export const transferQuerySchema = z.object({
-    transferId: z
-        .string()
-        .length(6)
-        .refine((value) => /^[a-zA-Z0-9]+$/.test(value), {
-            message: "Transfer ID can only contain letters and numbers.",
-        }),
+    transferId: transferIdSchema,
 });
 
 export const fileQuerySchema = z.object({

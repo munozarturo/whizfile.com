@@ -63,8 +63,10 @@ export async function POST(
             createdAt: getTimestamp(),
             title: input.title,
             message: input.message,
+            status: "PENDING",
             uploadCodeVerifSalt: authPair.salt,
             uploadCodeVerifHash: authPair.authenticationHash,
+            fileKey: null,
         };
 
         transfers.insertOne(transfer);

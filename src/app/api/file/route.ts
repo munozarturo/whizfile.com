@@ -8,6 +8,7 @@ import { connectToDatabase } from "@/db/mongo";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "@/db/s3client";
 import { generateRandomString } from "@/lib/api/utils";
+import Transfer from "@/db/models/transfer";
 
 function hashFileWithMeta(
     buffer: Buffer,
@@ -18,6 +19,18 @@ function hashFileWithMeta(
     hash.update(Date.now().toString());
     hash.update(generateRandomString(6));
     return hash.digest("hex");
+}
+
+function verifyAuthPair(
+    oneTimeCode: string,
+    salt: string,
+    expectedHash: string
+): boolean {
+    const hash = crypto.createHash("sha256");
+    hash.update(oneTimeCode);
+    hash.update(salt);
+
+    return hash.digest("hex") == expectedHash;
 }
 
 async function blobOrFileToBuffer(blobOrFile: any): Promise<Buffer> {
@@ -55,11 +68,55 @@ export async function POST(req: NextRequest) {
 
         const input = fileUploadSchema.parse({
             file: data.get("file"),
+            transferId: data.get("transferId"),
+            oneTimeCode: data.get("oneTimeCode"),
         });
 
         const client = await connectToDatabase();
         const db = client.db("main");
         const transfers = db.collection("transfers");
+
+        const doc: unknown = await transfers.findOne({
+            transferId: input.transferId,
+        });
+
+        if (doc === null) {
+            return Response.json(
+                {
+                    message: "Requested transfer does not exist",
+                    data: { transferId: input.transferId },
+                },
+                { status: 404 }
+            );
+        }
+
+        const queryResult = doc as Transfer;
+
+        if (queryResult.status !== "PENDING") {
+            return Response.json(
+                {
+                    message: "Transfer is not pending file upload.",
+                    data: { transferId: input.transferId },
+                },
+                { status: 401 }
+            );
+        }
+
+        if (
+            !verifyAuthPair(
+                input.oneTimeCode,
+                queryResult.uploadCodeVerifSalt,
+                queryResult.uploadCodeVerifHash
+            )
+        ) {
+            return Response.json(
+                {
+                    message: "Invalid One Time Upload Code.",
+                    data: { transferId: input.transferId },
+                },
+                { status: 401 }
+            );
+        }
 
         const file = input.file;
 
@@ -69,6 +126,11 @@ export async function POST(req: NextRequest) {
         const key = hashFileWithMeta(buffer);
 
         await putObject(buffer, bucketName, `${key}.zip`);
+
+        await transfers.updateOne(
+            { transferId: input.transferId },
+            { $set: { fileKey: key, status: "ACTIVE" } }
+        );
 
         return Response.json({ fileId: key }, { status: 200 });
     } catch (error) {
