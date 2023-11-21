@@ -27,10 +27,7 @@ function generateAuthPair(): AuthPair {
     };
 }
 
-export async function POST(
-    req: NextRequest,
-    context: { params: { transferId: string } }
-) {
+export async function POST(req: NextRequest) {
     if (await rateLimit(req)) {
         return Response.json(
             { message: "Rate limit exceeded." },

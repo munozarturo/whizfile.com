@@ -42,10 +42,6 @@ export async function GET(
             fileId: context.params.fileId,
         });
 
-        const client = await connectToDatabase();
-        const db = client.db("main");
-        const transfers = db.collection("transfers");
-
         const bucketName = "whizfile-com-transfers";
         const key = input.fileId;
 

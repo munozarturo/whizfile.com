@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardHeader,
@@ -5,24 +7,51 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Suspense } from "react";
+import axios from "axios";
+import { Suspense, useEffect, useState } from "react";
 
-if (!process.env.BASE_URL) {
+if (!process.env.NEXT_PUBLIC_BASE_URL) {
   throw new Error("BASE_URL environment variable not defined.");
 }
 
-const baseUrl = process.env.BASE_URL;
-
 async function Transfer({ transferId }: { transferId: string }) {
-  // Wait for the playlists
-  const res = await fetch(`${baseUrl}/api/transfer/${transferId}`);
-  const transfer = await res.json();
+  const [transfer, setTransfer] = useState(null); // Assuming the shape of transfer is compatible with null initially
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/transfer/${transferId}`);
+      const transferData = await res.json();
+      setTransfer(transferData);
+    };
+
+    fetchData();
+  }, [transferId]); // Dependency array containing transferId
+
+  const downloadTransfer = async (transferId: string) => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/your-file-id`);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${}.zip`); // Replace 'file.ext' with the filename
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading the file', error);
+    }
+  };
+
+  if (!transfer) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
       <h1>{transfer.title}</h1>
       <p>{transfer.message}</p>
       <p>{transfer.createdAt}</p>
+      <button onClick={() => downloadTransfer(transferId)}>Download</button>
     </div>
   );
 }

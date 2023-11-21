@@ -12,6 +12,12 @@ import * as React from "react";
 import { useState } from "react";
 import DropZone from "@/components/ui/dropzone";
 import JSZip from "jszip";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+
+if (!process.env.NEXT_PUBLIC_BASE_URL) {
+  throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.")
+}
 
 async function createZip(files: File[]): Promise<Blob> {
   const zip = new JSZip();
@@ -36,26 +42,24 @@ export default function Send() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("submitted");
-
     const file: Blob = await createZip(files);
 
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("message", message);
-
     try {
-      const response = await fetch("/api/transfer", {
-        method: "POST",
-        body: formData,
-      });
+      const transferResp = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/transfer`, {
+        title: title,
+        message: message,
+      })
 
-      const responseData = await response.json();
-      const transferId: string = responseData.data.transferId;
+      const data = transferResp.data.data as unknown as {oneTimeCode: string, transferId: string};
 
-      setSentTransferId(transferId);
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("oneTimeCode", data.oneTimeCode);
+      formData.set("transferId", data.transferId);
+
+      const fileResp = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file`, formData);
+
+      setSentTransferId(data.transferId);
     } catch {
       setTransferError(true);
     }
