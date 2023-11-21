@@ -1,4 +1,5 @@
 import { rateLimit } from "@/lib/api/rate-limiter";
+import { fileQuerySchema } from "@/lib/validations/transfer";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -10,7 +11,13 @@ export async function GET(
     }
 
     try {
-      return Response.json({message: `Hello API '${context.params.fileId}'`}, { status: 200 });
+      const input = fileQuerySchema.parse({
+        fileId: context.params.fileId,
+      })
+
+      
+
+      return Response.json({fileId: input.fileId}, { status: 200 });
     } catch (error) {
       console.log(error);
   

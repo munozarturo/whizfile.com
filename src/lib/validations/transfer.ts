@@ -1,5 +1,9 @@
 import * as z from "zod";
 
+const sha256HashSchema = z.string().regex(/^[a-f0-9]{64}$/i, {
+  message: "Invalid SHA-256 hash",
+});
+
 const blobOrFileSchema = z.custom((input) => input instanceof Blob || input instanceof File, {
   message: "Expected type Blob or File",
 });
@@ -20,4 +24,8 @@ export const transferQuerySchema = z.object({
     .refine((value) => /^[a-zA-Z0-9]+$/.test(value), {
       message: "Transfer ID can only contain letters and numbers.",
     }),
+});
+
+export const fileQuerySchema = z.object({
+  fileId: sha256HashSchema
 });
