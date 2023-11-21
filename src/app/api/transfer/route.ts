@@ -64,8 +64,10 @@ export async function POST(
             title: input.title,
             message: input.message,
             status: "PENDING",
-            uploadCodeVerifSalt: authPair.salt,
-            uploadCodeVerifHash: authPair.authenticationHash,
+            auth: {
+                uploadCodeVerifSalt: authPair.salt,
+                uploadCodeVerifHash: authPair.authenticationHash,
+            },
             fileKey: null,
         };
 

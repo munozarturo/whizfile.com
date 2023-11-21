@@ -9,6 +9,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "@/db/s3client";
 import { generateRandomString } from "@/lib/api/utils";
 import Transfer from "@/db/models/transfer";
+import { ApiConfig } from "@/config/api";
 
 function hashFileWithMeta(
     buffer: Buffer,
@@ -105,8 +106,8 @@ export async function POST(req: NextRequest) {
         if (
             !verifyAuthPair(
                 input.oneTimeCode,
-                queryResult.uploadCodeVerifSalt,
-                queryResult.uploadCodeVerifHash
+                queryResult.auth.uploadCodeVerifSalt,
+                queryResult.auth.uploadCodeVerifHash
             )
         ) {
             return Response.json(
@@ -121,6 +122,17 @@ export async function POST(req: NextRequest) {
         const file = input.file;
 
         const buffer: Buffer = await blobOrFileToBuffer(file);
+        const sizeInBytes: number = buffer.length;
+
+        if (sizeInBytes > ApiConfig.fileUpload.maxUploadSize) {
+            return Response.json(
+                {
+                    message: "Uploaded file is too large.",
+                    data: { transferId: input.transferId },
+                },
+                { status: 400 }
+            );
+        }
 
         const bucketName = "whizfile-com-transfers";
         const key = hashFileWithMeta(buffer);

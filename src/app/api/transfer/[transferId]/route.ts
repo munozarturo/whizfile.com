@@ -25,9 +25,17 @@ export async function GET(
         const db = client.db("main");
         const transfers = db.collection("transfers");
 
-        const doc: unknown = await transfers.findOne({
-            transferId: input.transferId,
-        });
+        const doc: unknown = await transfers.findOne(
+            {
+                transferId: input.transferId,
+            },
+            {
+                projection: {
+                    _id: 0,
+                    auth: 0,
+                },
+            }
+        );
 
         if (doc === null) {
             return Response.json(
@@ -55,7 +63,7 @@ export async function GET(
         }
 
         return Response.json(
-            { message: "Hello API", data: queryResult },
+            { message: "Transfer retrieved successfuly.", data: queryResult },
             { status: 200 }
         );
     } catch (error) {
