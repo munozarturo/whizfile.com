@@ -8,7 +8,7 @@ export async function GET(
     if (await rateLimit(req)) {
       return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
     }
-    
+
     try {
       return Response.json({message: `Hello API '${context.params.fileId}'`}, { status: 200 });
     } catch (error) {

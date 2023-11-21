@@ -7,6 +7,9 @@ const blobSchema = z.custom<Blob>((input) => input instanceof Blob, {
 export const transferUploadSchema = z.object({
   title: z.string().min(1).max(100),
   message: z.string().min(1).max(1000).optional().default(""),
+});
+
+export const fileUploadSchema = z.object({
   file: blobSchema,
 });
 
