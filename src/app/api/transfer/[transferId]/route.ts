@@ -17,7 +17,47 @@ export async function GET(
     }
 
     try {
-        return Response.json({ message: "Hello API" }, { status: 200 });
+        const input = transferQuerySchema.parse({
+            transferId: context.params.transferId,
+        });
+
+        const client = await connectToDatabase();
+        const db = client.db("main");
+        const transfers = db.collection("transfers");
+
+        const doc: unknown = await transfers.findOne({
+            transferId: input.transferId,
+        });
+
+        if (doc === null) {
+            return Response.json(
+                {
+                    message: "Requested transfer does not exist",
+                    data: { transferId: input.transferId },
+                },
+                { status: 404 }
+            );
+        }
+
+        const queryResult = doc as Transfer;
+
+        if (
+            queryResult.status !== "PENDING" &&
+            queryResult.status !== "ACTIVE"
+        ) {
+            return Response.json(
+                {
+                    message: "Transfer is not accessible.",
+                    data: { transferId: input.transferId },
+                },
+                { status: 401 }
+            );
+        }
+
+        return Response.json(
+            { message: "Hello API", data: queryResult },
+            { status: 200 }
+        );
     } catch (error) {
         console.log(error);
 
