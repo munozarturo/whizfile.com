@@ -5,7 +5,8 @@ import * as crypto from "crypto";
 import * as zod from "zod";
 import { fileUploadSchema } from "@/lib/validations/transfer";
 import { connectToDatabase } from "@/db/mongo";
-import { S3 } from "aws-sdk";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client } from "@/db/s3client";
 
 function generateRandomString(length: number): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -34,6 +35,16 @@ async function blobOrFileToBuffer(blobOrFile: any): Promise<Buffer> {
   return Buffer.from(await blobOrFile.arrayBuffer());
 }
 
+async function putObject(buffer: Buffer, bucketName: string, objectKey: string) {
+  const command = new PutObjectCommand({
+    Body: buffer,
+    Bucket: bucketName,
+    Key: objectKey
+  })
+
+  const response = await s3Client.send(command);
+}
+
 export async function POST(
     req: NextRequest,
   ) {
@@ -56,15 +67,10 @@ export async function POST(
 
         const buffer: Buffer = await blobOrFileToBuffer(file);
 
-        const s3 = new S3();
         const bucketName = "whizfile-com-transfers";
         const key = hashFileWithMeta(buffer);
 
-        await s3.putObject({
-          Body: buffer,
-          Bucket: bucketName,
-          Key: `${key}.zip`
-        }).promise();
+        await putObject(buffer, bucketName, `${key}.zip`);
 
         return Response.json({fileId: key}, { status: 200 });
     } catch (error) {
