@@ -11,8 +11,8 @@ const blobOrFileSchema = z.custom(
     }
 );
 
-export const transferUploadSchema = z.object({
-    title: z.string().min(1).max(100),
+export const sendTransferSchema = z.object({
+    title: z.string().min(1).max(100).optional().default(""),
     message: z.string().min(1).max(1000).optional().default(""),
 });
 

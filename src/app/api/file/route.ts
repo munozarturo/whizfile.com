@@ -7,19 +7,7 @@ import { fileUploadSchema } from "@/lib/validations/transfer";
 import { connectToDatabase } from "@/db/mongo";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "@/db/s3client";
-
-function generateRandomString(length: number): string {
-    const characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
-        );
-    }
-    return result;
-}
+import { generateRandomString } from "@/lib/api/utils";
 
 function hashFileWithMeta(
     buffer: Buffer,
