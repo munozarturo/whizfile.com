@@ -9,54 +9,64 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "@/db/s3client";
 
 function generateRandomString(length: number): string {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
+    const characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(
+            Math.floor(Math.random() * charactersLength)
+        );
+    }
+    return result;
 }
 
-
-function hashFileWithMeta(buffer: Buffer, algorithm: string = "sha256"): string {
+function hashFileWithMeta(
+    buffer: Buffer,
+    algorithm: string = "sha256"
+): string {
     const hash = crypto.createHash(algorithm);
     hash.update(buffer);
-    hash.update(Date.now().toString())
+    hash.update(Date.now().toString());
     hash.update(generateRandomString(6));
     return hash.digest("hex");
 }
 
 async function blobOrFileToBuffer(blobOrFile: any): Promise<Buffer> {
-  if (!(blobOrFile instanceof Blob || blobOrFile instanceof File)) {
-    throw new Error("Expected type of `blobOrFile` to be Blob or File.");
-  }
+    if (!(blobOrFile instanceof Blob || blobOrFile instanceof File)) {
+        throw new Error("Expected type of `blobOrFile` to be Blob or File.");
+    }
 
-  return Buffer.from(await blobOrFile.arrayBuffer());
+    return Buffer.from(await blobOrFile.arrayBuffer());
 }
 
-async function putObject(buffer: Buffer, bucketName: string, objectKey: string) {
-  const command = new PutObjectCommand({
-    Body: buffer,
-    Bucket: bucketName,
-    Key: objectKey
-  })
+async function putObject(
+    buffer: Buffer,
+    bucketName: string,
+    objectKey: string
+) {
+    const command = new PutObjectCommand({
+        Body: buffer,
+        Bucket: bucketName,
+        Key: objectKey,
+    });
 
-  const response = await s3Client.send(command);
+    const response = await s3Client.send(command);
 }
 
-export async function POST(
-    req: NextRequest,
-  ) {
+export async function POST(req: NextRequest) {
     if (await rateLimit(req)) {
-      return Response.json({ message: "Rate limit exceeded." }, { status: 429 });
+        return Response.json(
+            { message: "Rate limit exceeded." },
+            { status: 429 }
+        );
     }
 
     try {
         const data = await req.formData();
 
         const input = fileUploadSchema.parse({
-          file: data.get("file"),
+            file: data.get("file"),
         });
 
         const client = await connectToDatabase();
@@ -72,16 +82,16 @@ export async function POST(
 
         await putObject(buffer, bucketName, `${key}.zip`);
 
-        return Response.json({fileId: key}, { status: 200 });
+        return Response.json({ fileId: key }, { status: 200 });
     } catch (error) {
-      console.log(error);
+        console.log(error);
 
-      if (error instanceof zod.ZodError)
-      return Response.json(error, { status: 422 });
-  
-      return Response.json(
-        { message: "Unknown error.", data: {} },
-        { status: 500 }
-      );
+        if (error instanceof zod.ZodError)
+            return Response.json(error, { status: 422 });
+
+        return Response.json(
+            { message: "Unknown error.", data: {} },
+            { status: 500 }
+        );
     }
-  }
+}
