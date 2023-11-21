@@ -43,7 +43,7 @@ export async function GET(
       const bucketName = "whizfile-com-transfers";
       const key = input.fileId;
 
-      const buffer = await getObject(bucketName, key);
+      const buffer = await getObject(bucketName, `${key}.zip`);
 
       const headers = new Headers();
       headers.set('Content-Type', 'application/octet-stream');
