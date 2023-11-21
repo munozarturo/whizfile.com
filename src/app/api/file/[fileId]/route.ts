@@ -4,6 +4,7 @@ import { rateLimit } from "@/lib/api/rate-limiter";
 import { fileQuerySchema } from "@/lib/validations/transfer";
 import { GetObjectCommand, S3 } from "@aws-sdk/client-s3";
 import { NextRequest } from "next/server";
+import { Readable } from "stream";
 
 async function getObject(bucketName: string, objectKey: string): Promise<Buffer> {
   const command = new GetObjectCommand({
@@ -12,16 +13,14 @@ async function getObject(bucketName: string, objectKey: string): Promise<Buffer>
   });
 
   const response = await s3Client.send(command);
-  const stream = response.Body as ReadableStream;
+  const stream = response.Body as Readable;
 
-  // Convert the stream to a buffer for easier use in your application
-  const chunks: Uint8Array[] = [];
-  const reader = stream.getReader();
-  let readResult: ReadableStreamReadResult<Uint8Array>;
-  while (!(readResult = await reader.read()).done) {
-      chunks.push(readResult.value);
-  }
-  return Buffer.concat(chunks);
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk) => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+  });
 }
 
 export async function GET(
@@ -46,7 +45,14 @@ export async function GET(
 
       const buffer = await getObject(bucketName, key);
 
-      return Response.json({fileId: input.fileId}, { status: 200 });
+      const headers = new Headers();
+      headers.set('Content-Type', 'application/octet-stream');
+      headers.set('Content-Disposition', `attachment; filename="${key}"`);
+
+      return new Response(buffer, {
+        headers: headers,
+        status: 200,
+      });
     } catch (error) {
       console.log(error);
   
