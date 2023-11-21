@@ -7,8 +7,9 @@ import { fileUploadSchema } from "@/lib/validations/transfer";
 import { connectToDatabase } from "@/db/mongo";
 import { S3 } from "aws-sdk";
 
-function hashFileWithMeta(input: Blob, algorithm: string = "sha256"): string {
+function hashFileWithMeta(buffer: Buffer, algorithm: string = "sha256"): string {
     const hash = crypto.createHash(algorithm);
+    hash.update(buffer);
     hash.update(Date.now().toString())
     return hash.digest("hex");
 }
@@ -22,7 +23,6 @@ export async function POST(
 
     try {
         const data = await req.formData();
-
         const input = fileUploadSchema.parse(data);
 
         const client = await connectToDatabase();
@@ -34,7 +34,7 @@ export async function POST(
 
         const s3 = new S3();
         const bucketName = "whizfile-com-transfers";
-        const key = hashFileWithMeta(file);
+        const key = hashFileWithMeta(buffer);
 
         await s3.putObject({
           Body: buffer,
