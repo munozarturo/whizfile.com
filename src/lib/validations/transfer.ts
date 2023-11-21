@@ -1,7 +1,7 @@
 import * as z from "zod";
 
-const blobSchema = z.custom<Blob>((input) => input instanceof Blob, {
-  message: "Expected type Blob",
+const blobOrFileSchema = z.custom((input) => input instanceof Blob || input instanceof File, {
+  message: "Expected type Blob or File",
 });
 
 export const transferUploadSchema = z.object({
@@ -10,7 +10,7 @@ export const transferUploadSchema = z.object({
 });
 
 export const fileUploadSchema = z.object({
-  file: blobSchema,
+  file: blobOrFileSchema,
 });
 
 export const transferQuerySchema = z.object({

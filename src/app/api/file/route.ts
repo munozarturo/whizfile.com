@@ -14,6 +14,14 @@ function hashFileWithMeta(buffer: Buffer, algorithm: string = "sha256"): string 
     return hash.digest("hex");
 }
 
+async function blobOrFileToBuffer(blobOrFile: any): Promise<Buffer> {
+  if (!(blobOrFile instanceof Blob || blobOrFile instanceof File)) {
+    throw new Error("Expected type of `blobOrFile` to be Blob or File.");
+  }
+
+  return Buffer.from(await blobOrFile.arrayBuffer());
+}
+
 export async function POST(
     req: NextRequest,
   ) {
@@ -23,14 +31,18 @@ export async function POST(
 
     try {
         const data = await req.formData();
-        const input = fileUploadSchema.parse(data);
+
+        const input = fileUploadSchema.parse({
+          file: data.get("file"),
+        });
 
         const client = await connectToDatabase();
         const db = client.db("main");
         const transfers = db.collection("transfers");
 
         const file = input.file;
-        const buffer = Buffer.from(await file.arrayBuffer());
+
+        const buffer: Buffer = await blobOrFileToBuffer(file);
 
         const s3 = new S3();
         const bucketName = "whizfile-com-transfers";
