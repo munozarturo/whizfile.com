@@ -5,6 +5,8 @@ import { connectToDatabase } from "@/db/mongo";
 import { transferQuerySchema } from "@/lib/validations/transfer";
 import Transfer from "@/db/models/transfer";
 
+// https://stackoverflow.com/questions/76379368/how-can-i-upload-images-to-an-amazon-s3-bucket-using-next-js-13s-app-router-and
+
 export async function GET(
     req: NextRequest,
     context: { params: { transferId: string } }
