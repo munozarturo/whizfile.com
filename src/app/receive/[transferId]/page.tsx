@@ -31,8 +31,8 @@ function TransferView({ transferId }: { transferId: string }) {
   const downloadTransfer = async (transferId: string) => {
     try {
       console.log(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/${transfer?.fileKey}`);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/${transfer?.fileKey}`);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/${transfer?.fileKey}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `whizfile-transfer-${transferId}.zip`); // Replace 'file.ext' with the filename
