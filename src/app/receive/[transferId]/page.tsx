@@ -7,6 +7,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import Transfer from "@/db/models/transfer";
 import axios from "axios";
 import { Suspense, useEffect, useState } from "react";
 
@@ -14,14 +15,14 @@ if (!process.env.NEXT_PUBLIC_BASE_URL) {
   throw new Error("BASE_URL environment variable not defined.");
 }
 
-async function Transfer({ transferId }: { transferId: string }) {
-  const [transfer, setTransfer] = useState(null); // Assuming the shape of transfer is compatible with null initially
+function TransferView({ transferId }: { transferId: string }) {
+  const [transfer, setTransfer] = useState<Transfer | null>(null); // Assuming the shape of transfer is compatible with null initially
 
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/transfer/${transferId}`);
       const transferData = await res.json();
-      setTransfer(transferData);
+      setTransfer(transferData.data);
     };
 
     fetchData();
@@ -29,14 +30,19 @@ async function Transfer({ transferId }: { transferId: string }) {
 
   const downloadTransfer = async (transferId: string) => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/your-file-id`);
+      console.log(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/${transfer?.fileKey}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file/${transfer?.fileKey}`);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${}.zip`); // Replace 'file.ext' with the filename
+      link.setAttribute('download', `whizfile-transfer-${transferId}.zip`); // Replace 'file.ext' with the filename
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
+      
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+
     } catch (error) {
       console.error('Error downloading the file', error);
     }
@@ -56,7 +62,7 @@ async function Transfer({ transferId }: { transferId: string }) {
   );
 }
 
-export default async function ReceiveTransferId(context: {
+export default function ReceiveTransferId(context: {
   params: { transferId: string };
 }) {
   return (
@@ -68,7 +74,7 @@ export default async function ReceiveTransferId(context: {
           </CardTitle>
         </CardHeader>
         <Suspense fallback={"loading..."}>
-          <Transfer transferId={context.params.transferId} />
+          <TransferView transferId={context.params.transferId} />
         </Suspense>
       </Card>
     </main>
