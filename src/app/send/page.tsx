@@ -2,121 +2,162 @@
 
 import type { Metadata } from "next";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    CardFooter,
 } from "@/components/ui/card";
 import * as React from "react";
 import { useState } from "react";
 import DropZone from "@/components/ui/dropzone";
 import JSZip from "jszip";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import axiosInstance from "@/lib/api/axios-instance";
+import { PulseLoader } from "react-spinners";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
-  throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.")
+    throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
 }
 
 async function createZip(files: File[]): Promise<Blob> {
-  const zip = new JSZip();
+    const zip = new JSZip();
 
-  // Add each file to the zip
-  files.forEach((file) => {
-    zip.file(file.name, file);
-  });
+    files.forEach((file) => {
+        zip.file(file.name, file);
+    });
 
-  // Generate the zip file
-  const content: Blob = await zip.generateAsync({ type: "blob" });
-  return content;
+    const content: Blob = await zip.generateAsync({ type: "blob" });
+    return content;
 }
 
 export default function Send() {
-  const [files, setFiles] = useState<File[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
-  const [sentTransferId, setSentTransferId] = useState<string | null>(null);
-  const [transferError, setTransferError] = useState<boolean>(false);
+    const [files, setFiles] = useState<File[]>([]);
+    const [title, setTitle] = useState<string>("");
+    const [message, setMessage] = useState<string>("");
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    const submitTransfer = async ({
+        title,
+        message,
+        file,
+    }: {
+        title: string;
+        message: string;
+        file: Blob;
+    }) => {
+        const transferResp = await axiosInstance.post("/api/transfer", {
+            title: title,
+            message: message,
+        });
 
-    const file: Blob = await createZip(files);
+        const data = transferResp.data.data as unknown as {
+            oneTimeCode: string;
+            transferId: string;
+        };
 
-    try {
-      const transferResp = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/transfer`, {
-        title: title,
-        message: message,
-      })
+        const formData = new FormData();
+        formData.set("file", file);
+        formData.set("oneTimeCode", data.oneTimeCode);
+        formData.set("transferId", data.transferId);
 
-      const data = transferResp.data.data as unknown as {oneTimeCode: string, transferId: string};
+        const fileUploadResp = axios.post("/api/file");
 
-      const formData = new FormData();
-      formData.set("file", file);
-      formData.set("oneTimeCode", data.oneTimeCode);
-      formData.set("transferId", data.transferId);
+        return fileUploadResp;
+    };
 
-      const fileResp = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/file`, formData);
+    const mutation = useMutation({
+        mutationFn: async (transferUpload: {
+            title: string;
+            message: string;
+            file: Blob;
+        }) => {
+            const file: Blob = await createZip(files);
+            return submitTransfer(transferUpload);
+        },
+    });
 
-      setSentTransferId(data.transferId);
-    } catch {
-      setTransferError(true);
-    }
-  };
-
-  return (
-    <main className="w-full h-full flex flex-row justify-center items-center">
-      {sentTransferId == null && (
-        <Card className="w-3/5 h-3/4 flex flex-row">
-          <form onSubmit={onSubmit} className="w-full h-full flex flex-row">
-            <div className="w-1/2 h-full flex flex-col">
-              <CardHeader className="h-fit w-full">
-                <CardTitle as="h1" className="text-primary text-center">
-                  send
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="h-full w-full flex flex-col space-y-2">
-                <div className="flex flex-col">
-                  <input
-                    className="text-primary text-xl font-semibold outline-none"
-                    type="text"
-                    name="title"
-                    placeholder="your title"
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
-                <textarea
-                  className="h-full text-primary outline-none"
-                  name="message"
-                  placeholder="your message"
-                  onChange={(e) => setMessage(e.target.value)}
-                ></textarea>
-                <input
-                  type="submit"
-                  value="get a link"
-                  className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
-                />
-              </CardContent>
-            </div>
-            <div className="w-1/2 h-full flex flex-row items-center justify-center py-6 pr-6">
-              <DropZone
-                className="w-full h-full"
-                files={files}
-                setFiles={setFiles}
-              />
-            </div>
-          </form>
-        </Card>
-      )}
-      {sentTransferId != null && (
-        <Card className="w-3/5 h-3/4 flex flex-row">{sentTransferId}</Card>
-      )}
-      {transferError && (
-        <div className="error-message">
-          There was an error processing your transfer.
-        </div>
-      )}
-    </main>
-  );
+    return (
+        <main className="w-full h-full flex flex-row justify-center items-center">
+            <Card className="w-3/5 h-3/4 flex flex-row">
+                {mutation.isPending ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                        <PulseLoader
+                            color="#4539cd"
+                            size={20}
+                            speedMultiplier={0.5}
+                        />
+                    </div>
+                ) : mutation.isError ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center space-y-2">
+                        <h2>
+                            uh oh! an unexpected error occurred while fetching
+                            your transfer...
+                        </h2>
+                        <button
+                            onClick={() => mutation.reset()}
+                            className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                        >
+                            try again
+                        </button>
+                    </div>
+                ) : mutation.isSuccess ? (
+                    mutation.data.data
+                ) : (
+                    <form
+                        onSubmit={async () =>
+                            mutation.mutate({
+                                title,
+                                message,
+                                file: await createZip(files),
+                            })
+                        }
+                        className="w-full h-full flex flex-row"
+                    >
+                        <div className="w-1/2 h-full flex flex-col">
+                            <CardHeader className="h-fit w-full">
+                                <CardTitle
+                                    as="h1"
+                                    className="text-primary text-center"
+                                >
+                                    send
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="h-full w-full flex flex-col space-y-2">
+                                <div className="flex flex-col">
+                                    <input
+                                        className="text-primary text-xl font-semibold outline-none"
+                                        type="text"
+                                        name="title"
+                                        placeholder="your title"
+                                        onChange={(e) =>
+                                            setTitle(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <textarea
+                                    className="h-full text-primary outline-none"
+                                    name="message"
+                                    placeholder="your message"
+                                    onChange={(e) => setMessage(e.target.value)}
+                                ></textarea>
+                                <input
+                                    type="submit"
+                                    value="get a link"
+                                    className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                                />
+                            </CardContent>
+                        </div>
+                        <div className="w-1/2 h-full flex flex-row items-center justify-center py-6 pr-6">
+                            <DropZone
+                                className="w-full h-full"
+                                files={files}
+                                setFiles={setFiles}
+                            />
+                        </div>
+                    </form>
+                )}
+            </Card>
+        </main>
+    );
 }
