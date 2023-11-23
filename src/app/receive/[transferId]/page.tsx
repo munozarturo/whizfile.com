@@ -13,10 +13,6 @@ import axiosInstance from "@/lib/api/axios-instance";
 import { PulseLoader } from "react-spinners";
 import { useState } from "react";
 
-if (!process.env.NEXT_PUBLIC_BASE_URL) {
-    throw new Error("BASE_URL environment variable not defined.");
-}
-
 function TransferView({ transferId }: { transferId: string }) {
     const [downloadingFile, setDownloadingFile] = useState<boolean>(false);
 
