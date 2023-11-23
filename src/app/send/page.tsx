@@ -21,6 +21,8 @@ if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
 async function createZip(files: File[]): Promise<Blob> {
     const zip = new JSZip();
 
@@ -58,18 +60,14 @@ export default function Send() {
             transferId: string;
         };
 
-        console.log(data, "transferResp");
-
         const formData = new FormData();
         formData.set("file", file);
         formData.set("oneTimeCode", data.oneTimeCode);
         formData.set("transferId", data.transferId);
 
-        const fileUploadResp = await axios.post("/api/file", formData);
+        await axios.post("/api/file", formData);
 
-        console.log(fileUploadResp, "fileUploadResp");
-
-        return fileUploadResp;
+        return data.transferId;
     };
 
     const mutation = useMutation({
@@ -124,7 +122,34 @@ export default function Send() {
                         </button>
                     </div>
                 ) : mutation.isSuccess ? (
-                    <p>mutation success</p>
+                    <div className="h-full w-full flex flex-col">
+                        <CardContent className="h-full w-full flex flex-col space-y-5 items-center justify-center">
+                            <CardTitle
+                                as="h1"
+                                className="text-primary text-center"
+                            >
+                                transfer sent
+                            </CardTitle>
+                            <div
+                                onClick={() =>
+                                    navigator.clipboard.writeText(
+                                        `${BASE_URL}/receive/${mutation.data}`
+                                    )
+                                }
+                            >{`${BASE_URL}/receive/${mutation.data}`}</div>
+                            <button
+                                onClick={async () => {
+                                    setFiles([]);
+                                    setTitle("");
+                                    setMessage("");
+                                    mutation.reset();
+                                }}
+                                className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                            >
+                                send another
+                            </button>
+                        </CardContent>
+                    </div>
                 ) : (
                     <form
                         onSubmit={handleSubmit}
