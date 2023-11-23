@@ -68,7 +68,22 @@ function TransferView({ transferId }: { transferId: string }) {
                 <PulseLoader color="#4539cd" size={20} speedMultiplier={0.5} />
             </div>
         );
-    if (error) return <div>An error has occurred: {error.message}</div>;
+
+    if (error)
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center space-y-2">
+                <h2>
+                    uh oh! an unexpected error occurred while fetching your
+                    transfer...
+                </h2>
+                <button
+                    onClick={() => refetch()}
+                    className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                >
+                    try again
+                </button>
+            </div>
+        );
 
     const formattedTime = new Date(transfer?.createdAt || 0);
 
