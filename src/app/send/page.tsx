@@ -51,17 +51,23 @@ export default function Send() {
             message: message,
         });
 
+        console.log(transferResp, "transferResp");
+
         const data = transferResp.data.data as unknown as {
             oneTimeCode: string;
             transferId: string;
         };
+
+        console.log(data, "transferResp");
 
         const formData = new FormData();
         formData.set("file", file);
         formData.set("oneTimeCode", data.oneTimeCode);
         formData.set("transferId", data.transferId);
 
-        const fileUploadResp = axios.post("/api/file");
+        const fileUploadResp = await axios.post("/api/file", formData);
+
+        console.log(fileUploadResp, "fileUploadResp");
 
         return fileUploadResp;
     };
@@ -76,6 +82,16 @@ export default function Send() {
             return submitTransfer(transferUpload);
         },
     });
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const zipFile = await createZip(files);
+        mutation.mutate({
+            title,
+            message,
+            file: zipFile,
+        });
+    };
 
     return (
         <main className="w-full h-full flex flex-row justify-center items-center">
@@ -95,23 +111,23 @@ export default function Send() {
                             your transfer...
                         </h2>
                         <button
-                            onClick={() => mutation.reset()}
+                            onClick={async () =>
+                                mutation.mutate({
+                                    title,
+                                    message,
+                                    file: await createZip(files),
+                                })
+                            }
                             className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                         >
                             try again
                         </button>
                     </div>
                 ) : mutation.isSuccess ? (
-                    mutation.data.data
+                    <p>mutation success</p>
                 ) : (
                     <form
-                        onSubmit={async () =>
-                            mutation.mutate({
-                                title,
-                                message,
-                                file: await createZip(files),
-                            })
-                        }
+                        onSubmit={handleSubmit}
                         className="w-full h-full flex flex-row"
                     >
                         <div className="w-1/2 h-full flex flex-col">
