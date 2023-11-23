@@ -11,12 +11,15 @@ import Transfer from "@/db/models/transfer";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/api/axios-instance";
 import { PulseLoader } from "react-spinners";
+import { useState } from "react";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error("BASE_URL environment variable not defined.");
 }
 
 function TransferView({ transferId }: { transferId: string }) {
+    const [downloadingFile, setDownloadingFile] = useState<boolean>(false);
+
     const { data, error, refetch, isError, isLoading } = useQuery({
         queryKey: ["transferQuery", transferId],
         queryFn: async () => {
@@ -35,12 +38,10 @@ function TransferView({ transferId }: { transferId: string }) {
         if (!transfer) throw new Error("Transfer is undefined.");
 
         try {
+            setDownloadingFile(true);
+
             const transferId: string = transfer.transferId;
             const fileKey: string | null = transfer.fileKey;
-
-            console.log(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/api/file/${fileKey}`
-            );
             const response = await axiosInstance.get(`/api/file/${fileKey}`, {
                 responseType: "blob",
             });
@@ -57,6 +58,8 @@ function TransferView({ transferId }: { transferId: string }) {
             if (link.parentNode) {
                 link.parentNode.removeChild(link);
             }
+
+            setDownloadingFile(false);
         } catch (error) {
             console.error("Error downloading the file", error);
         }
@@ -89,15 +92,29 @@ function TransferView({ transferId }: { transferId: string }) {
 
     return (
         <div className="flex flex-col h-full w-full gap-2">
-            <div className="w-full h-full flex flex-col">
-                <p className="text-primary text-xl font-semibold">
-                    {transfer?.title}
-                </p>
-                <p className="text-primary text-xs">
-                    {formattedTime.toDateString()}
-                </p>
-                <p className="h-full text-primary">{transfer?.message}</p>
-            </div>
+            {!downloadingFile && (
+                <div className="w-full h-full flex flex-col">
+                    <p className="text-primary text-xl font-semibold">
+                        {transfer?.title}
+                    </p>
+                    <p className="text-primary text-xs">
+                        {formattedTime.toDateString()}
+                    </p>
+                    <p className="h-full text-primary">{transfer?.message}</p>
+                </div>
+            )}
+            {downloadingFile && (
+                <div className="w-full h-full flex flex-col items-center justify-center space-y-3">
+                    <h2 className="text-lg font-semibold italic">
+                        downloading transfer...
+                    </h2>
+                    <PulseLoader
+                        color="#4539cd"
+                        size={20}
+                        speedMultiplier={0.5}
+                    />
+                </div>
+            )}
             <button
                 onClick={() => downloadTransfer(transfer)}
                 className="h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
