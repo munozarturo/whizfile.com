@@ -26,7 +26,11 @@ const ShareButton = React.forwardRef<
         }
     };
 
-    return <button {...props}>Share</button>;
+    return (
+        <button onClick={handleShare} {...props}>
+            Share
+        </button>
+    );
 });
 ShareButton.displayName = "ShareButton";
 
