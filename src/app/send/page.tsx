@@ -17,6 +17,7 @@ import axios from "axios";
 import axiosInstance from "@/lib/api/axios-instance";
 import { PulseLoader } from "react-spinners";
 import { TransferLink } from "@/components/ui/transfer-link";
+import { ShareButton } from "@/components/ui/share-button";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
@@ -133,7 +134,7 @@ export default function Send() {
                             </CardTitle>
                             <TransferLink
                                 className="text-lg text-gray-500 font-semibold italic outline rounded-lg p-1"
-                                tooltipText="copy to clipboard"
+                                tooltipText="click to copy"
                                 copyText={`${BASE_URL}/receive/${mutation.data}`}
                                 displayText={`${BASE_URL}/receive/${mutation.data}`}
                             ></TransferLink>
@@ -148,6 +149,11 @@ export default function Send() {
                             >
                                 send another
                             </button>
+                            <ShareButton
+                                title={"some share"}
+                                text={"share me!"}
+                                url={"http://localhost:3000/send"}
+                            ></ShareButton>
                         </CardContent>
                     </div>
                 ) : (

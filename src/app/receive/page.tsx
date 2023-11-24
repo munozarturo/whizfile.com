@@ -43,19 +43,14 @@ export default function Receive() {
         enabled: false,
     });
 
-    // useEffect(() => {
-    //     if (data) {
-    //         // Redirect to the transfer page if data exists
-    //         router.push(`/transfer/${transferId}`);
-    //     }
-    // }, [data, router, transferId]);
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         await refetch();
 
-        console.log(data);
+        if (data) {
+            router.push(`/receive/${transferId}`);
+        }
     };
 
     return (
