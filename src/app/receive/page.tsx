@@ -40,7 +40,8 @@ export default function Receive() {
     const { data, error, refetch, isError, isLoading } = useQuery({
         queryKey: ["transfer", transferId],
         queryFn: async () => {
-            return fetchTransfer(transferId);
+            const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
+            return fetchTransfer(urlTransferId);
         },
         enabled: false,
     });
@@ -52,8 +53,10 @@ export default function Receive() {
 
         const { data: newData } = await refetch();
 
+        const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
+
         if (newData) {
-            router.push(`/receive/${transferId}`);
+            router.push(`/receive/${urlTransferId}`);
         }
     };
 
