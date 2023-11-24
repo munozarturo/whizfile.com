@@ -23,12 +23,9 @@ if (!process.env.NEXT_PUBLIC_BASE_URL) {
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function Receive() {
-    const queryClient = useQueryClient();
     const router = useRouter();
+    const [tryAgain, setTryAgain] = useState<boolean>(false);
     const [transferId, setTransferId] = useState<string>("");
-
-    const sleep = (ms: number) =>
-        new Promise((resolve) => setTimeout(resolve, ms));
 
     const fetchTransfer = async (transferId: string) => {
         const res = await axiosInstance.get(`/api/transfer/${transferId}`);
@@ -45,6 +42,8 @@ export default function Receive() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        setTryAgain(false);
 
         await refetch();
 
@@ -78,17 +77,23 @@ export default function Receive() {
                             onSubmit={handleSubmit}
                             className="flex flex-col w-full h-full gap-4"
                         >
-                            {isError ? (
+                            {isError && !tryAgain ? (
                                 <div className="w-full h-full flex flex-col items-center justify-center space-y-2">
                                     <h2>
-                                        uh oh! it looks like this transfer does
-                                        not exist...
+                                        uh oh! it looks like a transfer with the
+                                        id{" "}
+                                        <span className="text-xl text-primary font-bold">
+                                            {transferId}
+                                        </span>{" "}
+                                        does not exist...
                                     </h2>
                                     <button
-                                        onClick={() => {}}
+                                        onClick={() => {
+                                            setTryAgain(true);
+                                        }}
                                         className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                                     >
-                                        try again
+                                        try a new one
                                     </button>
                                 </div>
                             ) : (
@@ -100,7 +105,7 @@ export default function Receive() {
                                             setTransferId(e.target.value)
                                         }
                                         placeholder={`${BASE_URL}/receive/xxxxxx`}
-                                        className="w-full p-2 border-2 border-primary rounded-md text-3xl font-bold first-line:italic text-gray-500"
+                                        className="w-full p-2 border-2 border-primary rounded-md text-3xl font-bold focus:outline-none italic text-gray-500"
                                     />
                                     <input
                                         type="submit"
