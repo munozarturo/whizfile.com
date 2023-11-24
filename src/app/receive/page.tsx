@@ -45,9 +45,9 @@ export default function Receive() {
 
         setTryAgain(false);
 
-        await refetch();
+        const { data: newData } = await refetch();
 
-        if (data) {
+        if (newData) {
             router.push(`/receive/${transferId}`);
         }
     };
