@@ -21,6 +21,11 @@ if (!process.env.NEXT_PUBLIC_BASE_URL) {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL_NO_HTTP = BASE_URL.startsWith("http://")
+    ? BASE_URL.replace("http://", "")
+    : BASE_URL.startsWith("https://")
+    ? BASE_URL.replace("https://", "")
+    : BASE_URL;
 
 export default function Receive() {
     const router = useRouter();
@@ -51,6 +56,33 @@ export default function Receive() {
             router.push(`/receive/${transferId}`);
         }
     };
+
+    const parseTransferUrl = (url: string) => {
+        const transferIdRegex = /^[a-zA-Z0-9]{0,6}$/;
+        const fullUrlPattern =
+            /^(https?:\/\/)?whizfile\.com\/receive\/([a-zA-Z0-9]{0,6})$/;
+
+        let urlPrefix = url;
+        let urlTransferId = "";
+
+        if (url.match(transferIdRegex)) {
+            urlPrefix = "";
+            urlTransferId = url;
+        } else if (url.startsWith(`${BASE_URL}/receive/`)) {
+            urlPrefix = `${BASE_URL}/receive/`;
+            urlTransferId = url.replace(`${BASE_URL}/receive/`, "");
+        } else if (url.startsWith(`${BASE_URL_NO_HTTP}/receive/`)) {
+            urlPrefix = `${BASE_URL_NO_HTTP}/receive/`;
+            urlTransferId = url.replace(`${BASE_URL_NO_HTTP}/receive/`, "");
+        }
+
+        return {
+            urlPrefix: urlPrefix,
+            urlTransferId: urlTransferId,
+        };
+    };
+
+    const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
 
     return (
         <main className="w-full h-full flex flex-row justify-center items-center">
@@ -98,15 +130,29 @@ export default function Receive() {
                                 </div>
                             ) : (
                                 <>
-                                    <input
-                                        type="text"
-                                        value={transferId}
-                                        onChange={(e) =>
-                                            setTransferId(e.target.value)
-                                        }
-                                        placeholder={`${BASE_URL}/receive/xxxxxx`}
-                                        className="w-full p-2 border-2 border-primary rounded-md text-3xl font-bold focus:outline-none italic text-gray-500"
-                                    />
+                                    <div className="w-full h-fit flex flex-row p-2 border-2 border-primary rounded-md relative">
+                                        <div className="absolute flex flex-row pointer-events-none w-full h-fit">
+                                            <span className="pointer-events-none w-fit text-3xl font-bold italic text-gray-500 focus:outline-none">
+                                                {transferId === ""
+                                                    ? `${BASE_URL}/receive/`
+                                                    : urlPrefix}
+                                            </span>
+                                            <span className="pointer-events-none w-fit text-3xl font-bold italic text-primary focus:outline-none">
+                                                {transferId === ""
+                                                    ? "xxxxxx"
+                                                    : urlTransferId}
+                                            </span>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={transferId}
+                                            onChange={(e) =>
+                                                setTransferId(e.target.value)
+                                            }
+                                            className="w-full text-3xl font-bold italic text-opacity-0 focus:outline-none"
+                                        />
+                                    </div>
+
                                     <input
                                         type="submit"
                                         value="search"
