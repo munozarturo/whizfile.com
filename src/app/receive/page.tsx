@@ -9,10 +9,9 @@ import {
 } from "@/components/ui/card";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/api/axios-instance";
-import { useEffect, useState } from "react";
-import { TransferLink } from "@/components/ui/transfer-link";
+import { useState } from "react";
 import { PulseLoader } from "react-spinners";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
