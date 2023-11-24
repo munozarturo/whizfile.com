@@ -51,6 +51,9 @@ const DropZone = React.forwardRef<
     });
 
     let fileSize = files.reduce((acc, file) => acc + file.size, 0);
+    // const fileSizeUsedPercentage =
+    //     (fileSize / ApiConfig.fileUpload.maxUploadSize) * 100;
+    const fileSizeUsedPercentage = (fileSize / 100) * 100;
 
     return (
         <div
@@ -101,6 +104,7 @@ const DropZone = React.forwardRef<
                                     </button>
                                 </li>
                             ))}
+                            maxUploadSize
                         </ul>
                     </div>
                 </div>
@@ -116,6 +120,19 @@ const DropZone = React.forwardRef<
                 ) : (
                     <p>drag and drop, or click to select files</p>
                 )}
+            </div>
+            <div className="w-full bg-gray-300 rounded-full h-2.5">
+                <div
+                    className={cn(
+                        fileSizeUsedPercentage > 100
+                            ? "bg-red-500"
+                            : "bg-primary",
+                        "h-2.5 rounded-full"
+                    )}
+                    style={{
+                        width: `${Math.min(fileSizeUsedPercentage, 100)}%`,
+                    }}
+                ></div>
             </div>
         </div>
     );
