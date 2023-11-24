@@ -15,8 +15,26 @@ const DropZone = React.forwardRef<
 >(({ className, files, setFiles, ...props }, ref) => {
     const onDrop = useCallback(
         (acceptedFiles: File[]) => {
-            const combinedFiles = [...files, ...acceptedFiles];
-            setFiles(combinedFiles);
+            const updatedFiles = acceptedFiles.map((newFile) => {
+                let newName = newFile.name;
+                let count = 1;
+
+                while (
+                    files.some((existingFile) => existingFile.name === newName)
+                ) {
+                    const nameParts = newFile.name.split(".");
+                    const extension = nameParts.pop();
+                    newName = `${nameParts.join(".")} (${count}).${extension}`;
+                    count++;
+                }
+
+                return new File([newFile], newName, {
+                    type: newFile.type,
+                    lastModified: newFile.lastModified,
+                });
+            });
+
+            setFiles([...files, ...updatedFiles]);
         },
         [files, setFiles]
     );
