@@ -16,6 +16,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import axiosInstance from "@/lib/api/axios-instance";
 import { PulseLoader } from "react-spinners";
+import { TransferLink } from "@/components/ui/transfer-link";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
@@ -130,13 +131,12 @@ export default function Send() {
                             >
                                 transfer sent
                             </CardTitle>
-                            <div
-                                onClick={() =>
-                                    navigator.clipboard.writeText(
-                                        `${BASE_URL}/receive/${mutation.data}`
-                                    )
-                                }
-                            >{`${BASE_URL}/receive/${mutation.data}`}</div>
+                            <TransferLink
+                                className="text-lg text-gray-500 font-semibold italic outline rounded-lg p-1"
+                                tooltipText="copy to clipboard"
+                                copyText={`${BASE_URL}/receive/${mutation.data}`}
+                                displayText={`${BASE_URL}/receive/${mutation.data}`}
+                            ></TransferLink>
                             <button
                                 onClick={async () => {
                                     setFiles([]);

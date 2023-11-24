@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useEffect, useState } from "react";
+import { TransferLink } from "@/components/ui/transfer-link";
 
 export default function Receive() {
     const router = useRouter();
@@ -45,6 +46,7 @@ export default function Receive() {
                         receive
                     </CardTitle>
                 </CardHeader>
+                <CardContent className="flex flex-col w-fill h-fill items-center justify-center"></CardContent>
             </Card>
         </main>
     );
