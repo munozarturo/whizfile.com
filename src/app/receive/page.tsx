@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useEffect, useState } from "react";
 import { TransferLink } from "@/components/ui/transfer-link";
@@ -24,6 +24,7 @@ if (!process.env.NEXT_PUBLIC_BASE_URL) {
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function Receive() {
+    const queryClient = useQueryClient();
     const router = useRouter();
     const [transferId, setTransferId] = useState<string>("");
 
@@ -78,18 +79,37 @@ export default function Receive() {
                             onSubmit={handleSubmit}
                             className="flex flex-col w-full h-full gap-4"
                         >
-                            <input
-                                type="text"
-                                value={transferId}
-                                onChange={(e) => setTransferId(e.target.value)}
-                                placeholder={`${BASE_URL}/receive/xxxxxx`}
-                                className="w-full p-2 border-2 border-primary rounded-md text-3xl font-bold first-line:italic text-gray-500"
-                            />
-                            <input
-                                type="submit"
-                                value="search"
-                                className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-2xl"
-                            />
+                            {isError ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center space-y-2">
+                                    <h2>
+                                        uh oh! it looks like this transfer does
+                                        not exist...
+                                    </h2>
+                                    <button
+                                        onClick={() => {}}
+                                        className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                                    >
+                                        try again
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={transferId}
+                                        onChange={(e) =>
+                                            setTransferId(e.target.value)
+                                        }
+                                        placeholder={`${BASE_URL}/receive/xxxxxx`}
+                                        className="w-full p-2 border-2 border-primary rounded-md text-3xl font-bold first-line:italic text-gray-500"
+                                    />
+                                    <input
+                                        type="submit"
+                                        value="search"
+                                        className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-2xl"
+                                    />
+                                </>
+                            )}
                         </form>
                     )}
                 </CardContent>

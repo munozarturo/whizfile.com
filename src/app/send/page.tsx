@@ -149,11 +149,6 @@ export default function Send() {
                             >
                                 send another
                             </button>
-                            <ShareButton
-                                title={"some share"}
-                                text={"share me!"}
-                                url={"http://localhost:3000/send"}
-                            ></ShareButton>
                         </CardContent>
                     </div>
                 ) : (
