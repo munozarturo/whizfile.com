@@ -65,6 +65,25 @@ const DropZone = React.forwardRef<
                 {...getRootProps()}
                 className="w-full flex flex-col items-center justify-center p-6 border-8 border-dashed border-primary rounded-2xl flex-grow"
             >
+                <div className="flex flex-col w-full max-h-80 overflow-y-auto custom-scrollbar">
+                    {files.map((file) => (
+                        <li key={file.name}>
+                            {file.name}, {formatFileSize(file.size)}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeFile(file.name);
+                                }}
+                            >
+                                <Icons.cross
+                                    width={16}
+                                    height={16}
+                                    fill={"black"}
+                                />
+                            </button>
+                        </li>
+                    ))}
+                </div>
                 <Icons.add fill="#4539CD" width={96} height={96} />
                 <input {...getInputProps()} />
                 {isDragActive ? (
