@@ -152,7 +152,7 @@ export default function Receive() {
                                             onChange={(e) =>
                                                 setTransferId(e.target.value)
                                             }
-                                            className="w-full text-3xl font-bold italic text-opacity-0 focus:outline-none"
+                                            className="w-full text-3xl font-bold italic text-transparent focus:outline-none"
                                         />
                                     </div>
 
