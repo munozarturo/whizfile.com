@@ -53,8 +53,7 @@ const DropZone = React.forwardRef<
     let fileSize = files.reduce((acc, file) => acc + file.size, 0);
     // const fileSizeUsedPercentage =
     //     (fileSize / ApiConfig.fileUpload.maxUploadSize) * 100;
-    const fileSizeUsedPercentage =
-        (100 / ApiConfig.fileUpload.maxUploadSize) * 100;
+    const fileSizeUsedPercentage = (fileSize / 100) * 100;
 
     {
         files.length > 0 && (
@@ -110,8 +109,24 @@ const DropZone = React.forwardRef<
         >
             <div
                 {...getRootProps()}
-                className="w-full flex flex-col items-center justify-center p-6 border-8 border-dashed border-primary rounded-2xl flex-grow"
+                className="w-full flex flex-col items-center justify-center p-1 border-8 border-dashed border-primary rounded-2xl flex-grow"
             >
+                {files.length > 0 && (
+                    <div className="w-full max-h-[300px] custom-scrollbar overflow-y-auto flex flex-row flex-wrap overflow-x-auto gap-2 justify-center">
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                        <div className="w-24 h-36 bg-red-500"></div>
+                    </div>
+                )}
                 <Icons.add fill="#4539CD" width={96} height={96} />
                 <input {...getInputProps()} />
                 {isDragActive ? (
