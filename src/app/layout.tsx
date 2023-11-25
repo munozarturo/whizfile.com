@@ -20,7 +20,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body
-                className={`w-screen h-screen flex flex-col ${inter.className} bg-tile-12 bg-repeat bg-origin-content bg-size-tile`}
+                className={`w-screen h-screen flex flex-col ${inter.className} bg-tile-9 bg-repeat bg-origin-content bg-size-tile`}
             >
                 <Providers>
                     <Navbar />

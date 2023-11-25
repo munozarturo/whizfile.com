@@ -136,12 +136,9 @@ export default function ReceiveTransferId(context: {
                         </button>
                     </div>
                 ) : (
-                    <div className="w-full h-full flex flex-row">
-                        <CardContent className="h-full w-full flex flex-col">
-                            <TransferView transfer={transfer} />
-                        </CardContent>
-                        <CardContent className="h-full w-full flex flex-col"></CardContent>
-                    </div>
+                    <CardContent className="h-full w-full flex flex-col">
+                        <TransferView transfer={transfer} />
+                    </CardContent>
                 )}
             </Card>
         </main>

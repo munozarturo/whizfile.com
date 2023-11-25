@@ -76,7 +76,6 @@ export async function POST(req: NextRequest) {
                     transferId: transfer.transferId,
                     oneTimeCode: authPair.oneTimeCode,
                 },
-                debug: transfer,
             },
             { status: 200 }
         );

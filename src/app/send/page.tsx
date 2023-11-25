@@ -55,8 +55,6 @@ export default function Send() {
             message: message,
         });
 
-        console.log(transferResp, "transferResp");
-
         const data = transferResp.data.data as unknown as {
             oneTimeCode: string;
             transferId: string;
@@ -79,6 +77,7 @@ export default function Send() {
             file: Blob;
         }) => {
             const file: Blob = await createZip(files);
+            const fileNames: string[] = files.map((f) => f.name);
             return submitTransfer(transferUpload);
         },
     });
