@@ -12,5 +12,10 @@
 
 ## Todo
 
--   Add error state handling to find a transfer
--   Add query indicators to find a transfer
+-   Add better ui
+    -   Improve the dropzone
+        -   better ui
+        -   add support for folder uploads
+    -   add more information to file download
+-   improve data checking
+    -   add zod input validation to all forms
