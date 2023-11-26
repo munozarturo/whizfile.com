@@ -19,3 +19,5 @@
     -   add more information to file download
 -   improve data checking
     -   add zod input validation to all forms
+-   add a back to my transfer section for error
+- the dropzone drag doesn't actually work properly
