@@ -2,13 +2,16 @@
 const nextConfig = {
     async redirects() {
         return [
-          {
-            source: '/',
-            destination: '/send',
-            permanent: true,
-          },
-        ]
-      },
-}
+            {
+                source: "/",
+                destination: "/send",
+                permanent: true,
+            },
+        ];
+    },
+    serverRuntimeConfig: {
+        maxBodySize: "50mb",
+    },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
