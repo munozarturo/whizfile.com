@@ -20,4 +20,5 @@
 -   improve data checking
     -   add zod input validation to all forms
 -   add a back to my transfer section for error
-- the dropzone drag doesn't actually work properly
+-   the dropzone drag doesn't actually work properly
+-   change vercel upload to be directly to S3 to avoid 4.5mb upload limit

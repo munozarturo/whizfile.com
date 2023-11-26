@@ -9,9 +9,6 @@ const nextConfig = {
             },
         ];
     },
-    serverRuntimeConfig: {
-        maxBodySize: "50mb",
-    },
 };
 
 module.exports = nextConfig;
