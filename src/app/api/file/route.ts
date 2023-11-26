@@ -13,8 +13,8 @@ import { ApiConfig } from "@/config/api";
 
 export const config = {
     api: {
-        bodyParser: {
-            sizeLimit: "50mb", // Increase this value according to your needs
+        limits: {
+            bodyParser: "50mb", // Increase this value according to your needs
         },
     },
 };

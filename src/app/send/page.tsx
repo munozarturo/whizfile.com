@@ -65,7 +65,7 @@ export default function Send() {
         formData.set("oneTimeCode", data.oneTimeCode);
         formData.set("transferId", data.transferId);
 
-        await axios.post("/api/file", formData);
+        await axiosInstance.post("/api/file", formData);
 
         return data.transferId;
     };
