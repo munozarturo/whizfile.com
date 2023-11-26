@@ -22,3 +22,4 @@
 -   add a back to my transfer section for error
 -   the dropzone drag doesn't actually work properly
 -   change vercel upload to be directly to S3 to avoid 4.5mb upload limit
+    -   https://vercel.com/guides/how-to-bypass-vercel-body-size-limit-serverless-functions
