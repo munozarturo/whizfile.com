@@ -16,7 +16,7 @@ const someCollection: Collection<SomeSchema> = collections.someCollection;
 
 ## Adding Collections
 
-**_ Step 1: Create a document schema _**
+### Step 1: Create a document schema
 
 1. Open `@/db/schema`.
 2. Create a schema.
@@ -26,7 +26,7 @@ const someCollection: Collection<SomeSchema> = collections.someCollection;
 >   constructor(
 >       public attr1: type<attr1>,
 >       public attr2: type<attr2>,
->       ...
+>       ...,
 >       public attrN: type<attrN>,
 >       public id?: ObjectId
 >   ) {}
@@ -39,7 +39,7 @@ const someCollection: Collection<SomeSchema> = collections.someCollection;
 > export { SomeSchema };
 > ```
 
-**_ Step 2: Add the collection to `Collections` _**
+### Step 2: Add the collection to `Collections`
 
 1. Open `@/db/mongo`.
 2. Add the newly created `Collection<Schema>` to the `Collections` interface.
@@ -59,7 +59,7 @@ const someCollection: Collection<SomeSchema> = collections.someCollection;
 > };
 > ```
 
-**_ Step 3: Use the created collection _**
+### Step 3: Use the created collection
 
 ```TypeScript
 import {
