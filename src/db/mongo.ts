@@ -1,8 +1,15 @@
-import { MongoClient } from "mongodb";
+import { dbConfig } from "@/config/db";
+import {
+    Collection,
+    CollectionOptions,
+    Db,
+    DbOptions,
+    MongoClient,
+} from "mongodb";
 
 let cachedClient: MongoClient | null = null;
 
-export async function connectToDatabase() {
+async function fetchMongoClient() {
     if (cachedClient) {
         return cachedClient;
     }
@@ -21,3 +28,19 @@ export async function connectToDatabase() {
     cachedClient = client;
     return client;
 }
+
+interface DatabaseConnectionParameters {
+    client: MongoClient;
+    db?: string;
+    dbOptions?: DbOptions;
+}
+
+function connectToDatabase({
+    client,
+    db = dbConfig.rootDb,
+    dbOptions = undefined,
+}: DatabaseConnectionParameters): Db {
+    return client.db(db, dbOptions);
+}
+
+export { fetchMongoClient, connectToDatabase, MongoClient, Db };
