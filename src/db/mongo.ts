@@ -5,13 +5,8 @@ interface Collections {
     requests: Collection<schema.RequestSchema>;
 }
 
-interface dbConnection {
-    db: Db;
-    collections: Collections;
-}
-
 let cachedClient: MongoClient | null = null;
-let cachedConnection: dbConnection | null = null;
+let cachedConnection: Collections | null = null;
 
 async function fetchMongoClient() {
     if (cachedClient) {
@@ -53,13 +48,8 @@ async function connectToDatabase() {
         requests: db.collection("requests"),
     };
 
-    cachedConnection = {
-        db: db,
-        collections: collections,
-    };
-
-    return cachedConnection;
+    return collections;
 }
 
 export * from "@/db/schema";
-export { connectToDatabase, Collection, type dbConnection };
+export { connectToDatabase, Collection, type Collections };

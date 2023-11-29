@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
     Collection,
-    connectToDatabase,
-    dbConnection,
+    Collections,
     RequestSchema,
-} from "./db/mongo";
+    connectToDatabase,
+} from "@/db/mongo";
 
 export async function middleware(request: NextRequest) {
-    const db: dbConnection = await connectToDatabase();
-    const requests: Collection<RequestSchema> = db.collections.requests;
+    const collections: Collections = await connectToDatabase();
+    const requests: Collection<RequestSchema> = collections.requests;
+
+    const dbQueryResponse = collections.requests.findOne() as unknown as
+        | RequestSchema
+        | undefined;
 
     return NextResponse.next();
 }
