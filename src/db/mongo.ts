@@ -1,13 +1,17 @@
-import { dbConfig } from "@/config/db";
-import {
-    Collection,
-    CollectionOptions,
-    Db,
-    DbOptions,
-    MongoClient,
-} from "mongodb";
+import { Collection, Db, DbOptions, MongoClient } from "mongodb";
+import * as schema from "@/db/schema";
+
+interface Collections {
+    requests: Collection<schema.RequestSchema>;
+}
+
+interface dbConnection {
+    db: Db;
+    collections: Collections;
+}
 
 let cachedClient: MongoClient | null = null;
+let cachedConnection: dbConnection | null = null;
 
 async function fetchMongoClient() {
     if (cachedClient) {
@@ -15,32 +19,47 @@ async function fetchMongoClient() {
     }
 
     const config = {};
-    const uri = process.env.MONGO_URI;
+    const URI = process.env.MONGO_URI;
 
-    if (uri === undefined) {
+    if (URI === undefined) {
         throw new Error(
             "Please define the MONGO_URI environment variable inside .env"
         );
     }
 
-    const client = await MongoClient.connect(uri, config);
+    const client = await MongoClient.connect(URI, config);
 
     cachedClient = client;
     return client;
 }
 
-interface DatabaseConnectionParameters {
-    client: MongoClient;
-    db?: string;
-    dbOptions?: DbOptions;
+async function connectToDatabase() {
+    if (cachedConnection) {
+        return cachedConnection;
+    }
+
+    const MAIN_DB = process.env.MAIN_DB;
+
+    if (MAIN_DB === undefined) {
+        throw new Error(
+            "Please define the MAIN_DB environment variable inside .env"
+        );
+    }
+
+    const mongoClient: MongoClient = await fetchMongoClient();
+    const db: Db = mongoClient.db(MAIN_DB);
+
+    const collections: Collections = {
+        requests: db.collection("requests"),
+    };
+
+    cachedConnection = {
+        db: db,
+        collections: collections,
+    };
+
+    return cachedConnection;
 }
 
-function connectToDatabase({
-    client,
-    db = dbConfig.rootDb,
-    dbOptions = undefined,
-}: DatabaseConnectionParameters): Db {
-    return client.db(db, dbOptions);
-}
-
-export { fetchMongoClient, connectToDatabase, MongoClient, Db };
+export * from "@/db/schema";
+export { connectToDatabase, Collection, type dbConnection };

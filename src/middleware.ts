@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
+    Collection,
     connectToDatabase,
-    Db,
-    fetchMongoClient,
-    MongoClient,
+    dbConnection,
+    RequestSchema,
 } from "./db/mongo";
-import { dbConfig } from "@/config/db";
 
 export async function middleware(request: NextRequest) {
-    const mongoClient: MongoClient = await fetchMongoClient();
-    const mainDb: Db = connectToDatabase({
-        client: mongoClient,
-    });
-
-    const requests = mainDb.collection("requests");
+    const db: dbConnection = await connectToDatabase();
+    const requests: Collection<RequestSchema> = db.collections.requests;
 
     return NextResponse.next();
 }
