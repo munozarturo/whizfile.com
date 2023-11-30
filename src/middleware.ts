@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { apiResponse } from "./lib/api/utils";
+import { RequestSchema } from "./lib/db/schema/request";
+import * as zod from "zod";
 
 /*
  * Middleware must only use code that can run in the edge.
@@ -35,12 +37,13 @@ export async function middleware(req: NextRequest) {
 
     const requestTimestamp: number = Date.now();
 
-    const requestMetadata = {
-        timestamp: requestTimestamp,
-        method: req.method,
-        source: source || "unknown",
-        target: req.url,
-    };
+    const requestMetadata: zod.infer<typeof RequestSchema> =
+        RequestSchema.parse({
+            timestamp: requestTimestamp,
+            method: req.method,
+            source: source || "unknown",
+            target: req.url,
+        });
 
     const postRequest = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/requests`, {
         method: "POST",
@@ -54,7 +57,7 @@ export async function middleware(req: NextRequest) {
 
     const body = await postRequest.json();
 
-    if (body.authorize === "limit-exceeded") {
+    if (body.requests === "limit-exceeded") {
         return NextResponse.json(apiResponse("Request rate limit exceeded."), {
             status: 429,
         });

@@ -1,5 +1,5 @@
 import { apiResponse } from "@/lib/api/utils";
-import { RequestSchema } from "@/lib/schema/request";
+import { RequestSchema } from "@/lib/db/schema/request";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         });
 
         return Response.json(
-            apiResponse("Hello from `/api/requests`", {
+            apiResponse("Request logged sucessfully.", {
                 requests:
                     countBySource <= LIMIT ? "within-limit" : "limit-exceeded",
             })
