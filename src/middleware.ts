@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { apiResponse } from "./lib/api/utils";
+import { handleResponse } from "./lib/api/utils";
 import { RequestSchema } from "./lib/db/schema/request";
 import * as zod from "zod";
 
@@ -58,9 +58,12 @@ export async function middleware(req: NextRequest) {
     const body = await postRequest.json();
 
     if (body.requests === "limit-exceeded") {
-        return NextResponse.json(apiResponse("Request rate limit exceeded."), {
-            status: 429,
-        });
+        return NextResponse.json(
+            handleResponse("Request rate limit exceeded."),
+            {
+                status: 429,
+            }
+        );
     }
 
     return NextResponse.next();

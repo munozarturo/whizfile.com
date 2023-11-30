@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/api/utils";
+import { handleResponse } from "@/lib/api/utils";
 import { RequestSchema } from "@/lib/db/schema/request";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
@@ -22,7 +22,9 @@ if (!LIMIT) {
 
 export async function POST(req: NextRequest) {
     if (req.headers.get("Authorization") !== SECRET_KEY) {
-        return NextResponse.json(apiResponse("Unathorized"), { status: 401 });
+        return NextResponse.json(handleResponse("Unathorized"), {
+            status: 401,
+        });
     }
 
     try {
@@ -45,7 +47,7 @@ export async function POST(req: NextRequest) {
         });
 
         return Response.json(
-            apiResponse("Request logged sucessfully.", {
+            handleResponse("Request logged sucessfully.", {
                 requests:
                     countBySource <= LIMIT ? "within-limit" : "limit-exceeded",
             })
@@ -60,7 +62,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json(
-            apiResponse("Unknown error.", { status: 500 })
+            handleResponse("Unknown error.", { status: 500 })
         );
     }
 }

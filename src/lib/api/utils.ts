@@ -1,10 +1,13 @@
-interface ApiResponse {
+interface handleResponse {
     timestamp: number;
     message: string;
     data: Object | null;
 }
 
-function apiResponse(message: string, data: Object | null = null): ApiResponse {
+function handleResponse(
+    message: string,
+    data: Object | null = null
+): handleResponse {
     return {
         timestamp: Date.now(),
         message: message,
@@ -12,4 +15,4 @@ function apiResponse(message: string, data: Object | null = null): ApiResponse {
     };
 }
 
-export { apiResponse };
+export { handleResponse };
