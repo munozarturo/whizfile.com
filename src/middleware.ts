@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { RequestSchema } from "@/db/mongo";
+import { apiResponse } from "./lib/api/utils";
 
 /*
  * Middleware must only use code that can run in the edge.
@@ -35,29 +35,30 @@ export async function middleware(req: NextRequest) {
 
     const requestTimestamp: number = Date.now();
 
-    const requestMetadata: RequestSchema = {
+    const requestMetadata = {
         timestamp: requestTimestamp,
         method: req.method,
         source: source || "unknown",
         target: req.url,
     };
 
-    const addRequestMetadata = await fetch(
-        `${NEXT_PUBLIC_BASE_URL}/api/requests`,
-        {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `${SECRET_KEY}`,
-            },
-            body: JSON.stringify(requestMetadata),
-        }
-    );
+    const postRequest = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/requests`, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `${SECRET_KEY}`,
+        },
+        body: JSON.stringify(requestMetadata),
+    });
 
-    console.log(requestMetadata);
+    const body = await postRequest.json();
 
-    console.log(SECRET_KEY);
+    if (body.authorize === "limit-exceeded") {
+        return NextResponse.json(apiResponse("Request rate limit exceeded."), {
+            status: 429,
+        });
+    }
 
     return NextResponse.next();
 }

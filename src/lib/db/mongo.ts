@@ -1,4 +1,4 @@
-import { RequestSchema } from "@/lib/validations/request";
+import { RequestSchema } from "@/lib/schema/request";
 import { Collection, Db, DbOptions, MongoClient } from "mongodb";
 import * as zod from "zod";
 
