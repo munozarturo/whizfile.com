@@ -55,6 +55,10 @@ export async function middleware(req: NextRequest) {
         }
     );
 
+    console.log(requestMetadata);
+
+    console.log(SECRET_KEY);
+
     return NextResponse.next();
 }
 
