@@ -15,10 +15,7 @@ export async function POST(req: NextRequest) {
         return Response.json(apiResponse("Unathorized"), { status: 401 });
     }
 
-    const body: 
-
-    console.log(await req.json());
-    console.log(req.headers);
+    const body: null = null;
 
     return Response.json({ message: "Hello from /api/requests" });
 }
