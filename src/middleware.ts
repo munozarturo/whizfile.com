@@ -10,6 +10,22 @@ import { RequestSchema } from "@/db/mongo";
  * - Matcher for middleware makes sure to exclude `/api/requests` to avoid an infinite request logging.
  */
 
+const SECRET_KEY = process.env.MIDDLEWARE_SECRET_KEY;
+
+if (!SECRET_KEY) {
+    throw new Error(
+        "`MIDDLEWARE_SECRET_KEY` environment variable is not defined."
+    );
+}
+
+const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+if (!SECRET_KEY) {
+    throw new Error(
+        "`NEXT_PUBLIC_BASE_URL` environment variable is not defined."
+    );
+}
+
 export async function middleware(req: NextRequest) {
     let source = req.ip ?? req.headers.get("x-real-ip");
     const forwardedFor = req.headers.get("x-forwarded-for");
@@ -26,14 +42,18 @@ export async function middleware(req: NextRequest) {
         target: req.url,
     };
 
-    const addRequestMetadata = await fetch("/api/requests", {
-        method: "POST",
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestMetadata),
-    });
+    const addRequestMetadata = await fetch(
+        `${NEXT_PUBLIC_BASE_URL}/api/requests`,
+        {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `${SECRET_KEY}`,
+            },
+            body: JSON.stringify(requestMetadata),
+        }
+    );
 
     return NextResponse.next();
 }
@@ -41,8 +61,12 @@ export async function middleware(req: NextRequest) {
 export const config = {
     matcher: [
         /*
-         * Match all request paths starting with /api/ except for /api/requests
+         * Match all request paths except for the ones starting with:
+         * - api/requests (API route)
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
          */
-        "/api/((?!requests$).*)",
+        "/((?!api/requests|_next/static|_next/image|favicon.ico).*)",
     ],
 };
