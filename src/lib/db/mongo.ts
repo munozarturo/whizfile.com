@@ -1,8 +1,9 @@
+import { RequestSchema } from "@/lib/validations/request";
 import { Collection, Db, DbOptions, MongoClient } from "mongodb";
-import * as schema from "@/db/schema";
+import * as zod from "zod";
 
 interface Collections {
-    requests: Collection<schema.RequestSchema>;
+    requests: Collection<zod.infer<typeof RequestSchema>>;
 }
 
 let cachedClient: MongoClient | null = null;
@@ -51,5 +52,4 @@ async function connectToDatabase() {
     return collections;
 }
 
-export * from "@/db/schema";
 export { connectToDatabase, Collection, type Collections };
