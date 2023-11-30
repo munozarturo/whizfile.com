@@ -3,37 +3,32 @@
 ## Usage
 
 ```TypeScript
-import {
-    Collection,
-    Collections,
-    SomeSchema,
-    connectToDatabase,
-} from "@/db/mongo";
+import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
+import { SomeSchema } from "@/lib/db/schema/request";
+import * as zod from "zod";
 
 const collections: Collections = await connectToDatabase();
-const someCollection: Collection<SomeSchema> = collections.someCollection;
+const someCollection: Collection<zod.infer<typeof SomeSchema>> = collections.someCollection;
 ```
 
 ## Adding Collections
 
 ### Step 1: Create a document schema
 
-1. Open `@/db/schema`.
-2. Create a schema.
+1. Open `@/db/schema/schema-file.ts`, where `schema-file` is an appropriately named file for your schema.
+2. Create a schema with `zod`
 
 > ```TypeScript
-> class SomeSchema {
->   constructor(
->       public attr1: type<attr1>,
->       public attr2: type<attr2>,
->       ...,
->       public attrN: type<attrN>,
->       public id?: ObjectId
->   ) {}
-> }
+> import * as zod from "zod";
+>
+> const someSchema = zod.object({
+>   attr1: z.type().<...>,
+>   ...,
+>   attrN: z.type().<...>,
+> })
 > ```
 
-3. Add the schema to the export statement.
+3. Add the schema to the export statement in the same file.
 
 > ```TypeScript
 > export { SomeSchema };
@@ -45,8 +40,11 @@ const someCollection: Collection<SomeSchema> = collections.someCollection;
 2. Add the newly created `Collection<Schema>` to the `Collections` interface.
 
 > ```TypeScript
+> import * as zod from "zod";
+> import { someSchema } from "@/db/schema/schema-file.ts";
+>
 > interface Collections {
->   requests: Collection<schema.SomeSchema>;
+>   someCollection: Collection<zod.infer<typeof SomeSchema>>;
 > }
 > ```
 
@@ -54,21 +52,18 @@ const someCollection: Collection<SomeSchema> = collections.someCollection;
 
 > ```TypeScript
 > const collections: Collections = {
->   // where `collectionName` is the name of the collection in the db.
->   requests: db.collection("collectionName"),
+>   // where `someCollection` is the name of the collection in the db.
+>   someCollection: db.collection("someCollection"),
 > };
 > ```
 
 ### Step 3: Use the created collection
 
 ```TypeScript
-import {
-    Collection,
-    Collections,
-    SomeSchema,
-    connectToDatabase,
-} from "@/db/mongo";
+import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
+import { SomeSchema } from "@/lib/db/schema/request";
+import * as zod from "zod";
 
 const collections: Collections = await connectToDatabase();
-const someCollection: Collection<SomeSchema> = collections.someCollection;
+const someCollection: Collection<zod.infer<typeof SomeSchema>> = collections.someCollection;
 ```
