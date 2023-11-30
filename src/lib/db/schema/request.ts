@@ -11,13 +11,7 @@ const HTTPMethod = zod.enum([
 ]);
 
 const RequestSchema = zod.object({
-    timestamp: zod.preprocess((input) => {
-        if (typeof input === "string") {
-            const parsed = Number(input);
-            return isNaN(parsed) ? undefined : parsed;
-        }
-        return input;
-    }, zod.number()),
+    timestamp: zod.number(),
     method: HTTPMethod,
     source: zod.string(),
     target: zod.string(),

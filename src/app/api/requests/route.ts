@@ -1,8 +1,9 @@
 import { handleResponse } from "@/lib/api/utils";
-import { RequestSchema } from "@/lib/db/schema/request";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
+import { RequestSchema } from "@/lib/db/schema/request";
+import { RequestsReq } from "@/lib/api/validations/requests";
 
 const SECRET_KEY = process.env.MIDDLEWARE_SECRET_KEY;
 
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const body: zod.infer<typeof RequestSchema> = RequestSchema.parse(
+        const body: zod.infer<typeof RequestsReq> = RequestsReq.parse(
             await req.json()
         );
         const collections: Collections = await connectToDatabase();
