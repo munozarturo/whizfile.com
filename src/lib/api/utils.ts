@@ -4,13 +4,12 @@ interface ApiResponse {
     data: Object | null;
 }
 
-export function apiResponse(
-    message: string,
-    data: Object | null = null
-): ApiResponse {
+function apiResponse(message: string, data: Object | null = null): ApiResponse {
     return {
         timestamp: Date.now(),
         message: message,
         data: data,
     };
 }
+
+export { apiResponse };
