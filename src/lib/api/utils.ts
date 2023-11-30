@@ -1,4 +1,6 @@
-interface handleResponse {
+import * as zod from "zod";
+
+interface ApiResponse {
     timestamp: number;
     message: string;
     data: Object | null;
@@ -7,7 +9,7 @@ interface handleResponse {
 function handleResponse(
     message: string,
     data: Object | null = null
-): handleResponse {
+): ApiResponse {
     return {
         timestamp: Date.now(),
         message: message,
@@ -15,4 +17,16 @@ function handleResponse(
     };
 }
 
-export { handleResponse };
+function handleError(e: any): ApiResponse {
+    if (e instanceof Error) {
+        console.error(e);
+    } else if (e instanceof zod.ZodError) {
+        console.log(e.message);
+    } else {
+        console.log("Unknown error.");
+    }
+
+    return handleResponse("Unknown error.");
+}
+
+export { handleResponse, handleError };

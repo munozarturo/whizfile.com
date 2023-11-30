@@ -1,4 +1,4 @@
-import { handleResponse } from "@/lib/api/utils";
+import { handleError, handleResponse } from "@/lib/api/utils";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
@@ -47,23 +47,13 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        return Response.json(
+        return NextResponse.json(
             handleResponse("Request logged sucessfully.", {
                 requests:
                     countBySource <= LIMIT ? "within-limit" : "limit-exceeded",
             })
         );
     } catch (e: any) {
-        if (e instanceof Error) {
-            console.error(e);
-        } else if (e instanceof zod.ZodError) {
-            console.log(e.message);
-        } else {
-            console.log("Unknown error.");
-        }
-
-        return NextResponse.json(
-            handleResponse("Unknown error.", { status: 500 })
-        );
+        return NextResponse.json(handleError(e));
     }
 }
