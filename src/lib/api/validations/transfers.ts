@@ -1,6 +1,10 @@
 import * as zod from "zod";
 import { Hash } from "./shared";
 
+const TransferId = zod
+    .string()
+    .refine((input) => /^[a-zA-Z0-9]{6}$/.test(input));
+
 const ObjectData = zod.object({
     size: zod.preprocess((input) => {
         if (typeof input === "string") {
@@ -18,4 +22,4 @@ const TransfersReq = zod.object({
     objectData: ObjectData,
 });
 
-export { TransfersReq };
+export { TransfersReq, TransferId };
