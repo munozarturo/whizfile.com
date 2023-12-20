@@ -21,13 +21,13 @@ import { RequestsReq } from "@/lib/api/validations/api-endpoint-validations.ts";
 import ... from "..."
 
 // environment variables
-const ENV_VAR = process.env.ENV_VAR;
-
-if (!ENV_VAR) {
+if (!process.env.ENV_VAR) {
     throw new Error(
         "`ENV_VAR` environment variable is not defined."
     );
 }
+
+const ENV_VAR = process.env.ENV_VAR;
 
 // Next.js Methods
 

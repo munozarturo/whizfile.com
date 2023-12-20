@@ -12,7 +12,6 @@ const TransferSchema = zod.object({
     transferUId: Hash,
     timestamp: zod.number(),
     status: TransferStatus,
-    uploadUrl: zod.string(),
 
     title: zod.string(),
     message: zod.string(),
@@ -21,4 +20,8 @@ const TransferSchema = zod.object({
     objectIdSalt: zod.string(),
 });
 
-export { TransferSchema };
+const TransferIdSchema = zod.object({
+    transferIdHash: Hash,
+});
+
+export { TransferSchema, TransferIdSchema };
