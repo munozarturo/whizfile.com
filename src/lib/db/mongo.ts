@@ -1,9 +1,11 @@
 import { RequestSchema } from "@/lib/db/schema/request";
+import { TransferSchema } from "@/lib/db/schema/transfers";
 import { Collection, Db, DbOptions, MongoClient } from "mongodb";
 import * as zod from "zod";
 
 interface Collections {
     requests: Collection<zod.infer<typeof RequestSchema>>;
+    transfers: Collection<zod.infer<typeof TransferSchema>>;
 }
 
 let cachedClient: MongoClient | null = null;
@@ -47,6 +49,7 @@ async function connectToDatabase() {
 
     const collections: Collections = {
         requests: db.collection("requests"),
+        transfers: db.collection("transfers"),
     };
 
     return collections;
