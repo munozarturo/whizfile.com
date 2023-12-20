@@ -18,15 +18,20 @@ function handleResponse(
 }
 
 function handleError(e: any): ApiResponse {
-    if (e instanceof Error) {
-        console.error(e);
-    } else if (e instanceof zod.ZodError) {
+    var errorMessage;
+
+    if (e instanceof zod.ZodError) {
         console.log(e.message);
+        errorMessage = "Invalid contents.";
+    } else if (e instanceof Error) {
+        console.error(e);
+        errorMessage = e.name;
     } else {
         console.log("Unknown error.");
+        errorMessage = "Unknown error.";
     }
 
-    return handleResponse("Unknown error.");
+    return handleResponse(errorMessage);
 }
 
 export { handleResponse, handleError };
