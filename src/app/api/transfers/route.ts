@@ -119,14 +119,15 @@ export async function POST(req: NextRequest) {
             }
         );
 
-        // await transfers.insertOne(document);
-        // await transferIds.insertOne({
-        //     transferIdHash: transferIdHashPair.hash,
-        // });
+        await transfers.insertOne(document);
+        await transferIds.insertOne({
+            transferIdHash: transferIdHashPair.hash,
+        });
 
         return NextResponse.json(
             handleResponse("Response message.", {
-                debug: document && { objId: objectId },
+                debug: document,
+                debug2: { oId: objectId },
                 transferId: transferIdHashPair.transferId,
                 uploadUrl: presignedUploadUrl,
             }),
