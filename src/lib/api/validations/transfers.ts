@@ -1,10 +1,15 @@
 import * as zod from "zod";
-import { SHA256Hash } from "./shared";
+import { Hash } from "./shared";
 
 const ObjectData = zod.object({
-    contents: zod.array(zod.string()),
-    size: zod.number(),
-    fileHash: SHA256Hash,
+    size: zod.preprocess((input) => {
+        if (typeof input === "string") {
+            const parsed = Number(input);
+            return isNaN(parsed) ? undefined : parsed;
+        }
+        return input;
+    }, zod.number()),
+    fileHash: Hash,
 });
 
 const TransfersReq = zod.object({
