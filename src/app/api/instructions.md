@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
         // connect to db
         const collections: Collections = await connectToDatabase();
-        const requests: Collection<zod.infer<typeof CollectionSchema>> =
+        const collection: Collection<zod.infer<typeof CollectionSchema>> =
             collections.someCollection;
 
         // api endpoint body

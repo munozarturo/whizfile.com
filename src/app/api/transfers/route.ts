@@ -3,6 +3,7 @@ import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransfersReq } from "@/lib/api/validations/transfers";
+import { TransferSchema } from "@/lib/db/schema/transfers";
 
 export async function POST(req: NextRequest) {
     try {
@@ -12,15 +13,16 @@ export async function POST(req: NextRequest) {
         );
 
         // connect to db
-        // const collections: Collections = await connectToDatabase();
-        // const requests: Collection<zod.infer<typeof CollectionSchema>> =
-        //     collections.someCollection;
+        const collections: Collections = await connectToDatabase();
+        const transfers: Collection<zod.infer<typeof TransferSchema>> =
+            collections.transfers;
 
         // api endpoint body
 
         // standard response
         return NextResponse.json(
-            handleResponse("Response message.", { "data": "data" }), { status: 200 }
+            handleResponse("Response message.", { hash: "" }),
+            { status: 200 }
         );
     } catch (e: any) {
         return NextResponse.json(handleError(e));
