@@ -28,17 +28,34 @@ export async function GET(
         const transfers: Collection<zod.infer<typeof TransferSchema>> =
             collections.transfers;
 
-        // api endpoint body
+        const transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
 
-        // standard response
-        return NextResponse.json(
-            handleResponse("Response message.", {
-                transferId: transferId,
-            }),
-            {
-                status: 200,
-            }
-        );
+        const document: zod.infer<typeof TransferSchema> | null =
+            await transfers.findOne(
+                { transferUId: transferUId },
+                {
+                    projection: {
+                        _id: 0,
+                        timestamp: 1,
+                        status: 1,
+                        title: 1,
+                        message: 1,
+                        objectData: 1,
+                    },
+                }
+            );
+
+        if (!document) {
+            return NextResponse.json(
+                handleResponse(
+                    "Transfer with associated transfer id not found."
+                )
+            );
+        }
+
+        return NextResponse.json(handleResponse("Found transfer.", document), {
+            status: 200,
+        });
     } catch (e: any) {
         return NextResponse.json(handleError(e));
     }
