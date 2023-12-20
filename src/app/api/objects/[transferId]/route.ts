@@ -1,5 +1,4 @@
 import {
-    generateTransferId,
     getObjectId,
     getTransferUId,
     handleError,
