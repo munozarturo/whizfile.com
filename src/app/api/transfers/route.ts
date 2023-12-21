@@ -107,10 +107,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(
             handleResponse("Response message.", {
-                debug: document,
-                debug2: { oId: objectId },
                 transferId: transferId,
-                uploadUrl: presignedUploadUrl,
+                upload: { method: "PUT", url: presignedUploadUrl },
             }),
             { status: 200 }
         );
