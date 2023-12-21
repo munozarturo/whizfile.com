@@ -221,7 +221,7 @@ export async function DELETE(
     try {
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
         objectIdSalt = generateRandomSalt();
-        objectId = getObjectId(transferUId, objectIdSalt);
+        objectId = getObjectId(transferId, transferUId, objectIdSalt);
 
         s3Client = new S3Client({ region: AWS_REGION });
         const command = new DeleteObjectCommand({

@@ -114,7 +114,7 @@ export async function GET(
     }
 
     try {
-        objectId = getObjectId(transferUId, transfer.objectIdSalt);
+        objectId = getObjectId(transferId, transferUId, transfer.objectIdSalt);
         const s3Client = new S3Client({ region: AWS_REGION });
         const command = new GetObjectCommand({
             Bucket: AWS_BUCKET,

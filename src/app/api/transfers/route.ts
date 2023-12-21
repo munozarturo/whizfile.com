@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     try {
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
         objectIdSalt = generateRandomSalt();
-        objectId = getObjectId(transferUId, objectIdSalt);
+        objectId = getObjectId(transferId, transferUId, objectIdSalt);
 
         const document: zod.infer<typeof TransferSchema> = {
             transferUId: transferUId,

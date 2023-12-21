@@ -24,8 +24,13 @@ function getTransferUId(transferId: string, salt: string): string {
     return hash.digest("hex");
 }
 
-function getObjectId(transferUId: string, salt: string): string {
+function getObjectId(
+    transferId: string,
+    transferUId: string,
+    salt: string
+): string {
     const hash = createHash("sha256");
+    hash.update(transferId);
     hash.update(transferUId);
     hash.update(salt);
     return hash.digest("hex");
