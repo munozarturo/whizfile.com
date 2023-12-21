@@ -2,6 +2,7 @@ import { RequestSchema } from "@/lib/db/schema/request";
 import { TransferIdSchema, TransferSchema } from "@/lib/db/schema/transfers";
 import { Collection, Db, DbOptions, MongoClient } from "mongodb";
 import * as zod from "zod";
+import whizfileConfig from "../config/config";
 
 interface Collections {
     requests: Collection<zod.infer<typeof RequestSchema>>;
@@ -37,16 +38,8 @@ async function connectToDatabase() {
         return cachedConnection;
     }
 
-    const MAIN_DB = process.env.MAIN_DB;
-
-    if (MAIN_DB === undefined) {
-        throw new Error(
-            "Please define the MAIN_DB environment variable inside .env"
-        );
-    }
-
     const mongoClient: MongoClient = await fetchMongoClient();
-    const db: Db = mongoClient.db(MAIN_DB);
+    const db: Db = mongoClient.db(whizfileConfig.mongo.mainDb);
 
     const collections: Collections = {
         requests: db.collection("requests"),

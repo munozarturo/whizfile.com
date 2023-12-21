@@ -5,6 +5,7 @@ import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 
 import { RequestSchema } from "@/lib/db/schema/request";
 import { RequestsReq } from "@/lib/api/validations/requests";
+import whizfileConfig from "@/lib/config/config";
 
 if (!process.env.MIDDLEWARE_SECRET_KEY) {
     throw new Error(
@@ -13,14 +14,6 @@ if (!process.env.MIDDLEWARE_SECRET_KEY) {
 }
 
 const SECRET_KEY = process.env.MIDDLEWARE_SECRET_KEY;
-
-if (!process.env.API_RATE_LIMIT_REQS_PER_MIN) {
-    throw new Error(
-        "`API_RATE_LIMIT_REQS_PER_MIN` environment variable is not defined."
-    );
-}
-
-const LIMIT = Number(process.env.API_RATE_LIMIT_REQS_PER_MIN);
 
 export async function POST(req: NextRequest) {
     if (req.headers.get("Authorization") !== SECRET_KEY) {
@@ -93,7 +86,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
         handleResponse("Request logged sucessfully.", {
             requests:
-                countBySource <= LIMIT ? "within-limit" : "limit-exceeded",
+                countBySource <= whizfileConfig.api.rateLimit
+                    ? "within-limit"
+                    : "limit-exceeded",
         })
     );
 }

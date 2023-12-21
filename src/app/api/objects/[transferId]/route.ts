@@ -11,32 +11,13 @@ import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema } from "@/lib/db/schema/transfers";
 import { S3Client, GetObjectCommand, NoSuchKey } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
+import whizfileConfig from "@/lib/config/config";
 
 if (!process.env.UNIVERSAL_SALT) {
     throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");
 }
 
 const UNIVERSAL_SALT = process.env.UNIVERSAL_SALT;
-
-if (!process.env.AWS_BUCKET) {
-    throw new Error("`AWS_BUCKET` environment variable is not defined.");
-}
-
-const AWS_BUCKET = process.env.AWS_BUCKET;
-
-if (!process.env.AWS_REGION) {
-    throw new Error("`AWS_REGION` environment variable is not defined.");
-}
-
-const AWS_REGION = process.env.AWS_REGION;
-
-if (!process.env.AWS_UPLOAD_EXPIRY_TIME_S) {
-    throw new Error(
-        "`AWS_UPLOAD_EXPIRY_TIME_S` environment variable is not defined."
-    );
-}
-
-const AWS_UPLOAD_EXPIRY_TIME = Number(process.env.AWS_UPLOAD_EXPIRY_TIME_S);
 
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -115,9 +96,9 @@ export async function GET(
 
     try {
         objectId = getObjectId(transferId, transferUId, transfer.objectIdSalt);
-        const s3Client = new S3Client({ region: AWS_REGION });
+        const s3Client = new S3Client({ region: whizfileConfig.s3.region });
         const command = new GetObjectCommand({
-            Bucket: AWS_BUCKET,
+            Bucket: whizfileConfig.s3.bucket,
             Key: objectId,
         });
 
@@ -158,7 +139,8 @@ export async function GET(
     } catch (e: any) {
         if (e instanceof NoSuchKey) {
             const uploadExpiryTime =
-                transfer.timestamp + AWS_UPLOAD_EXPIRY_TIME * 1000;
+                transfer.timestamp +
+                whizfileConfig.s3.presignedUrlExpireIn * 1000;
             const awaitingUpload = Date.now() < uploadExpiryTime;
 
             if (awaitingUpload) {

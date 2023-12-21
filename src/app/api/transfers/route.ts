@@ -12,32 +12,13 @@ import { TransfersReq } from "@/lib/api/validations/transfers";
 import { TransferIdSchema, TransferSchema } from "@/lib/db/schema/transfers";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import whizfileConfig from "@/lib/config/config";
 
 if (!process.env.UNIVERSAL_SALT) {
     throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");
 }
 
 const UNIVERSAL_SALT = process.env.UNIVERSAL_SALT;
-
-if (!process.env.AWS_BUCKET) {
-    throw new Error("`AWS_BUCKET` environment variable is not defined.");
-}
-
-const AWS_BUCKET = process.env.AWS_BUCKET;
-
-if (!process.env.AWS_REGION) {
-    throw new Error("`AWS_REGION` environment variable is not defined.");
-}
-
-const AWS_REGION = process.env.AWS_REGION;
-
-if (!process.env.AWS_UPLOAD_EXPIRY_TIME_S) {
-    throw new Error(
-        "`AWS_UPLOAD_EXPIRY_TIME_S` environment variable is not defined."
-    );
-}
-
-const AWS_UPLOAD_EXPIRY_TIME = Number(process.env.AWS_UPLOAD_EXPIRY_TIME_S);
 
 export async function POST(req: NextRequest) {
     let requestBody: Object;
@@ -157,17 +138,17 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        s3Client = new S3Client({ region: AWS_REGION });
+        s3Client = new S3Client({ region: whizfileConfig.s3.region });
         /*
          * Add usage of ChecksumSHA256: "STRING_VALUE", Expires: new Date("TIMESTAMP"),
          * This should avoid any issues with file upload sizes being too large or uploading the incorrect files as well as automatic expires.
          */
         const command = new PutObjectCommand({
-            Bucket: AWS_BUCKET,
+            Bucket: whizfileConfig.s3.bucket,
             Key: objectId,
         });
         presignedUploadUrl = await getSignedUrl(s3Client, command, {
-            expiresIn: AWS_UPLOAD_EXPIRY_TIME,
+            expiresIn: whizfileConfig.s3.presignedUrlExpireIn,
         });
     } catch (e: any) {
         await transfers.updateOne(

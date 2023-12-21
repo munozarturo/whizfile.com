@@ -10,24 +10,13 @@ import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema } from "@/lib/db/schema/transfers";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import whizfileConfig from "@/lib/config/config";
 
 if (!process.env.UNIVERSAL_SALT) {
     throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");
 }
 
 const UNIVERSAL_SALT = process.env.UNIVERSAL_SALT;
-
-if (!process.env.UNIVERSAL_SALT) {
-    throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");
-}
-
-const AWS_BUCKET = process.env.AWS_BUCKET;
-
-if (!process.env.AWS_REGION) {
-    throw new Error("`AWS_REGION` environment variable is not defined.");
-}
-
-const AWS_REGION = process.env.AWS_REGION;
 
 export async function GET(
     req: NextRequest,
@@ -230,9 +219,9 @@ export async function DELETE(
         objectIdSalt = generateRandomSalt();
         objectId = getObjectId(transferId, transferUId, objectIdSalt);
 
-        s3Client = new S3Client({ region: AWS_REGION });
+        s3Client = new S3Client({ region: whizfileConfig.s3.region });
         const command = new DeleteObjectCommand({
-            Bucket: AWS_BUCKET,
+            Bucket: whizfileConfig.s3.bucket,
             Key: objectId,
         });
         s3Client.send(command);
