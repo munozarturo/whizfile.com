@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema } from "@/lib/db/schema/transfers";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, NoSuchKey } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 
 if (!process.env.UNIVERSAL_SALT) {
@@ -138,12 +138,46 @@ export async function GET(
                             size: transfer.objectData.size,
                             hash: transfer.objectData.fileHash,
                         },
+                        receivedObject: {
+                            size: size,
+                            hash: digest,
+                        },
                     }
                 ),
                 { status: 400 }
             );
         }
     } catch (e: any) {
+        if (e instanceof NoSuchKey) {
+            const uploadExpiryTime = transfer.timestamp + 60 * 1000;
+            const awaitingUpload = Date.now() > uploadExpiryTime;
+
+            if (awaitingUpload) {
+                return NextResponse.json(
+                    handleResponse(
+                        "Awaiting upload for specified `transferId`.",
+                        {
+                            transferId: transferId,
+                            uploadExpiryTime: uploadExpiryTime,
+                        }
+                    ),
+                    { status: 500 }
+                );
+            }
+
+            await transfers.updateOne(
+                { transferUId: transferUId },
+                { $set: { status: "failed" } }
+            );
+
+            return NextResponse.json(
+                handleResponse("Upload expired for transfer `transferId`.", {
+                    transferId: transferId,
+                }),
+                { status: 500 }
+            );
+        }
+
         return NextResponse.json(
             handleResponse(
                 "Error fetching object associated with `transferId`.",
