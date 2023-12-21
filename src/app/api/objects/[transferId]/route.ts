@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema } from "@/lib/db/schema/transfers";
-import { S3Client, S3ClientConfig, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 
 if (!process.env.UNIVERSAL_SALT) {
@@ -44,6 +44,8 @@ export async function GET(
     context: { params: { transferId: string } }
 ) {
     let transferId: string;
+    let collections: Collections;
+    let transfers: Collection<zod.infer<typeof TransferSchema>>;
     let transferUId: string;
     let transfer: zod.infer<typeof TransferSchema> | null;
     let objectId: string;
@@ -64,9 +66,8 @@ export async function GET(
     }
 
     try {
-        const collections: Collections = await connectToDatabase();
-        const transfers: Collection<zod.infer<typeof TransferSchema>> =
-            collections.transfers;
+        collections = await connectToDatabase();
+        transfers = collections.transfers;
 
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
         transfer = await transfers.findOne({ transferUId: transferUId });
@@ -110,6 +111,11 @@ export async function GET(
             digest !== transfer.objectData.fileHash ||
             size !== transfer.objectData.size
         ) {
+            await transfers.updateOne(
+                { transferUId: transferUId },
+                { $set: { status: "corrupted" } }
+            );
+
             return NextResponse.json(
                 handleResponse(
                     "Uploaded object does not match promised object shape. Hash or size mismatch. Polluted transfer.",
