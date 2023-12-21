@@ -32,7 +32,7 @@ if (!process.env.AWS_REGION) {
 const AWS_REGION = process.env.AWS_REGION;
 
 export async function POST(req: NextRequest) {
-    let requestBody: Object = await req.json();
+    let requestBody: Object;
     let body: zod.infer<typeof TransfersReq>;
     let collections: Collections;
     let transferIds: Collection<zod.infer<typeof TransferIdSchema>>;
@@ -46,10 +46,18 @@ export async function POST(req: NextRequest) {
     let presignedUploadUrl: string;
 
     try {
+        requestBody = await req.json();
+    } catch (e: any) {
+        return NextResponse.json(handleResponse("Bad request body."), {
+            status: 400,
+        });
+    }
+
+    try {
         body = TransfersReq.parse(requestBody);
     } catch (e: any) {
         return NextResponse.json(
-            handleResponse("Invalid `requestBody`.", {
+            handleResponse("Invalid request body.", {
                 requestBody: requestBody,
             }),
             { status: 400 }
@@ -62,9 +70,12 @@ export async function POST(req: NextRequest) {
         transfers = collections.transfers;
     } catch (e: any) {
         return NextResponse.json(
-            handleResponse("Error fetching transfer. Please try again later.", {
-                requestBody: requestBody,
-            }),
+            handleResponse(
+                "Error connecting to database. Please try again later.",
+                {
+                    requestBody: requestBody,
+                }
+            ),
             {
                 status: 500,
             }
