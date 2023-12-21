@@ -23,7 +23,8 @@ const TransferSchema = zod.object({
     title: zod.string(),
     message: zod.string(),
     objectData: ObjectData,
-    allowDelete: zod.boolean().optional().default(false),
+    allowDelete: zod.boolean(),
+    expireIn: zod.number(),
 
     objectIdSalt: zod.string(),
 });

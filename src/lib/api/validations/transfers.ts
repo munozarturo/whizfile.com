@@ -1,5 +1,6 @@
 import * as zod from "zod";
 import { Hash } from "./shared";
+import whizfileConfig from "@/lib/config/config";
 
 const TransferId = zod
     .string()
@@ -21,6 +22,7 @@ const TransfersReq = zod.object({
     message: zod.string(),
     objectData: ObjectData,
     allowDelete: zod.boolean().optional().default(false),
+    expireIn: zod.number().min(0).max(whizfileConfig.api.expireInMax),
 });
 
 export { TransfersReq, TransferId };

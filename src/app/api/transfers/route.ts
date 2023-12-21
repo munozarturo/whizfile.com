@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
             message: body.message,
             objectData: body.objectData,
             allowDelete: body.allowDelete,
-            // expireIn
+            expireIn: body.expireIn,
             // views
             // maxViews
             // downloads
