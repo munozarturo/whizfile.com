@@ -135,6 +135,7 @@ export async function POST(req: NextRequest) {
             title: body.title,
             message: body.message,
             objectData: body.objectData,
+            allowDelete: body.allowDelete,
 
             objectIdSalt: objectIdSalt,
         };

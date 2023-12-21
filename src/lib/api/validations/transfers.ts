@@ -20,6 +20,7 @@ const TransfersReq = zod.object({
     title: zod.string(),
     message: zod.string(),
     objectData: ObjectData,
+    allowDelete: zod.boolean().optional().default(false),
 });
 
 export { TransfersReq, TransferId };
