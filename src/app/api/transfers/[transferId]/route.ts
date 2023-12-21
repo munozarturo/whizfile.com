@@ -1,4 +1,4 @@
-import { getTransferUId, handleError, handleResponse } from "@/lib/api/utils";
+import { getTransferUId, handleResponse } from "@/lib/api/utils";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
@@ -15,42 +15,74 @@ export async function GET(
     req: NextRequest,
     context: { params: { transferId: string } }
 ) {
+    let transferId;
+    let collections: Collections;
+    let transfers: Collection<zod.infer<typeof TransferSchema>>;
+    let transferUId;
+    let document: zod.infer<typeof TransferSchema> | null;
+
     try {
-        const transferId = TransferId.parse(context.params.transferId);
-
-        const collections: Collections = await connectToDatabase();
-        const transfers: Collection<zod.infer<typeof TransferSchema>> =
-            collections.transfers;
-
-        const transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-
-        const document: zod.infer<typeof TransferSchema> | null =
-            await transfers.findOne(
-                { transferUId: transferUId },
-                {
-                    projection: {
-                        _id: 0,
-                        timestamp: 1,
-                        status: 1,
-                        title: 1,
-                        message: 1,
-                        objectData: 1,
-                    },
-                }
-            );
-
-        if (!document) {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated transfer id not found."
-                )
-            );
-        }
-
-        return NextResponse.json(handleResponse("Found transfer.", document), {
-            status: 200,
-        });
+        transferId = TransferId.parse(context.params.transferId);
     } catch (e: any) {
-        return NextResponse.json(handleError(e));
+        return NextResponse.json(
+            handleResponse(
+                "Invalid `transferId`, `transferId` must contain 6 case sensitive alphanumeric caracters.",
+                {
+                    transferId: transferId,
+                }
+            ),
+            { status: 400 }
+        );
     }
+
+    try {
+        collections = await connectToDatabase();
+        transfers = collections.transfers;
+
+        transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
+        document = await transfers.findOne(
+            { transferUId: transferUId },
+            {
+                projection: {
+                    _id: 0,
+                    timestamp: 1,
+                    status: 1,
+                    title: 1,
+                    message: 1,
+                    objectData: 1,
+                },
+            }
+        );
+    } catch (e: any) {
+        return NextResponse.json(
+            handleResponse("Error fetching transfer. Please try again later.", {
+                transferId: transferId,
+            }),
+            {
+                status: 500,
+            }
+        );
+    }
+
+    if (!document) {
+        return NextResponse.json(
+            handleResponse(
+                "No transfer is associated with provided `transferId`.",
+                {
+                    transferId: transferId,
+                }
+            ),
+            { status: 404 }
+        );
+    }
+
+    return NextResponse.json(
+        handleResponse(
+            "Sucessfully fetched transfer with provided `transferId`.",
+            { transferId: transferId, transfer: document }
+        ),
+        {
+            status: 200,
+        }
+    );
 }
