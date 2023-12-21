@@ -159,7 +159,7 @@ export async function GET(
         if (e instanceof NoSuchKey) {
             const uploadExpiryTime =
                 transfer.timestamp + AWS_UPLOAD_EXPIRY_TIME * 1000;
-            const awaitingUpload = Date.now() > uploadExpiryTime;
+            const awaitingUpload = Date.now() < uploadExpiryTime;
 
             if (awaitingUpload) {
                 return NextResponse.json(
@@ -170,7 +170,7 @@ export async function GET(
                             uploadExpiryTime: uploadExpiryTime,
                         }
                     ),
-                    { status: 500 }
+                    { status: 423 }
                 );
             }
 
@@ -183,7 +183,7 @@ export async function GET(
                 handleResponse("Upload expired for transfer `transferId`.", {
                     transferId: transferId,
                 }),
-                { status: 500 }
+                { status: 410 }
             );
         }
 
