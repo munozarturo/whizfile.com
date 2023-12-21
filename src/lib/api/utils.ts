@@ -65,6 +65,20 @@ function generateRandomSalt(size: number = 64): string {
     return randomBytes(size / 2).toString("hex");
 }
 
+function verifyObject(
+    buffer: Buffer,
+    expected: { size: number; fileHash: string }
+) {
+    const hash = createHash("sha256");
+    hash.update(buffer);
+    const digest = hash.digest("hex");
+    const size = buffer.length;
+
+    if (digest !== expected.fileHash || size !== expected.size) {
+        throw new Error("Hash or size mismatch.");
+    }
+}
+
 export {
     handleResponse,
     handleError,
@@ -72,4 +86,5 @@ export {
     getObjectId,
     generateTransferId,
     generateRandomSalt,
+    verifyObject,
 };

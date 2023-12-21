@@ -3,6 +3,7 @@ import {
     getTransferUId,
     handleError,
     handleResponse,
+    verifyObject,
 } from "@/lib/api/utils";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
@@ -66,8 +67,6 @@ export async function GET(
             Key: objectId,
         });
 
-        console.log("searching for", objectId);
-
         const resp = await s3Client.send(command);
         const stream = resp.Body as Readable;
         const object: Promise<Buffer> = new Promise((resolve, reject) => {
@@ -77,6 +76,16 @@ export async function GET(
             stream.on("end", () => resolve(Buffer.concat(chunks)));
         });
         const buffer = await object;
+
+        try {
+            verifyObject(buffer, transfer.objectData);
+        } catch (e) {
+            return NextResponse.json(
+                handleResponse(
+                    "Uploaded object does not match promised object shape. Hash or size mismatch. Polluted transfer."
+                )
+            );
+        }
 
         const headers = new Headers();
         headers.set("Content-Type", "application/octet-stream");
