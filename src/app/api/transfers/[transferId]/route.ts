@@ -27,6 +27,9 @@ export async function GET(
     let transfers: Collection<zod.infer<typeof TransferSchema>>;
     let transferUId;
     let transfer: zod.infer<typeof TransferSchema> | null;
+    let expiresIn: number;
+    let objectId: string;
+    let s3Client: S3Client;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -58,12 +61,11 @@ export async function GET(
                     message: 1,
                     objectData: 1,
                     allowDelete: 1,
+                    expireIn: 1,
                 },
             }
         );
 
-        // expires
-        // expiresIn
         // views
         // maxViews
         // downloads
@@ -79,6 +81,55 @@ export async function GET(
                 ),
                 { status: 404 }
             );
+        }
+
+        expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
+
+        if (expiresIn <= 0) {
+            try {
+                await transfers.updateOne(
+                    { transferUId: transferUId },
+                    { $set: { status: "expired" } }
+                );
+            } catch (e: any) {
+                return NextResponse.json(
+                    handleResponse(
+                        "Error deleting transfer from server. Please try again later.",
+                        {
+                            transferId: transferId,
+                        }
+                    ),
+                    { status: 500 }
+                );
+            }
+
+            try {
+                transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
+                objectId = getObjectId(
+                    transferId,
+                    transferUId,
+                    transfer.objectIdSalt
+                );
+
+                s3Client = new S3Client({ region: whizfileConfig.s3.region });
+                const command = new DeleteObjectCommand({
+                    Bucket: whizfileConfig.s3.bucket,
+                    Key: objectId,
+                });
+                s3Client.send(command);
+            } catch (e: any) {
+                await transfers.updateOne(
+                    { transferUId: transferUId },
+                    { $set: { status: "removed" } }
+                );
+
+                return NextResponse.json(
+                    handleResponse("Error deleting object from media server.", {
+                        transferId: transferId,
+                    }),
+                    { status: 500 }
+                );
+            }
         }
 
         if (transfer.status !== "active") {
@@ -107,7 +158,10 @@ export async function GET(
     return NextResponse.json(
         handleResponse(
             "Sucessfully fetched transfer with provided `transferId`.",
-            { transferId: transferId, transfer: transfer }
+            {
+                transferId: transferId,
+                transfer: { ...transfer, expiresIn: expiresIn },
+            }
         ),
         {
             status: 200,
@@ -124,7 +178,7 @@ export async function DELETE(
     let transfers: Collection<zod.infer<typeof TransferSchema>>;
     let transferUId;
     let transfer: zod.infer<typeof TransferSchema> | null;
-    let objectIdSalt: string;
+    let expiresIn: number;
     let objectId: string;
     let s3Client: S3Client;
 
@@ -159,6 +213,55 @@ export async function DELETE(
                 ),
                 { status: 404 }
             );
+        }
+
+        expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
+
+        if (expiresIn <= 0) {
+            try {
+                await transfers.updateOne(
+                    { transferUId: transferUId },
+                    { $set: { status: "expired" } }
+                );
+            } catch (e: any) {
+                return NextResponse.json(
+                    handleResponse(
+                        "Error deleting transfer from server. Please try again later.",
+                        {
+                            transferId: transferId,
+                        }
+                    ),
+                    { status: 500 }
+                );
+            }
+
+            try {
+                transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
+                objectId = getObjectId(
+                    transferId,
+                    transferUId,
+                    transfer.objectIdSalt
+                );
+
+                s3Client = new S3Client({ region: whizfileConfig.s3.region });
+                const command = new DeleteObjectCommand({
+                    Bucket: whizfileConfig.s3.bucket,
+                    Key: objectId,
+                });
+                s3Client.send(command);
+            } catch (e: any) {
+                await transfers.updateOne(
+                    { transferUId: transferUId },
+                    { $set: { status: "removed" } }
+                );
+
+                return NextResponse.json(
+                    handleResponse("Error deleting object from media server.", {
+                        transferId: transferId,
+                    }),
+                    { status: 500 }
+                );
+            }
         }
 
         if (transfer.status !== "active") {
@@ -216,8 +319,7 @@ export async function DELETE(
 
     try {
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-        objectIdSalt = generateRandomSalt();
-        objectId = getObjectId(transferId, transferUId, objectIdSalt);
+        objectId = getObjectId(transferId, transferUId, transfer.objectIdSalt);
 
         s3Client = new S3Client({ region: whizfileConfig.s3.region });
         const command = new DeleteObjectCommand({

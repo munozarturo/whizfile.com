@@ -9,7 +9,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema } from "@/lib/db/schema/transfers";
-import { S3Client, GetObjectCommand, NoSuchKey } from "@aws-sdk/client-s3";
+import {
+    S3Client,
+    GetObjectCommand,
+    NoSuchKey,
+    DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import whizfileConfig from "@/lib/config/config";
 
@@ -37,8 +42,10 @@ export async function GET(
     let transfers: Collection<zod.infer<typeof TransferSchema>>;
     let transferUId: string;
     let transfer: zod.infer<typeof TransferSchema> | null;
+    let expiresIn: number;
     let objectId: string;
     let buffer: Buffer;
+    let s3Client: S3Client;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -71,6 +78,55 @@ export async function GET(
                 ),
                 { status: 404 }
             );
+        }
+
+        expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
+
+        if (expiresIn <= 0) {
+            try {
+                await transfers.updateOne(
+                    { transferUId: transferUId },
+                    { $set: { status: "expired" } }
+                );
+            } catch (e: any) {
+                return NextResponse.json(
+                    handleResponse(
+                        "Error deleting transfer from server. Please try again later.",
+                        {
+                            transferId: transferId,
+                        }
+                    ),
+                    { status: 500 }
+                );
+            }
+
+            try {
+                transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
+                objectId = getObjectId(
+                    transferId,
+                    transferUId,
+                    transfer.objectIdSalt
+                );
+
+                s3Client = new S3Client({ region: whizfileConfig.s3.region });
+                const command = new DeleteObjectCommand({
+                    Bucket: whizfileConfig.s3.bucket,
+                    Key: objectId,
+                });
+                s3Client.send(command);
+            } catch (e: any) {
+                await transfers.updateOne(
+                    { transferUId: transferUId },
+                    { $set: { status: "removed" } }
+                );
+
+                return NextResponse.json(
+                    handleResponse("Error deleting object from media server.", {
+                        transferId: transferId,
+                    }),
+                    { status: 500 }
+                );
+            }
         }
 
         if (transfer.status !== "active") {
