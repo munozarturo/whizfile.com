@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
             s3Client,
             command,
             {
-                expiresIn: 3600,
+                expiresIn: 60,
             }
         );
 
