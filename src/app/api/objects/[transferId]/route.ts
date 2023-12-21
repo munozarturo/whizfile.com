@@ -83,6 +83,19 @@ export async function GET(
                 { status: 404 }
             );
         }
+
+        if (transfer.status !== "active") {
+            return NextResponse.json(
+                handleResponse(
+                    "Transfer with associated `transferId` is no longer active.",
+                    {
+                        transferId: transferId,
+                        status: transfer.status,
+                    }
+                ),
+                { status: 404 }
+            );
+        }
     } catch (e: any) {
         return NextResponse.json(
             handleResponse("Error fetching transfer data for `transferId`.", {

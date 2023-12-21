@@ -19,7 +19,7 @@ export async function GET(
     let collections: Collections;
     let transfers: Collection<zod.infer<typeof TransferSchema>>;
     let transferUId;
-    let document: zod.infer<typeof TransferSchema> | null;
+    let transfer: zod.infer<typeof TransferSchema> | null;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -40,7 +40,7 @@ export async function GET(
         transfers = collections.transfers;
 
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-        document = await transfers.findOne(
+        transfer = await transfers.findOne(
             { transferUId: transferUId },
             {
                 projection: {
@@ -53,6 +53,31 @@ export async function GET(
                 },
             }
         );
+
+        if (!transfer) {
+            return NextResponse.json(
+                handleResponse(
+                    "Transfer with associated `transferId` not found.",
+                    {
+                        transferId: transferId,
+                    }
+                ),
+                { status: 404 }
+            );
+        }
+
+        if (transfer.status !== "active") {
+            return NextResponse.json(
+                handleResponse(
+                    "Transfer with associated `transferId` is no longer active.",
+                    {
+                        transferId: transferId,
+                        status: transfer.status,
+                    }
+                ),
+                { status: 404 }
+            );
+        }
     } catch (e: any) {
         return NextResponse.json(
             handleResponse("Error fetching transfer. Please try again later.", {
@@ -64,22 +89,10 @@ export async function GET(
         );
     }
 
-    if (!document) {
-        return NextResponse.json(
-            handleResponse(
-                "No transfer is associated with provided `transferId`.",
-                {
-                    transferId: transferId,
-                }
-            ),
-            { status: 404 }
-        );
-    }
-
     return NextResponse.json(
         handleResponse(
             "Sucessfully fetched transfer with provided `transferId`.",
-            { transferId: transferId, transfer: document }
+            { transferId: transferId, transfer: transfer }
         ),
         {
             status: 200,
