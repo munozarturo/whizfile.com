@@ -73,6 +73,13 @@ export async function GET(
             }
         );
 
+        // expires
+        // expiresIn
+        // views
+        // maxViews
+        // downloads
+        // maxDownloads
+
         if (!transfer) {
             return NextResponse.json(
                 handleResponse(
