@@ -101,7 +101,7 @@ export async function GET(
                         status: transfer.status,
                     }
                 ),
-                { status: 404 }
+                { status: 410 }
             );
         }
     } catch (e: any) {
@@ -152,7 +152,7 @@ export async function GET(
                         },
                     }
                 ),
-                { status: 400 }
+                { status: 409 }
             );
         }
     } catch (e: any) {
