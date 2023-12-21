@@ -31,6 +31,14 @@ if (!process.env.AWS_REGION) {
 
 const AWS_REGION = process.env.AWS_REGION;
 
+if (!process.env.AWS_UPLOAD_EXPIRY_TIME_S) {
+    throw new Error(
+        "`AWS_UPLOAD_EXPIRY_TIME_S` environment variable is not defined."
+    );
+}
+
+const AWS_UPLOAD_EXPIRY_TIME = Number(process.env.AWS_UPLOAD_EXPIRY_TIME_S);
+
 export async function POST(req: NextRequest) {
     let requestBody: Object;
     let body: zod.infer<typeof TransfersReq>;
@@ -105,7 +113,7 @@ export async function POST(req: NextRequest) {
     } catch (e: any) {
         return NextResponse.json(
             handleResponse(
-                "Error generating unique `transferId` for transfer.",
+                "Error generating unique `transferId` for transfer. Please try again later.",
                 {
                     requestBody: requestBody,
                 }
@@ -135,7 +143,7 @@ export async function POST(req: NextRequest) {
         await transferIds.insertOne({ transferIdHash: transferIdHash });
     } catch (e: any) {
         return NextResponse.json(
-            handleResponse("Error creating transfer.", {
+            handleResponse("Error creating transfer. Please try again later.", {
                 requestBody: requestBody,
             }),
             { status: 500 }
@@ -144,12 +152,16 @@ export async function POST(req: NextRequest) {
 
     try {
         s3Client = new S3Client({ region: AWS_REGION });
+        /*
+         * Add usage of ChecksumSHA256: "STRING_VALUE", Expires: new Date("TIMESTAMP"),
+         * This should avoid any issues with file upload sizes being too large or uploading the incorrect files as well as automatic expires.
+         */
         const command = new PutObjectCommand({
             Bucket: AWS_BUCKET,
             Key: objectId,
         });
         presignedUploadUrl = await getSignedUrl(s3Client, command, {
-            expiresIn: 60,
+            expiresIn: AWS_UPLOAD_EXPIRY_TIME,
         });
     } catch (e: any) {
         await transfers.updateOne(
@@ -166,7 +178,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-        handleResponse("Response message.", {
+        handleResponse("Succesfully created transfer.", {
             transferId: transferId,
             upload: { method: "PUT", url: presignedUploadUrl },
         }),

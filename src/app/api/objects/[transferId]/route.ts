@@ -30,6 +30,14 @@ if (!process.env.AWS_REGION) {
 
 const AWS_REGION = process.env.AWS_REGION;
 
+if (!process.env.AWS_UPLOAD_EXPIRY_TIME_S) {
+    throw new Error(
+        "`AWS_UPLOAD_EXPIRY_TIME_S` environment variable is not defined."
+    );
+}
+
+const AWS_UPLOAD_EXPIRY_TIME = Number(process.env.AWS_UPLOAD_EXPIRY_TIME_S);
+
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const chunks: Buffer[] = [];
@@ -149,7 +157,8 @@ export async function GET(
         }
     } catch (e: any) {
         if (e instanceof NoSuchKey) {
-            const uploadExpiryTime = transfer.timestamp + 60 * 1000;
+            const uploadExpiryTime =
+                transfer.timestamp + AWS_UPLOAD_EXPIRY_TIME * 1000;
             const awaitingUpload = Date.now() > uploadExpiryTime;
 
             if (awaitingUpload) {
