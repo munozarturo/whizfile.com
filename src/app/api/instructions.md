@@ -8,7 +8,7 @@ The standard format covers imports, environment variables
 
 ```TypeScript
 // the below imporst are universal in all routes
-import { handleError, handleResponse } from "@/lib/api/utils";
+import { handleResponse } from "@/lib/api/utils";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";

@@ -1,9 +1,8 @@
 import {
     getObjectId,
     getTransferUId,
-    handleError,
     handleResponse,
-    verifyObject,
+    hash,
 } from "@/lib/api/utils";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
@@ -31,74 +30,116 @@ if (!process.env.AWS_REGION) {
 
 const AWS_REGION = process.env.AWS_REGION;
 
+async function streamToBuffer(stream: Readable): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        stream.on("data", (chunk) => chunks.push(chunk));
+        stream.on("error", reject);
+        stream.on("end", () => resolve(Buffer.concat(chunks)));
+    });
+}
+
 export async function GET(
     req: NextRequest,
     context: { params: { transferId: string } }
 ) {
-    try {
-        const transferId = TransferId.parse(context.params.transferId);
+    let transferId: string;
+    let transferUId: string;
+    let transfer: zod.infer<typeof TransferSchema> | null;
+    let objectId: string;
+    let buffer: Buffer;
 
+    try {
+        transferId = TransferId.parse(context.params.transferId);
+    } catch (e: any) {
+        return NextResponse.json(
+            handleResponse(
+                "Invalid `transferId`, `transferId` must contain 6 case sensitive alphanumeric caracters.",
+                {
+                    transferId: context.params.transferId,
+                }
+            ),
+            { status: 400 }
+        );
+    }
+
+    try {
         const collections: Collections = await connectToDatabase();
         const transfers: Collection<zod.infer<typeof TransferSchema>> =
             collections.transfers;
 
-        const transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-
-        const transfer: zod.infer<typeof TransferSchema> | null =
-            await transfers.findOne({ transferUId: transferUId });
+        transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
+        transfer = await transfers.findOne({ transferUId: transferUId });
 
         if (!transfer) {
             return NextResponse.json(
                 handleResponse(
-                    "Transfer with associated transfer id not found."
-                )
+                    "Transfer with associated `transferId` not found.",
+                    {
+                        transferId: transferId,
+                    }
+                ),
+                { status: 404 }
             );
         }
+    } catch (e: any) {
+        return NextResponse.json(
+            handleResponse("Error fetching transfer data for `transferId`.", {
+                transferId: transferId,
+            }),
+            { status: 500 }
+        );
+    }
 
-        const objectId = getObjectId(transferUId, transfer.objectIdSalt);
-
-        const s3Config: S3ClientConfig = {
-            region: AWS_REGION,
-        };
-        const s3Client: S3Client = new S3Client(s3Config);
-
-        const command: GetObjectCommand = new GetObjectCommand({
+    try {
+        objectId = getObjectId(transferUId, transfer.objectIdSalt);
+        const s3Client = new S3Client({ region: AWS_REGION });
+        const command = new GetObjectCommand({
             Bucket: AWS_BUCKET,
             Key: objectId,
         });
 
         const resp = await s3Client.send(command);
         const stream = resp.Body as Readable;
-        const object: Promise<Buffer> = new Promise((resolve, reject) => {
-            const chunks: Buffer[] = [];
-            stream.on("data", (chunk) => chunks.push(chunk));
-            stream.on("error", reject);
-            stream.on("end", () => resolve(Buffer.concat(chunks)));
-        });
-        const buffer = await object;
+        buffer = await streamToBuffer(stream);
 
-        try {
-            verifyObject(buffer, transfer.objectData);
-        } catch (e) {
+        const digest = hash(buffer);
+        const size = buffer.length;
+
+        if (
+            digest !== transfer.objectData.fileHash ||
+            size !== transfer.objectData.size
+        ) {
             return NextResponse.json(
                 handleResponse(
-                    "Uploaded object does not match promised object shape. Hash or size mismatch. Polluted transfer."
-                )
+                    "Uploaded object does not match promised object shape. Hash or size mismatch. Polluted transfer.",
+                    {
+                        transferId: transferId,
+                        expectedObject: {
+                            size: transfer.objectData.size,
+                            hash: transfer.objectData.fileHash,
+                        },
+                    }
+                ),
+                { status: 400 }
             );
         }
-
-        const headers = new Headers();
-        headers.set("Content-Type", "application/octet-stream");
-        headers.set(
-            "Content-Disposition",
-            `attachment; filename="whizfile_transfer_${transferId}.zip"`
-        );
-
-        return new Response(buffer, {
-            headers: headers,
-            status: 200,
-        });
     } catch (e: any) {
-        return NextResponse.json(handleError(e));
+        return NextResponse.json(
+            handleResponse(
+                "Error fetching object associated with `transferId`.",
+                { transferId: transferId }
+            ),
+            { status: 500 }
+        );
     }
+
+    const headers = new Headers();
+    headers.set("Content-Type", "application/octet-stream");
+    headers.set(
+        "Content-Disposition",
+        `attachment; filename="whizfile_transfer_${transferId}.zip"`
+    );
+
+    return new Response(buffer, { headers: headers, status: 200 });
 }

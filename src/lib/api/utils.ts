@@ -1,5 +1,4 @@
-import * as zod from "zod";
-import { createHash, randomBytes } from "crypto";
+import { BinaryLike, createHash, randomBytes } from "crypto";
 
 interface ApiResponse {
     timestamp: number;
@@ -16,23 +15,6 @@ function handleResponse(
         message: message,
         data: data,
     };
-}
-
-function handleError(e: any): ApiResponse {
-    var errorMessage;
-
-    if (e instanceof zod.ZodError) {
-        console.log(e.message);
-        errorMessage = "Invalid contents.";
-    } else if (e instanceof Error) {
-        console.error(e);
-        errorMessage = e.name;
-    } else {
-        console.log("Unknown error.");
-        errorMessage = "Unknown error.";
-    }
-
-    return handleResponse(errorMessage);
 }
 
 function getTransferUId(transferId: string, salt: string): string {
@@ -65,26 +47,18 @@ function generateRandomSalt(size: number = 64): string {
     return randomBytes(size / 2).toString("hex");
 }
 
-function verifyObject(
-    buffer: Buffer,
-    expected: { size: number; fileHash: string }
-) {
+function hash(data: BinaryLike): string {
     const hash = createHash("sha256");
-    hash.update(buffer);
+    hash.update(data);
     const digest = hash.digest("hex");
-    const size = buffer.length;
-
-    if (digest !== expected.fileHash || size !== expected.size) {
-        throw new Error("Hash or size mismatch.");
-    }
+    return digest;
 }
 
 export {
     handleResponse,
-    handleError,
     getTransferUId,
     getObjectId,
     generateTransferId,
     generateRandomSalt,
-    verifyObject,
+    hash,
 };
