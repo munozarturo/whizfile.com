@@ -8,7 +8,11 @@ import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
-import { ProcessedTransfer, TransferSchema } from "@/lib/db/schema/transfers";
+import {
+    ProcessedTransfer,
+    TransferSchema,
+    TransferStatus,
+} from "@/lib/db/schema/transfers";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import whizfileConfig from "@/lib/config/config";
 import { APIError } from "@/lib/api/errors";
@@ -25,7 +29,7 @@ export async function GET(
 ) {
     let transferId;
     let collections: Collections;
-    let document: zod.infer<typeof TransferSchema> | null;
+    let document: TransferSchema | null;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -92,9 +96,9 @@ export async function DELETE(
 ) {
     let transferId;
     let collections: Collections;
-    let transfers: Collection<zod.infer<typeof TransferSchema>>;
+    let transfers: Collection<TransferSchema>;
     let transferUId;
-    let transfer: zod.infer<typeof TransferSchema> | null;
+    let transfer: TransferSchema | null;
     let expiresIn: number;
     let objectId: string;
     let s3Client: S3Client;
@@ -142,9 +146,9 @@ export async function DELETE(
             try {
                 await transfers.updateOne(
                     { transferUId: transferUId },
-                    { $set: { status: "expired" } }
+                    { $set: { status: TransferStatus.expired } }
                 );
-                transfer.status = "expired";
+                transfer.status = TransferStatus.expired;
             } catch (e: any) {
                 return NextResponse.json(
                     handleResponse(
@@ -174,7 +178,7 @@ export async function DELETE(
             } catch (e: any) {
                 await transfers.updateOne(
                     { transferUId: transferUId },
-                    { $set: { status: "removed" } }
+                    { $set: { status: TransferStatus.removed } }
                 );
 
                 return NextResponse.json(
@@ -225,7 +229,7 @@ export async function DELETE(
     try {
         await transfers.updateOne(
             { transferUId: transferUId },
-            { $set: { status: "deleted" } }
+            { $set: { status: TransferStatus.deleted } }
         );
     } catch (e: any) {
         return NextResponse.json(
@@ -252,7 +256,7 @@ export async function DELETE(
     } catch (e: any) {
         await transfers.updateOne(
             { transferUId: transferUId },
-            { $set: { status: "removed" } }
+            { $set: { status: TransferStatus.removed } }
         );
 
         return NextResponse.json(

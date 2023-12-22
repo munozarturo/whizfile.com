@@ -1,63 +1,58 @@
-import * as zod from "zod";
 import { Hash } from "./shared";
 
-const TransferStatus = zod.enum([
-    "active", // for transfers that are active
-    "failed", // for when the generation of a presigned S3 URL fails
-    "expired", // for transfers that have expired
-    "deleted", // for transfers that have been deleted by a user
-    "removed", // for transfers which were force removed by an administrator
-    "corrupted", // for when the file hash does not match the hash of the updated file
-]);
+enum TransferStatus {
+    active = "active", // for transfers that are active
+    failed = "failed", // for when the generation of a presigned S3 URL fails
+    expired = "expired", // for transfers that have expired
+    deleted = "deleted", // for transfers that have been deleted by a user
+    removed = "removed", // for transfers which were force removed by an administrator
+    corrupted = "corrupted", // for when the file hash does not match the hash of the updated file
+}
 
-const ObjectData = zod.object({
-    size: zod.number(),
-    fileHash: Hash,
-});
+interface ObjectData {
+    size: number;
+    fileHash: Hash;
+}
 
-const TransferSchema = zod.object({
-    transferUId: Hash,
-    timestamp: zod.number(),
-    status: TransferStatus,
+interface TransferSchema {
+    transferUId: Hash;
+    timestamp: number;
+    status: TransferStatus;
 
-    title: zod.string(),
-    message: zod.string(),
-    objectData: ObjectData,
-    allowDelete: zod.boolean(),
-    expireIn: zod.number(),
+    title: string;
+    message: string;
+    objectData: ObjectData;
+    allowDelete: boolean;
+    expireIn: number;
 
-    views: zod.number(),
-    downloads: zod.number(),
+    views: number;
+    downloads: number;
 
-    maxViews: zod.number(),
-    maxDownloads: zod.number(),
+    maxViews: number;
+    maxDownloads: number;
 
-    objectIdSalt: zod.string(),
-});
+    objectIdSalt: string;
+}
 
-const ProcessedTransfer = zod.object({
-    transferUId: Hash,
-    timestamp: zod.number(),
-    status: TransferStatus,
+interface ProcessedTransfer {
+    transferUId: Hash;
+    timestamp: number;
+    status: TransferStatus;
 
-    title: zod.string(),
-    message: zod.string(),
-    objectData: ObjectData,
-    allowDelete: zod.boolean(),
-    expireIn: zod.number(),
-    expiresIn: zod.number(),
+    title: string;
+    message: string;
+    objectData: ObjectData;
+    allowDelete: boolean;
+    expireIn: number;
+    expiresIn: number;
 
-    views: zod.number(),
-    downloads: zod.number(),
+    views: number;
+    downloads: number;
 
-    maxViews: zod.number(),
-    maxDownloads: zod.number(),
+    maxViews: number;
+    maxDownloads: number;
 
-    objectIdSalt: zod.string(),
-});
+    objectIdSalt: string;
+}
 
-const TransferIdSchema = zod.object({
-    transferIdHash: Hash,
-});
-
-export { TransferSchema, TransferIdSchema, ProcessedTransfer };
+export { TransferStatus, type TransferSchema, type ProcessedTransfer };

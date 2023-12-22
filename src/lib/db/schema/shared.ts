@@ -1,7 +1,3 @@
-import * as zod from "zod";
+type Hash = string;
 
-const Hash = zod.string().refine((input) => /^[a-f0-9]{64}$/.test(input), {
-    message: "Not a valid SHA-256 hash",
-});
-
-export { Hash };
+export { type Hash };

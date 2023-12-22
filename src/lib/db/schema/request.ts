@@ -1,21 +1,19 @@
-import * as zod from "zod";
+enum HTTPMethod {
+    GET = "GET",
+    HEAD = "HEAD",
+    POST = "POST",
+    PUT = "PUT",
+    DELETE = "DELETE",
+    PATCH = "PATCH",
+    OPTIONS = "OPTIONS",
+}
 
-const HTTPMethod = zod.enum([
-    "GET",
-    "HEAD",
-    "POST",
-    "PUT",
-    "DELETE",
-    "PATCH",
-    "OPTIONS",
-]);
+interface RequestSchema {
+    timestamp: number;
+    method: HTTPMethod;
+    source: string;
+    target: string;
+    id?: string;
+}
 
-const RequestSchema = zod.object({
-    timestamp: zod.number(),
-    method: HTTPMethod,
-    source: zod.string(),
-    target: zod.string(),
-    id: zod.string().optional(),
-});
-
-export { HTTPMethod, RequestSchema };
+export { HTTPMethod, type RequestSchema };

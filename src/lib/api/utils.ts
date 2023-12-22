@@ -2,7 +2,11 @@ import { BinaryLike, createHash, randomBytes } from "crypto";
 import * as zod from "zod";
 import { Collections } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
-import { ProcessedTransfer, TransferSchema } from "@/lib/db/schema/transfers";
+import {
+    ProcessedTransfer,
+    TransferSchema,
+    TransferStatus,
+} from "@/lib/db/schema/transfers";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import whizfileConfig from "@/lib/config/config";
 import {
@@ -76,7 +80,7 @@ async function fetchTransfer(
     transferId: string,
     universalSalt: string,
     collections: Collections
-): Promise<zod.infer<typeof ProcessedTransfer>> {
+): Promise<ProcessedTransfer> {
     let tId: string;
     let tUId: string;
     let oId: string;
@@ -95,7 +99,7 @@ async function fetchTransfer(
         }
     }
 
-    let doc: zod.infer<typeof TransferSchema> | null;
+    let doc: TransferSchema | null;
 
     try {
         tUId = getTransferUId(transferId, universalSalt);
@@ -127,9 +131,9 @@ async function fetchTransfer(
         try {
             await collections.transfers.updateOne(
                 { transferUId: tUId },
-                { $set: { status: "expired" } }
+                { $set: { status: TransferStatus.expired } }
             );
-            doc.status = "expired";
+            doc.status = TransferStatus.expired;
         } catch (e: any) {
             throw new InfrastructureError(
                 "Transfer expired. Error deleting from server.",
