@@ -1,21 +1,18 @@
 import {
+    fetchTransfer,
     getObjectId,
-    getTransferUId,
     handleResponse,
     hash,
+    streamToBuffer,
 } from "@/lib/api/utils";
 import { NextRequest, NextResponse } from "next/server";
-import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
+import { Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
-import {
-    S3Client,
-    GetObjectCommand,
-    NoSuchKey,
-    DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, NoSuchKey } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import whizfileConfig from "@/lib/config/config";
+import { APIError } from "@/lib/api/errors";
 
 if (!process.env.UNIVERSAL_SALT) {
     throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");
@@ -23,28 +20,16 @@ if (!process.env.UNIVERSAL_SALT) {
 
 const UNIVERSAL_SALT = process.env.UNIVERSAL_SALT;
 
-async function streamToBuffer(stream: Readable): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        const chunks: Buffer[] = [];
-        stream.on("data", (chunk) => chunks.push(chunk));
-        stream.on("error", reject);
-        stream.on("end", () => resolve(Buffer.concat(chunks)));
-    });
-}
-
 export async function GET(
     req: NextRequest,
     context: { params: { transferId: string } }
 ) {
-    let transferId: string;
-    let collections: Collections;
-    let transfers: Collection<TransferSchema>;
-    let transferUId: string;
-    let transfer: TransferSchema | null;
-    let expiresIn: number;
     let objectId: string;
     let buffer: Buffer;
-    let s3Client: S3Client;
+
+    let transferId;
+    let collections: Collections;
+    let document: TransferSchema | null;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -53,109 +38,41 @@ export async function GET(
             handleResponse(
                 "Invalid `transferId`, `transferId` must contain 6 case sensitive alphanumeric caracters.",
                 {
-                    transferId: context.params.transferId,
+                    transferId: transferId,
                 }
             ),
             { status: 400 }
         );
     }
 
+    collections = await connectToDatabase();
+
     try {
-        collections = await connectToDatabase();
-        transfers = collections.transfers;
-
-        transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-        transfer = await transfers.findOne({ transferUId: transferUId });
-
-        if (!transfer) {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` not found.",
-                    {
-                        transferId: transferId,
-                    }
-                ),
-                { status: 404 }
-            );
-        }
-
-        expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
-        const expired = expiresIn <= 0;
-        const maxViewsReached: boolean = transfer.views >= transfer.maxViews;
-        const maxDownloadsReached: boolean =
-            transfer.downloads >= transfer.maxDownloads;
-
-        if (expired || maxViewsReached || maxDownloadsReached) {
-            try {
-                await transfers.updateOne(
-                    { transferUId: transferUId },
-                    { $set: { status: TransferStatus.expired } }
-                );
-                transfer.status = TransferStatus.expired;
-            } catch (e: any) {
-                return NextResponse.json(
-                    handleResponse(
-                        "Error deleting transfer from server. Please try again later.",
-                        {
-                            transferId: transferId,
-                        }
-                    ),
-                    { status: 500 }
-                );
-            }
-
-            try {
-                transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-                objectId = getObjectId(
-                    transferId,
-                    transferUId,
-                    transfer.objectIdSalt
-                );
-
-                s3Client = new S3Client({ region: whizfileConfig.s3.region });
-                const command = new DeleteObjectCommand({
-                    Bucket: whizfileConfig.s3.bucket,
-                    Key: objectId,
-                });
-                s3Client.send(command);
-            } catch (e: any) {
-                await transfers.updateOne(
-                    { transferUId: transferUId },
-                    { $set: { status: TransferStatus.removed } }
-                );
-
-                return NextResponse.json(
-                    handleResponse("Error deleting object from media server.", {
-                        transferId: transferId,
-                    }),
-                    { status: 500 }
-                );
-            }
-        }
-
-        if (transfer.status !== "active") {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` is no longer active.",
-                    {
-                        transferId: transferId,
-                        status: transfer.status,
-                    }
-                ),
-                { status: 410 }
-            );
-        }
+        document = await fetchTransfer(transferId, UNIVERSAL_SALT, collections);
     } catch (e: any) {
-        return NextResponse.json(
-            handleResponse("Error fetching transfer data for `transferId`.", {
-                transferId: transferId,
-            }),
-            { status: 500 }
-        );
+        if (e instanceof APIError) {
+            return NextResponse.json(
+                handleResponse(e.message, {
+                    transferId: transferId,
+                }),
+                { status: e.status }
+            );
+        } else {
+            return NextResponse.json(
+                handleResponse("Unknown error.", {
+                    transferId: transferId,
+                }),
+                { status: 500 }
+            );
+        }
     }
 
     try {
-        objectId = getObjectId(transferId, transferUId, transfer.objectIdSalt);
+        objectId = getObjectId(
+            transferId,
+            document.transferUId,
+            document.objectIdSalt
+        );
         const s3Client = new S3Client({ region: whizfileConfig.s3.region });
         const command = new GetObjectCommand({
             Bucket: whizfileConfig.s3.bucket,
@@ -170,11 +87,11 @@ export async function GET(
         const size = buffer.length;
 
         if (
-            digest !== transfer.objectData.fileHash ||
-            size !== transfer.objectData.size
+            digest !== document.objectData.fileHash ||
+            size !== document.objectData.size
         ) {
-            await transfers.updateOne(
-                { transferUId: transferUId },
+            await collections.transfers.updateOne(
+                { transferUId: document.transferUId },
                 { $set: { status: TransferStatus.corrupted } }
             );
 
@@ -184,8 +101,8 @@ export async function GET(
                     {
                         transferId: transferId,
                         expectedObject: {
-                            size: transfer.objectData.size,
-                            hash: transfer.objectData.fileHash,
+                            size: document.objectData.size,
+                            hash: document.objectData.fileHash,
                         },
                         receivedObject: {
                             size: size,
@@ -199,7 +116,7 @@ export async function GET(
     } catch (e: any) {
         if (e instanceof NoSuchKey) {
             const uploadExpiryTime =
-                transfer.timestamp +
+                document.timestamp +
                 whizfileConfig.s3.presignedUrlExpireIn * 1000;
             const awaitingUpload = Date.now() < uploadExpiryTime;
 
@@ -216,8 +133,8 @@ export async function GET(
                 );
             }
 
-            await transfers.updateOne(
-                { transferUId: transferUId },
+            await collections.transfers.updateOne(
+                { transferUId: document.transferUId },
                 { $set: { status: TransferStatus.failed } }
             );
 
@@ -245,8 +162,8 @@ export async function GET(
         `attachment; filename="whizfile_transfer_${transferId}.zip"`
     );
 
-    await transfers.updateOne(
-        { transferUId: transferUId },
+    await collections.transfers.updateOne(
+        { transferUId: document.transferUId },
         { $inc: { downloads: 1 } }
     );
 

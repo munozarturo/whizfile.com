@@ -16,6 +16,7 @@ import {
     InfrastructureError,
     InactiveTransferError,
 } from "@/lib/api/errors";
+import { Readable } from "stream";
 
 interface ApiResponse {
     timestamp: number;
@@ -74,6 +75,15 @@ function hash(data: BinaryLike): string {
     hash.update(data);
     const digest = hash.digest("hex");
     return digest;
+}
+
+async function streamToBuffer(stream: Readable): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        stream.on("data", (chunk) => chunks.push(chunk));
+        stream.on("error", reject);
+        stream.on("end", () => resolve(Buffer.concat(chunks)));
+    });
 }
 
 async function fetchTransfer(
@@ -153,7 +163,7 @@ async function fetchTransfer(
         } catch (e: any) {
             await collections.transfers.updateOne(
                 { transferUId: tUId },
-                { $set: { status: "removed" } }
+                { $set: { status: TransferStatus.removed } }
             );
 
             throw new InfrastructureError(
@@ -180,5 +190,6 @@ export {
     generateTransferId,
     generateRandomSalt,
     hash,
+    streamToBuffer,
     fetchTransfer,
 };
