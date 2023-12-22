@@ -4,15 +4,10 @@ import {
     handleResponse,
     fetchTransfer,
 } from "@/lib/api/utils";
-import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
-import {
-    ProcessedTransfer,
-    TransferSchema,
-    TransferStatus,
-} from "@/lib/db/schema/transfers";
+import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import whizfileConfig from "@/lib/config/config";
 import { APIError } from "@/lib/api/errors";

@@ -9,7 +9,7 @@ import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransfersReq } from "@/lib/api/validations/transfers";
-import { TransferIdSchema, TransferSchema } from "@/lib/db/schema/transfers";
+import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import whizfileConfig from "@/lib/config/config";
@@ -24,8 +24,7 @@ export async function POST(req: NextRequest) {
     let requestBody: Object;
     let body: zod.infer<typeof TransfersReq>;
     let collections: Collections;
-    let transferIds: Collection<zod.infer<typeof TransferIdSchema>>;
-    let transfers: Collection<zod.infer<typeof TransferSchema>>;
+    let transfers: Collection<TransferSchema>;
     let transferId: string;
     let transferIdHash: string;
     let transferUId: string;
@@ -55,7 +54,6 @@ export async function POST(req: NextRequest) {
 
     try {
         collections = await connectToDatabase();
-        transferIds = collections.transferIds;
         transfers = collections.transfers;
     } catch (e: any) {
         return NextResponse.json(
@@ -80,8 +78,8 @@ export async function POST(req: NextRequest) {
             var transferIdHash = getTransferUId(transferId, UNIVERSAL_SALT);
 
             while (
-                (await transferIds.countDocuments({
-                    transferId: transferIdHash,
+                (await transfers.countDocuments({
+                    transferUId: transferIdHash,
                 })) > 0
             ) {
                 transferId = generateTransferId();
@@ -108,10 +106,10 @@ export async function POST(req: NextRequest) {
         objectIdSalt = generateRandomSalt();
         objectId = getObjectId(transferId, transferUId, objectIdSalt);
 
-        const document: zod.infer<typeof TransferSchema> = {
+        const document: TransferSchema = {
             transferUId: transferUId,
             timestamp: Date.now(),
-            status: "active",
+            status: TransferStatus.active,
 
             title: body.title,
             message: body.message,
@@ -129,7 +127,6 @@ export async function POST(req: NextRequest) {
         };
 
         await transfers.insertOne(document);
-        await transferIds.insertOne({ transferIdHash: transferIdHash });
     } catch (e: any) {
         return NextResponse.json(
             handleResponse("Error creating transfer. Please try again later.", {
@@ -155,7 +152,7 @@ export async function POST(req: NextRequest) {
     } catch (e: any) {
         await transfers.updateOne(
             { transferUId: transferUId },
-            { $set: { status: "failed" } }
+            { $set: { status: TransferStatus.failed } }
         );
 
         return NextResponse.json(

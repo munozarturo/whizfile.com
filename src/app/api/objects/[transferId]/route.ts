@@ -4,11 +4,10 @@ import {
     handleResponse,
     hash,
 } from "@/lib/api/utils";
-import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
-import { TransferSchema } from "@/lib/db/schema/transfers";
+import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
 import {
     S3Client,
     GetObjectCommand,
@@ -39,9 +38,9 @@ export async function GET(
 ) {
     let transferId: string;
     let collections: Collections;
-    let transfers: Collection<zod.infer<typeof TransferSchema>>;
+    let transfers: Collection<TransferSchema>;
     let transferUId: string;
-    let transfer: zod.infer<typeof TransferSchema> | null;
+    let transfer: TransferSchema | null;
     let expiresIn: number;
     let objectId: string;
     let buffer: Buffer;
@@ -90,9 +89,9 @@ export async function GET(
             try {
                 await transfers.updateOne(
                     { transferUId: transferUId },
-                    { $set: { status: "expired" } }
+                    { $set: { status: TransferStatus.expired } }
                 );
-                transfer.status = "expired";
+                transfer.status = TransferStatus.expired;
             } catch (e: any) {
                 return NextResponse.json(
                     handleResponse(
@@ -122,7 +121,7 @@ export async function GET(
             } catch (e: any) {
                 await transfers.updateOne(
                     { transferUId: transferUId },
-                    { $set: { status: "removed" } }
+                    { $set: { status: TransferStatus.removed } }
                 );
 
                 return NextResponse.json(
@@ -176,7 +175,7 @@ export async function GET(
         ) {
             await transfers.updateOne(
                 { transferUId: transferUId },
-                { $set: { status: "corrupted" } }
+                { $set: { status: TransferStatus.corrupted } }
             );
 
             return NextResponse.json(
@@ -219,7 +218,7 @@ export async function GET(
 
             await transfers.updateOne(
                 { transferUId: transferUId },
-                { $set: { status: "failed" } }
+                { $set: { status: TransferStatus.failed } }
             );
 
             return NextResponse.json(
