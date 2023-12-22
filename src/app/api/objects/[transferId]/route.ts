@@ -82,9 +82,9 @@ export async function GET(
 
         expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
         const expired = expiresIn <= 0;
-        const maxViewsReached: boolean = transfer.views > transfer.maxViews;
+        const maxViewsReached: boolean = transfer.views >= transfer.maxViews;
         const maxDownloadsReached: boolean =
-            transfer.downloads > transfer.maxDownloads;
+            transfer.downloads >= transfer.maxDownloads;
 
         if (expired || maxViewsReached || maxDownloadsReached) {
             try {

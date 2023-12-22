@@ -60,12 +60,14 @@ export async function GET(
                     status: 1,
                     title: 1,
                     message: 1,
-                    objectData: 1,
-                    allowDelete: 1,
                     expireIn: 1,
                     objectIdSalt: 1,
                     views: 1,
+                    maxViews: 1,
                     downloads: 1,
+                    maxDownloads: 1,
+                    objectData: 1,
+                    allowDelete: 1,
                 },
             }
         );
@@ -87,9 +89,9 @@ export async function GET(
 
         expiresIn = document.timestamp + document.expireIn - Date.now();
         const expired = expiresIn <= 0;
-        const maxViewsReached: boolean = document.views > document.maxViews;
+        const maxViewsReached: boolean = document.views >= document.maxViews;
         const maxDownloadsReached: boolean =
-            document.downloads > document.maxDownloads;
+            document.downloads >= document.maxDownloads;
 
         if (expired || maxViewsReached || maxDownloadsReached) {
             try {
@@ -233,9 +235,9 @@ export async function DELETE(
 
         expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
         const expired = expiresIn <= 0;
-        const maxViewsReached: boolean = transfer.views > transfer.maxViews;
+        const maxViewsReached: boolean = transfer.views >= transfer.maxViews;
         const maxDownloadsReached: boolean =
-            transfer.downloads > transfer.maxDownloads;
+            transfer.downloads >= transfer.maxDownloads;
 
         if (expired || maxViewsReached || maxDownloadsReached) {
             try {
