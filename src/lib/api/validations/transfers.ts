@@ -28,6 +28,18 @@ const TransfersReq = zod.object({
         .max(whizfileConfig.api.transfer.expireInMax)
         .optional()
         .default(whizfileConfig.api.transfer.expireInMax),
+    maxViews: zod
+        .number()
+        .min(whizfileConfig.api.transfer.maxViewsMin)
+        .max(whizfileConfig.api.transfer.maxViewsMax)
+        .optional()
+        .default(999),
+    maxDownloads: zod
+        .number()
+        .min(whizfileConfig.api.transfer.maxDownloadsMin)
+        .max(whizfileConfig.api.transfer.maxDownloadsMax)
+        .optional()
+        .default(999),
 });
 
 export { TransfersReq, TransferId };

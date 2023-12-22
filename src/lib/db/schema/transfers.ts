@@ -29,6 +29,9 @@ const TransferSchema = zod.object({
     views: zod.number(),
     downloads: zod.number(),
 
+    maxViews: zod.number(),
+    maxDownloads: zod.number(),
+
     objectIdSalt: zod.string(),
 });
 

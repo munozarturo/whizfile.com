@@ -122,8 +122,8 @@ export async function POST(req: NextRequest) {
             views: 0,
             downloads: 0,
 
-            // maxViews
-            // maxDownloads
+            maxViews: body.maxViews,
+            maxDownloads: body.maxDownloads,
 
             objectIdSalt: objectIdSalt,
         };

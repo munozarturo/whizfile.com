@@ -1,6 +1,10 @@
 interface TransferConfig {
     expireInMin: number;
     expireInMax: number;
+    maxDownloadsMin: number;
+    maxDownloadsMax: number;
+    maxViewsMin: number;
+    maxViewsMax: number;
 }
 
 interface APIConfig {
@@ -27,7 +31,14 @@ interface WhizfileConfig {
 const whizfileConfig: WhizfileConfig = {
     api: {
         rateLimit: 20,
-        transfer: { expireInMin: 0, expireInMax: 60 * 60 * 24 * 7 * 1000 }, // 7 days in ms
+        transfer: {
+            expireInMin: 0,
+            expireInMax: 60 * 60 * 24 * 7 * 1000, // 7 days in ms
+            maxDownloadsMin: 1,
+            maxDownloadsMax: 999,
+            maxViewsMin: 1,
+            maxViewsMax: 999,
+        },
     },
     mongo: {
         mainDb: "test",
