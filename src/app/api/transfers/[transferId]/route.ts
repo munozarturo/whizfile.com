@@ -1,16 +1,17 @@
 import {
-    generateRandomSalt,
     getObjectId,
     getTransferUId,
     handleResponse,
+    fetchTransfer,
 } from "@/lib/api/utils";
 import * as zod from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
-import { TransferSchema } from "@/lib/db/schema/transfers";
+import { ProcessedTransfer, TransferSchema } from "@/lib/db/schema/transfers";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import whizfileConfig from "@/lib/config/config";
+import { APIError } from "@/lib/api/errors";
 
 if (!process.env.UNIVERSAL_SALT) {
     throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");
@@ -24,12 +25,7 @@ export async function GET(
 ) {
     let transferId;
     let collections: Collections;
-    let transfers: Collection<zod.infer<typeof TransferSchema>>;
-    let transferUId;
     let document: zod.infer<typeof TransferSchema> | null;
-    let expiresIn: number;
-    let objectId: string;
-    let s3Client: S3Client;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -45,129 +41,32 @@ export async function GET(
         );
     }
 
+    collections = await connectToDatabase();
+
     try {
-        collections = await connectToDatabase();
-        transfers = collections.transfers;
-
-        transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-
-        document = await transfers.findOne(
-            { transferUId: transferUId },
-            {
-                projection: {
-                    _id: 0,
-                    timestamp: 1,
-                    status: 1,
-                    title: 1,
-                    message: 1,
-                    expireIn: 1,
-                    objectIdSalt: 1,
-                    views: 1,
-                    maxViews: 1,
-                    downloads: 1,
-                    maxDownloads: 1,
-                    objectData: 1,
-                    allowDelete: 1,
-                },
-            }
-        );
-
-        // maxViews
-        // maxDownloads
-
-        if (!document) {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` not found.",
-                    {
-                        transferId: transferId,
-                    }
-                ),
-                { status: 404 }
-            );
-        }
-
-        expiresIn = document.timestamp + document.expireIn - Date.now();
-        const expired = expiresIn <= 0;
-        const maxViewsReached: boolean = document.views >= document.maxViews;
-        const maxDownloadsReached: boolean =
-            document.downloads >= document.maxDownloads;
-
-        if (expired || maxViewsReached || maxDownloadsReached) {
-            try {
-                await transfers.updateOne(
-                    { transferUId: transferUId },
-                    { $set: { status: "expired" } }
-                );
-                document.status = "expired";
-            } catch (e: any) {
-                return NextResponse.json(
-                    handleResponse(
-                        "Error deleting transfer from server. Please try again later.",
-                        {
-                            transferId: transferId,
-                        }
-                    ),
-                    { status: 500 }
-                );
-            }
-
-            try {
-                transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-                objectId = getObjectId(
-                    transferId,
-                    transferUId,
-                    document.objectIdSalt
-                );
-
-                s3Client = new S3Client({ region: whizfileConfig.s3.region });
-                const command = new DeleteObjectCommand({
-                    Bucket: whizfileConfig.s3.bucket,
-                    Key: objectId,
-                });
-                s3Client.send(command);
-            } catch (e: any) {
-                await transfers.updateOne(
-                    { transferUId: transferUId },
-                    { $set: { status: "removed" } }
-                );
-
-                return NextResponse.json(
-                    handleResponse("Error deleting object from media server.", {
-                        transferId: transferId,
-                    }),
-                    { status: 500 }
-                );
-            }
-        }
-
-        if (document.status !== "active") {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` is not active.",
-                    {
-                        transferId: transferId,
-                        status: document.status,
-                    }
-                ),
-                { status: 410 }
-            );
-        }
+        document = await fetchTransfer(transferId, UNIVERSAL_SALT, collections);
     } catch (e: any) {
-        return NextResponse.json(
-            handleResponse("Error fetching transfer. Please try again later.", {
-                transferId: transferId,
-            }),
-            {
-                status: 500,
-            }
-        );
+        if (e instanceof APIError) {
+            return NextResponse.json(
+                handleResponse(e.message, {
+                    transferId: transferId,
+                }),
+                { status: e.status }
+            );
+        } else {
+            return NextResponse.json(
+                handleResponse("Unknown error.", {
+                    transferId: transferId,
+                }),
+                { status: 500 }
+            );
+        }
     }
 
-    const { objectIdSalt, ...transfer } = document;
+    const { transferUId, objectIdSalt, ...transfer } = document;
 
-    await transfers.updateOne(
-        { transferUId: transferUId },
+    await collections.transfers.updateOne(
+        { transferUId: document.transferUId },
         { $inc: { views: 1 } }
     );
 
@@ -178,7 +77,7 @@ export async function GET(
             "Sucessfully fetched transfer with provided `transferId`.",
             {
                 transferId: transferId,
-                transfer: { ...transfer, expiresIn: expiresIn },
+                transfer: transfer,
             }
         ),
         {

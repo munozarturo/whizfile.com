@@ -35,8 +35,29 @@ const TransferSchema = zod.object({
     objectIdSalt: zod.string(),
 });
 
+const ProcessedTransfer = zod.object({
+    transferUId: Hash,
+    timestamp: zod.number(),
+    status: TransferStatus,
+
+    title: zod.string(),
+    message: zod.string(),
+    objectData: ObjectData,
+    allowDelete: zod.boolean(),
+    expireIn: zod.number(),
+    expiresIn: zod.number(),
+
+    views: zod.number(),
+    downloads: zod.number(),
+
+    maxViews: zod.number(),
+    maxDownloads: zod.number(),
+
+    objectIdSalt: zod.string(),
+});
+
 const TransferIdSchema = zod.object({
     transferIdHash: Hash,
 });
 
-export { TransferSchema, TransferIdSchema };
+export { TransferSchema, TransferIdSchema, ProcessedTransfer };

@@ -1,4 +1,17 @@
 import { BinaryLike, createHash, randomBytes } from "crypto";
+import * as zod from "zod";
+import { Collections } from "@/lib/db/mongo";
+import { TransferId } from "@/lib/api/validations/transfers";
+import { ProcessedTransfer, TransferSchema } from "@/lib/db/schema/transfers";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import whizfileConfig from "@/lib/config/config";
+import {
+    APIError,
+    InvalidRequestError,
+    NonExistentTransferError,
+    InfrastructureError,
+    InactiveTransferError,
+} from "@/lib/api/errors";
 
 interface ApiResponse {
     timestamp: number;
@@ -59,6 +72,103 @@ function hash(data: BinaryLike): string {
     return digest;
 }
 
+async function fetchTransfer(
+    transferId: string,
+    universalSalt: string,
+    collections: Collections
+): Promise<zod.infer<typeof ProcessedTransfer>> {
+    let tId: string;
+    let tUId: string;
+    let oId: string;
+    let s3Client: S3Client;
+
+    try {
+        tId = TransferId.parse(transferId);
+    } catch (e: any) {
+        if (e instanceof zod.ZodError) {
+            throw new InvalidRequestError(
+                "`transferId` must contain 6 case sensitive alphanumeric characters.",
+                400
+            );
+        } else {
+            throw new APIError("Unknown error.", 500);
+        }
+    }
+
+    let doc: zod.infer<typeof TransferSchema> | null;
+
+    try {
+        tUId = getTransferUId(transferId, universalSalt);
+
+        doc = await collections.transfers.findOne(
+            { transferUId: tUId },
+            { projection: { _id: 0 } }
+        );
+    } catch (e: any) {
+        throw new InfrastructureError(
+            "Failed to retreive transfer from server.",
+            500
+        );
+    }
+
+    if (!doc)
+        throw new NonExistentTransferError(
+            "No transfer associated with the provided `transferId` exists.",
+            404
+        );
+
+    const expiresIn = doc.timestamp + doc.expireIn - Date.now();
+
+    const expired = expiresIn <= 0;
+    const maxViewsReached: boolean = doc.views >= doc.maxViews;
+    const maxDownloadsReached: boolean = doc.downloads >= doc.maxDownloads;
+
+    if (expired || maxViewsReached || maxDownloadsReached) {
+        try {
+            await collections.transfers.updateOne(
+                { transferUId: tUId },
+                { $set: { status: "expired" } }
+            );
+            doc.status = "expired";
+        } catch (e: any) {
+            throw new InfrastructureError(
+                "Transfer expired. Error deleting from server.",
+                500
+            );
+        }
+
+        try {
+            oId = getObjectId(tId, tUId, doc.objectIdSalt);
+
+            s3Client = new S3Client({ region: whizfileConfig.s3.region });
+            const command = new DeleteObjectCommand({
+                Bucket: whizfileConfig.s3.bucket,
+                Key: oId,
+            });
+            s3Client.send(command);
+        } catch (e: any) {
+            await collections.transfers.updateOne(
+                { transferUId: tUId },
+                { $set: { status: "removed" } }
+            );
+
+            throw new InfrastructureError(
+                "Error deleting object from media server.",
+                500
+            );
+        }
+    }
+
+    if (doc.status !== "active") {
+        throw new InactiveTransferError(
+            "Transfer with associated `transferId` is not active.",
+            410
+        );
+    }
+
+    return { ...doc, expiresIn: expiresIn };
+}
+
 export {
     handleResponse,
     getTransferUId,
@@ -66,4 +176,5 @@ export {
     generateTransferId,
     generateRandomSalt,
     hash,
+    fetchTransfer,
 };
