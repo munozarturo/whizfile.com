@@ -63,14 +63,14 @@ export async function GET(
         }
     }
 
-    const { transferUId, objectIdSalt, ...transfer } = document;
-
     await collections.transfers.updateOne(
         { transferUId: document.transferUId },
         { $inc: { views: 1 } }
     );
 
     document.views += 1;
+
+    const { transferUId, objectIdSalt, ...transfer } = document;
 
     return NextResponse.json(
         handleResponse(
