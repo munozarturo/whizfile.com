@@ -24,22 +24,22 @@ Allow `GetObject`, `PutObject`, `ListBucket`, `DeleteObject` on bucket `whizfile
 
 ```json
 {
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Effect": "Allow",
-			"Action": [
-				"s3:GetObject",
-				"s3:PutObject",
-				"s3:ListBucket",
-				"s3:DeleteObject"
-			],
-			"Resource": [
-				"arn:aws:s3:::whizfile-transfers",
-				"arn:aws:s3:::whizfile-transfers/*"
-			]
-		}
-	]
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": [
+    "s3:GetObject",
+    "s3:PutObject",
+    "s3:ListBucket",
+    "s3:DeleteObject"
+   ],
+   "Resource": [
+    "arn:aws:s3:::whizfile-transfers",
+    "arn:aws:s3:::whizfile-transfers/*"
+   ]
+  }
+ ]
 }
 ```
 
@@ -63,7 +63,7 @@ User with `whizfile-transfers-read-write-delete` permission policy. In the secur
 
 ### Trigger
 
-```
+```text
 S3: whizfile-transfers
 arn:aws:s3:::whizfile-transfers
 Details
