@@ -5,7 +5,7 @@ import {
     fetchTransfer,
 } from "@/lib/api/utils";
 import { NextRequest, NextResponse } from "next/server";
-import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
+import { Collections, connectToDatabase } from "@/lib/db/mongo";
 import { TransferId } from "@/lib/api/validations/transfers";
 import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -91,12 +91,7 @@ export async function DELETE(
 ) {
     let transferId;
     let collections: Collections;
-    let transfers: Collection<TransferSchema>;
-    let transferUId;
-    let transfer: TransferSchema | null;
-    let expiresIn: number;
-    let objectId: string;
-    let s3Client: S3Client;
+    let document: TransferSchema | null;
 
     try {
         transferId = TransferId.parse(context.params.transferId);
@@ -112,117 +107,47 @@ export async function DELETE(
         );
     }
 
+    collections = await connectToDatabase();
+
     try {
-        collections = await connectToDatabase();
-        transfers = collections.transfers;
-
-        transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-        transfer = await transfers.findOne({ transferUId: transferUId });
-
-        if (!transfer) {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` not found.",
-                    {
-                        transferId: transferId,
-                    }
-                ),
-                { status: 404 }
-            );
-        }
-
-        expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
-        const expired = expiresIn <= 0;
-        const maxViewsReached: boolean = transfer.views >= transfer.maxViews;
-        const maxDownloadsReached: boolean =
-            transfer.downloads >= transfer.maxDownloads;
-
-        if (expired || maxViewsReached || maxDownloadsReached) {
-            try {
-                await transfers.updateOne(
-                    { transferUId: transferUId },
-                    { $set: { status: TransferStatus.expired } }
-                );
-                transfer.status = TransferStatus.expired;
-            } catch (e: any) {
-                return NextResponse.json(
-                    handleResponse(
-                        "Error deleting transfer from server. Please try again later.",
-                        {
-                            transferId: transferId,
-                        }
-                    ),
-                    { status: 500 }
-                );
-            }
-
-            try {
-                transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-                objectId = getObjectId(
-                    transferId,
-                    transferUId,
-                    transfer.objectIdSalt
-                );
-
-                s3Client = new S3Client({ region: whizfileConfig.s3.region });
-                const command = new DeleteObjectCommand({
-                    Bucket: whizfileConfig.s3.bucket,
-                    Key: objectId,
-                });
-                s3Client.send(command);
-            } catch (e: any) {
-                await transfers.updateOne(
-                    { transferUId: transferUId },
-                    { $set: { status: TransferStatus.removed } }
-                );
-
-                return NextResponse.json(
-                    handleResponse("Error deleting object from media server.", {
-                        transferId: transferId,
-                    }),
-                    { status: 500 }
-                );
-            }
-        }
-
-        if (transfer.status !== "active") {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` is not active. Can only delete an active transfer.",
-                    {
-                        transferId: transferId,
-                        status: transfer.status,
-                    }
-                ),
-                { status: 410 }
-            );
-        }
-
-        if (!transfer.allowDelete) {
-            return NextResponse.json(
-                handleResponse(
-                    "Transfer with associated `transferId` can't be deleted.",
-                    {
-                        transferId: transferId,
-                        transferAllowsDelete: transfer.allowDelete,
-                    }
-                ),
-                { status: 400 }
-            );
-        }
+        document = await fetchTransfer(transferId, UNIVERSAL_SALT, collections);
     } catch (e: any) {
+        if (e instanceof APIError) {
+            return NextResponse.json(
+                handleResponse(e.message, {
+                    transferId: transferId,
+                }),
+                { status: e.status }
+            );
+        } else {
+            return NextResponse.json(
+                handleResponse("Unknown error.", {
+                    transferId: transferId,
+                }),
+                { status: 500 }
+            );
+        }
+    }
+
+    if (!document.allowDelete) {
         return NextResponse.json(
-            handleResponse("Error fetching transfer. Please try again later.", {
-                transferId: transferId,
-            }),
-            {
-                status: 500,
-            }
+            handleResponse(
+                "Transfer with associated `transferId` can't be deleted.",
+                {
+                    transferId: transferId,
+                    transferAllowsDelete: document.allowDelete,
+                }
+            ),
+            { status: 400 }
         );
     }
 
+    let transferUId;
+    let objectId: string;
+    let s3Client: S3Client;
+
     try {
-        await transfers.updateOne(
+        await collections.transfers.updateOne(
             { transferUId: transferUId },
             { $set: { status: TransferStatus.deleted } }
         );
@@ -240,7 +165,7 @@ export async function DELETE(
 
     try {
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-        objectId = getObjectId(transferId, transferUId, transfer.objectIdSalt);
+        objectId = getObjectId(transferId, transferUId, document.objectIdSalt);
 
         s3Client = new S3Client({ region: whizfileConfig.s3.region });
         const command = new DeleteObjectCommand({
@@ -249,7 +174,7 @@ export async function DELETE(
         });
         s3Client.send(command);
     } catch (e: any) {
-        await transfers.updateOne(
+        await collections.transfers.updateOne(
             { transferUId: transferUId },
             { $set: { status: TransferStatus.removed } }
         );
