@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
     let collections: Collections;
     let transfers: Collection<TransferSchema>;
     let transferId: string;
-    let transferIdHash: string;
     let transferUId: string;
     let objectIdSalt: string;
     let objectId: string;
@@ -70,10 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const generateUniqueTransferId = async (): Promise<{
-            transferId: string;
-            transferIdHash: string;
-        }> => {
+        const generateUniqueTransferId = async (): Promise<string> => {
             var transferId = generateTransferId();
             var transferIdHash = getTransferUId(transferId, UNIVERSAL_SALT);
 
@@ -85,10 +81,10 @@ export async function POST(req: NextRequest) {
                 transferId = generateTransferId();
             }
 
-            return { transferId: transferId, transferIdHash: transferIdHash };
+            return transferId;
         };
 
-        ({ transferId, transferIdHash } = await generateUniqueTransferId());
+        transferId = await generateUniqueTransferId();
     } catch (e: any) {
         return NextResponse.json(
             handleResponse(
