@@ -1,4 +1,4 @@
-# DB Instructions
+# Mongo Usage
 
 ## Usage
 
