@@ -118,9 +118,11 @@ export async function POST(req: NextRequest) {
             objectData: body.objectData,
             allowDelete: body.allowDelete,
             expireIn: body.expireIn,
-            // views
+
+            views: 0,
+            downloads: 0,
+
             // maxViews
-            // downloads
             // maxDownloads
 
             objectIdSalt: objectIdSalt,

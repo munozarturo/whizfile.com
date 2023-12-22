@@ -242,5 +242,10 @@ export async function GET(
         `attachment; filename="whizfile_transfer_${transferId}.zip"`
     );
 
+    await transfers.updateOne(
+        { transferUId: transferUId },
+        { $inc: { downloads: 1 } }
+    );
+
     return new Response(buffer, { headers: headers, status: 200 });
 }

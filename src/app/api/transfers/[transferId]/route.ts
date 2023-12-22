@@ -50,6 +50,12 @@ export async function GET(
         transfers = collections.transfers;
 
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
+
+        await transfers.updateOne(
+            { transferUId: transferUId },
+            { $inc: { views: 1 } }
+        );
+
         document = await transfers.findOne(
             { transferUId: transferUId },
             {
@@ -63,13 +69,13 @@ export async function GET(
                     allowDelete: 1,
                     expireIn: 1,
                     objectIdSalt: 1,
+                    views: 1,
+                    downloads: 1,
                 },
             }
         );
 
-        // views
         // maxViews
-        // downloads
         // maxDownloads
 
         if (!document) {

@@ -26,6 +26,9 @@ const TransferSchema = zod.object({
     allowDelete: zod.boolean(),
     expireIn: zod.number(),
 
+    views: zod.number(),
+    downloads: zod.number(),
+
     objectIdSalt: zod.string(),
 });
 
