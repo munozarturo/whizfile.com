@@ -1,3 +1,7 @@
+import { Collections, connectToDatabase } from "@/lib/db/mongo";
+import { GetObjectCommand, NoSuchKey, S3Client } from "@aws-sdk/client-s3";
+import { NextRequest, NextResponse } from "next/server";
+import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
 import {
     fetchTransfer,
     getObjectId,
@@ -5,14 +9,11 @@ import {
     hash,
     streamToBuffer,
 } from "@/lib/api/utils";
-import { NextRequest, NextResponse } from "next/server";
-import { Collections, connectToDatabase } from "@/lib/db/mongo";
-import { TransferId } from "@/lib/api/validations/transfers";
-import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
-import { S3Client, GetObjectCommand, NoSuchKey } from "@aws-sdk/client-s3";
-import { Readable } from "stream";
-import whizfileConfig from "@/lib/config/config";
+
 import { APIError } from "@/lib/api/errors";
+import { Readable } from "stream";
+import { TransferId } from "@/lib/api/validations/transfers";
+import whizfileConfig from "@/lib/config/config";
 
 if (!process.env.UNIVERSAL_SALT) {
     throw new Error("`UNIVERSAL_SALT` environment variable is not defined.");

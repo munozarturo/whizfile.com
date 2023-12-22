@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { handleResponse } from "@/lib/api/utils";
 import * as zod from "zod";
+
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { RequestsReq } from "@/lib/api/validations/requests";
+import { handleResponse } from "@/lib/api/utils";
 
 /*
  * Middleware must only use code that can run in the edge.

@@ -1,10 +1,11 @@
-import { handleResponse } from "@/lib/api/utils";
 import * as zod from "zod";
-import { NextRequest, NextResponse } from "next/server";
+
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
+import { NextRequest, NextResponse } from "next/server";
 
 import { RequestSchema } from "@/lib/db/schema/request";
 import { RequestsReq } from "@/lib/api/validations/requests";
+import { handleResponse } from "@/lib/api/utils";
 import whizfileConfig from "@/lib/config/config";
 
 if (!process.env.MIDDLEWARE_SECRET_KEY) {
