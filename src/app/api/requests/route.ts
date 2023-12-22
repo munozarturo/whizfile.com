@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     let body: zod.infer<typeof RequestsReq>;
     let requestBody: Object;
     let collections: Collections;
-    let requests: Collection<zod.infer<typeof RequestSchema>>;
+    let requests: Collection<RequestSchema>;
     let countBySource: number;
 
     try {

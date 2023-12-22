@@ -1,14 +1,14 @@
 import * as zod from "zod";
 
-const HTTPMethod = zod.enum([
-    "GET",
-    "HEAD",
-    "POST",
-    "PUT",
-    "DELETE",
-    "PATCH",
-    "OPTIONS",
-]);
+enum HTTPMethod {
+    GET = "GET",
+    HEAD = "HEAD",
+    POST = "POST",
+    PUT = "PUT",
+    DELETE = "DELETE",
+    PATCH = "PATCH",
+    OPTIONS = "OPTIONS",
+}
 
 const RequestsReq = zod.object({
     timestamp: zod.preprocess((input) => {
@@ -18,7 +18,7 @@ const RequestsReq = zod.object({
         }
         return input;
     }, zod.number()),
-    method: HTTPMethod,
+    method: zod.nativeEnum(HTTPMethod),
     source: zod.string(),
     target: zod.string(),
     id: zod.string().optional(),
