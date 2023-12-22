@@ -53,6 +53,20 @@ export async function POST(req: NextRequest) {
         );
     }
 
+    if (body.objectData.size > whizfileConfig.api.transfer.maxSize) {
+        return NextResponse.json(
+            handleResponse(
+                `Transfer size is too large. Limit is ${whizfileConfig.api.transfer.maxSize} bytes.`,
+                {
+                    requestBody: requestBody,
+                }
+            ),
+            {
+                status: 400,
+            }
+        );
+    }
+
     try {
         collections = await connectToDatabase();
         transfers = collections.transfers;
