@@ -25,7 +25,9 @@ const TransfersReq = zod.object({
     expireIn: zod
         .number()
         .min(whizfileConfig.api.transfer.expireInMin)
-        .max(whizfileConfig.api.transfer.expireInMax),
+        .max(whizfileConfig.api.transfer.expireInMax)
+        .optional()
+        .default(whizfileConfig.api.transfer.expireInMax),
 });
 
 export { TransfersReq, TransferId };

@@ -26,7 +26,7 @@ export async function GET(
     let collections: Collections;
     let transfers: Collection<zod.infer<typeof TransferSchema>>;
     let transferUId;
-    let transfer: zod.infer<typeof TransferSchema> | null;
+    let document: zod.infer<typeof TransferSchema> | null;
     let expiresIn: number;
     let objectId: string;
     let s3Client: S3Client;
@@ -50,7 +50,7 @@ export async function GET(
         transfers = collections.transfers;
 
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
-        transfer = await transfers.findOne(
+        document = await transfers.findOne(
             { transferUId: transferUId },
             {
                 projection: {
@@ -62,6 +62,7 @@ export async function GET(
                     objectData: 1,
                     allowDelete: 1,
                     expireIn: 1,
+                    objectIdSalt: 1,
                 },
             }
         );
@@ -71,7 +72,7 @@ export async function GET(
         // downloads
         // maxDownloads
 
-        if (!transfer) {
+        if (!document) {
             return NextResponse.json(
                 handleResponse(
                     "Transfer with associated `transferId` not found.",
@@ -83,7 +84,7 @@ export async function GET(
             );
         }
 
-        expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
+        expiresIn = document.timestamp + document.expireIn - Date.now();
 
         if (expiresIn <= 0) {
             try {
@@ -91,6 +92,7 @@ export async function GET(
                     { transferUId: transferUId },
                     { $set: { status: "expired" } }
                 );
+                document.status = "expired";
             } catch (e: any) {
                 return NextResponse.json(
                     handleResponse(
@@ -108,7 +110,7 @@ export async function GET(
                 objectId = getObjectId(
                     transferId,
                     transferUId,
-                    transfer.objectIdSalt
+                    document.objectIdSalt
                 );
 
                 s3Client = new S3Client({ region: whizfileConfig.s3.region });
@@ -132,13 +134,13 @@ export async function GET(
             }
         }
 
-        if (transfer.status !== "active") {
+        if (document.status !== "active") {
             return NextResponse.json(
                 handleResponse(
                     "Transfer with associated `transferId` is not active.",
                     {
                         transferId: transferId,
-                        status: transfer.status,
+                        status: document.status,
                     }
                 ),
                 { status: 410 }
@@ -154,6 +156,8 @@ export async function GET(
             }
         );
     }
+
+    const { objectIdSalt, ...transfer } = document;
 
     return NextResponse.json(
         handleResponse(
@@ -223,6 +227,7 @@ export async function DELETE(
                     { transferUId: transferUId },
                     { $set: { status: "expired" } }
                 );
+                transfer.status = "expired";
             } catch (e: any) {
                 return NextResponse.json(
                     handleResponse(

@@ -88,6 +88,7 @@ export async function GET(
                     { transferUId: transferUId },
                     { $set: { status: "expired" } }
                 );
+                transfer.status = "expired";
             } catch (e: any) {
                 return NextResponse.json(
                     handleResponse(
