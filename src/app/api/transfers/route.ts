@@ -2,7 +2,7 @@ import * as zod from "zod";
 
 import { Collection, Collections, connectToDatabase } from "@/lib/db/mongo";
 import { NextRequest, NextResponse } from "next/server";
-import { PutObjectCommand, S3Client /*  */ } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { TransferSchema, TransferStatus } from "@/lib/db/schema/transfers";
 import {
     generateRandomSalt,
@@ -136,10 +136,6 @@ export async function POST(req: NextRequest) {
 
     try {
         s3Client = new S3Client({ region: whizfileConfig.s3.region });
-        /*
-         * Add usage of ChecksumSHA256: "STRING_VALUE", Expires: new Date("TIMESTAMP"),
-         * This should avoid any issues with file upload sizes being too large or uploading the incorrect files as well as automatic expires.
-         */
         const command = new PutObjectCommand({
             Bucket: whizfileConfig.s3.bucket,
             Key: objectId,

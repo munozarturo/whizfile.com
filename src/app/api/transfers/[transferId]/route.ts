@@ -147,8 +147,6 @@ export async function DELETE(
     const oId: string = getObjectId(transferId, tUId, document.objectIdSalt);
 
     try {
-        console.log(transferId, tUId, oId, "deleted");
-
         await collections.transfers.updateOne(
             { transferUId: tUId },
             { $set: { status: TransferStatus.deleted } }
