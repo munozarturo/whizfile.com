@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     let collections: Collections;
     let transfers: Collection<TransferSchema>;
     let transferId: string;
+    let document: TransferSchema;
     let transferUId: string;
     let objectIdSalt: string;
     let objectId: string;
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
         objectIdSalt = generateRandomSalt();
         objectId = getObjectId(transferId, transferUId, objectIdSalt);
 
-        const document: TransferSchema = {
+        document = {
             transferUId: transferUId,
             timestamp: Date.now(),
             status: TransferStatus.active,
@@ -153,6 +154,9 @@ export async function POST(req: NextRequest) {
         const command = new PutObjectCommand({
             Bucket: whizfileConfig.s3.bucket,
             Key: objectId,
+            Metadata: {
+                expire: (document.timestamp + document.expireIn).toString(),
+            },
         });
         presignedUploadUrl = await getSignedUrl(s3Client, command, {
             expiresIn: whizfileConfig.s3.presignedUrlExpireIn,
