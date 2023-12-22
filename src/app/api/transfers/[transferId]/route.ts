@@ -143,18 +143,14 @@ export async function DELETE(
         );
     }
 
-    const transferUId: string = getTransferUId(transferId, UNIVERSAL_SALT);
-    const objectId: string = getObjectId(
-        transferId,
-        transferUId,
-        document.objectIdSalt
-    );
+    const tUId: string = getTransferUId(transferId, UNIVERSAL_SALT);
+    const oId: string = getObjectId(transferId, tUId, document.objectIdSalt);
 
     try {
-        console.log(transferId, transferUId, objectId, "deleted");
+        console.log(transferId, tUId, oId, "deleted");
 
         await collections.transfers.updateOne(
-            { transferUId: transferUId },
+            { transferUId: tUId },
             { $set: { status: TransferStatus.deleted } }
         );
     } catch (e: any) {
@@ -173,12 +169,12 @@ export async function DELETE(
         const s3Client = new S3Client({ region: whizfileConfig.s3.region });
         const command = new DeleteObjectCommand({
             Bucket: whizfileConfig.s3.bucket,
-            Key: objectId,
+            Key: oId,
         });
         s3Client.send(command);
     } catch (e: any) {
         await collections.transfers.updateOne(
-            { transferUId: transferUId },
+            { transferUId: tUId },
             { $set: { status: TransferStatus.removed } }
         );
 
