@@ -33,7 +33,7 @@ const whizfileConfig: WhizfileConfig = {
     api: {
         rateLimit: 20,
         transfer: {
-            maxSize: 1073741824, // 1GB
+            maxSize: 1000000000, // 1GB
             expireInMin: 0,
             expireInMax: 60 * 60 * 24 * 7 * 1000, // 7 days in ms
             maxDownloadsMin: 1,
@@ -48,7 +48,7 @@ const whizfileConfig: WhizfileConfig = {
     s3: {
         region: "us-east-2",
         bucket: "whizfile-transfers",
-        presignedUrlExpireIn: 60,
+        presignedUrlExpireIn: 60 * 60, // 1 hour
     },
 };
 
