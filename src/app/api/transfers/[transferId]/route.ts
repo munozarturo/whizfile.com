@@ -51,11 +51,6 @@ export async function GET(
 
         transferUId = getTransferUId(transferId, UNIVERSAL_SALT);
 
-        await transfers.updateOne(
-            { transferUId: transferUId },
-            { $inc: { views: 1 } }
-        );
-
         document = await transfers.findOne(
             { transferUId: transferUId },
             {
@@ -164,6 +159,13 @@ export async function GET(
     }
 
     const { objectIdSalt, ...transfer } = document;
+
+    await transfers.updateOne(
+        { transferUId: transferUId },
+        { $inc: { views: 1 } }
+    );
+
+    document.views += 1;
 
     return NextResponse.json(
         handleResponse(
