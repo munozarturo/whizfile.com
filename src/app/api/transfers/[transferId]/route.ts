@@ -86,8 +86,12 @@ export async function GET(
         }
 
         expiresIn = document.timestamp + document.expireIn - Date.now();
+        const expired = expiresIn <= 0;
+        const maxViewsReached: boolean = document.views > document.maxViews;
+        const maxDownloadsReached: boolean =
+            document.downloads > document.maxDownloads;
 
-        if (expiresIn <= 0) {
+        if (expired || maxViewsReached || maxDownloadsReached) {
             try {
                 await transfers.updateOne(
                     { transferUId: transferUId },
@@ -228,8 +232,12 @@ export async function DELETE(
         }
 
         expiresIn = transfer.timestamp + transfer.expireIn - Date.now();
+        const expired = expiresIn <= 0;
+        const maxViewsReached: boolean = transfer.views > transfer.maxViews;
+        const maxDownloadsReached: boolean =
+            transfer.downloads > transfer.maxDownloads;
 
-        if (expiresIn <= 0) {
+        if (expired || maxViewsReached || maxDownloadsReached) {
             try {
                 await transfers.updateOne(
                     { transferUId: transferUId },
