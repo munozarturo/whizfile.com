@@ -12,6 +12,7 @@
     "@aws-sdk/client-s3": "^3.477.0",
     "@aws-sdk/s3-request-presigner": "^3.477.0",
     "axios": "^1.6.2",
+    "lucide-react": "^0.302.0",
     "mongodb": "^6.3.0",
     "next": "14.0.3",
     "react": "^18",
