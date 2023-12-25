@@ -2,15 +2,16 @@
 
 import {
     Card,
-    CardHeader,
-    CardTitle,
     CardContent,
     CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
-import Transfer from "@/db/models/transfer";
-import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/lib/api/axios-instance";
+
 import { PulseLoader } from "react-spinners";
+import Transfer from "@/db/models/transfer";
+import axiosInstance from "@/lib/api/axios-instance";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 function TransferView({ transfer }: { transfer: Transfer | undefined }) {

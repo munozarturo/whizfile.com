@@ -3,7 +3,7 @@
 import { Icons } from "@/components/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { NavLink } from "./ui/nav-link";
+import { NavLink } from "@/components/ui/nav-link";
 import { usePathname } from "next/navigation";
 
 export default function Navbar() {

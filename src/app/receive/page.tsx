@@ -1,18 +1,20 @@
 "use client";
 
+import * as React from "react";
+
 import {
     Card,
-    CardHeader,
-    CardTitle,
     CardContent,
     CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/api/axios-instance";
-import { useState } from "react";
+
 import { PulseLoader } from "react-spinners";
+import axiosInstance from "@/lib/api/axios-instance";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error(

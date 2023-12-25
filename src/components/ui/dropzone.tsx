@@ -1,9 +1,10 @@
-import { cn } from "@/lib/utils";
 import React, { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
+
 import { Icons } from "@/components/icons";
+import { cn } from "@/lib/utils";
 import { formatFileSize } from "@/lib/utils";
-import { ApiConfig } from "@/config/api";
+import { useDropzone } from "react-dropzone";
+import whizfileConfig from "@/lib/config/config";
 
 const DropZone = React.forwardRef<
     HTMLDivElement,
@@ -52,7 +53,7 @@ const DropZone = React.forwardRef<
 
     let fileSize = files.reduce((acc, file) => acc + file.size, 0);
     const fileSizeUsedPercentage =
-        (fileSize / ApiConfig.fileUpload.maxUploadSize) * 100;
+        (fileSize / whizfileConfig.api.transfer.maxSize) * 100;
 
     return (
         <div

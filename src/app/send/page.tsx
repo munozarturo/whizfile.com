@@ -1,23 +1,22 @@
 "use client";
 
-import type { Metadata } from "next";
+import * as React from "react";
+
 import {
     Card,
-    CardHeader,
-    CardTitle,
     CardContent,
     CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
-import * as React from "react";
-import { useState } from "react";
+
 import DropZone from "@/components/ui/dropzone";
 import JSZip from "jszip";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import axiosInstance from "@/lib/api/axios-instance";
 import { PulseLoader } from "react-spinners";
 import { TransferLink } from "@/components/ui/transfer-link";
-import { ShareButton } from "@/components/ui/share-button";
+import axiosInstance from "@/lib/api/axios-instance";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
