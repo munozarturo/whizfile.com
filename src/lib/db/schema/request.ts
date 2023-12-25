@@ -8,12 +8,12 @@ enum HTTPMethod {
     OPTIONS = "OPTIONS",
 }
 
-interface RequestSchema {
+type RequestSchema = {
     timestamp: number;
     method: HTTPMethod;
     source: string;
     target: string;
     id?: string;
-}
+};
 
 export { HTTPMethod, type RequestSchema };

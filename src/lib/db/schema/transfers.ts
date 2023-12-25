@@ -9,12 +9,12 @@ enum TransferStatus {
     corrupted = "corrupted", // for when the file hash does not match the hash of the updated file
 }
 
-interface ObjectData {
+type ObjectData = {
     size: number;
     fileHash: Hash;
-}
+};
 
-interface TransferSchema {
+type TransferSchema = {
     transferUId: Hash;
     timestamp: number;
     status: TransferStatus;
@@ -32,9 +32,9 @@ interface TransferSchema {
     maxDownloads: number;
 
     objectIdSalt: string;
-}
+};
 
-interface ProcessedTransfer {
+type ProcessedTransfer = {
     transferUId: Hash;
     timestamp: number;
     status: TransferStatus;
@@ -53,6 +53,6 @@ interface ProcessedTransfer {
     maxDownloads: number;
 
     objectIdSalt: string;
-}
+};
 
 export { TransferStatus, type TransferSchema, type ProcessedTransfer };
