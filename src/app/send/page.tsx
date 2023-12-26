@@ -72,7 +72,7 @@ export default function Send() {
                         <CardTitle className="p-6 text-primary font-extrabold">
                             send
                         </CardTitle>
-                        <CardContent className="w-full h-full flex flex-col gap-3">
+                        <div className="w-full h-full flex flex-col gap-3 p-3">
                             <div className="relative">
                                 <label
                                     htmlFor="title"
@@ -200,7 +200,7 @@ export default function Send() {
                                 value="get a link"
                                 className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                             />
-                        </CardContent>
+                        </div>
                     </CardContent>
                     <CardContent className="w-1/2 h-full">
                         {/* Additional content can go here */}
