@@ -19,6 +19,7 @@ export default function Send() {
     const [expiryTime, setExpiryTime] = React.useState(""); // for time
     const [maxViews, setMaxViews] = React.useState<number>(0);
     const [maxDownloads, setMaxDownloads] = React.useState<number>(0);
+    const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -48,6 +49,12 @@ export default function Send() {
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         setMaxDownloads(parseInt(event.target.value, 10) || 0);
+    };
+
+    const handleAllowDeleteChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setAllowDelete(event.target.checked);
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -130,7 +137,7 @@ export default function Send() {
                                 <div className="flex flex-col">
                                     <label
                                         htmlFor="maxViews"
-                                        className="block text-sm font-medium text-primary italic"
+                                        className="block text-sm font-bold text-primary italic"
                                     >
                                         max views
                                     </label>
@@ -148,7 +155,7 @@ export default function Send() {
                                 <div className="flex flex-col">
                                     <label
                                         htmlFor="maxDownloads"
-                                        className="block text-sm font-medium text-primary italic"
+                                        className="block text-sm font-bold text-primary italic"
                                     >
                                         max downloads
                                     </label>
@@ -163,6 +170,22 @@ export default function Send() {
                                         max={999}
                                     />
                                 </div>
+                            </div>
+                            <div className="flex flex-row items-center gap-2">
+                                <label
+                                    htmlFor="allowDelete"
+                                    className="text-sm font-bold text-primary italic"
+                                >
+                                    allow delete
+                                </label>
+                                <input
+                                    type="checkbox"
+                                    name="allowDelete"
+                                    id="allowDelete"
+                                    className="rounded text-primary focus:ring-primary"
+                                    checked={allowDelete}
+                                    onChange={handleAllowDeleteChange}
+                                />
                             </div>
                             <input
                                 type="submit"
