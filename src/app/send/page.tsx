@@ -13,16 +13,27 @@ import {
 import whizfileConfig from "@/lib/config/config";
 
 export default function Send() {
+    // maxSize: number; // in bytes
+    // expireInMin: number;
+    // expireInMax: number;
+
+    const {
+        maxTitleLength,
+        maxMessageLength,
+        maxDownloadsMin,
+        maxDownloadsMax,
+        maxViewsMin,
+        maxViewsMax,
+    } = whizfileConfig.api.transfer;
+
     const [title, setTitle] = React.useState("");
     const [message, setMessage] = React.useState("");
     const [expiryDate, setExpiryDate] = React.useState(""); // for date
     const [expiryTime, setExpiryTime] = React.useState(""); // for time
-    const [maxViews, setMaxViews] = React.useState<number>(999);
-    const [maxDownloads, setMaxDownloads] = React.useState<number>(999);
+    const [maxViews, setMaxViews] = React.useState<number>(maxViewsMax);
+    const [maxDownloads, setMaxDownloads] =
+        React.useState<number>(maxDownloadsMax);
     const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
-
-    const titleMaxLength = 50; // Maximum length for title
-    const messageMaxLength = 500; // Maximum length for message
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -90,7 +101,7 @@ export default function Send() {
                                     onChange={handleTitleChange}
                                 />
                                 <p className="absolute right-1 bottom-1 text-xs">
-                                    {title.length}/{titleMaxLength}
+                                    {title.length}/{maxTitleLength}
                                 </p>
                             </div>
                             <div className="flex flex-col h-full relative">
@@ -109,7 +120,7 @@ export default function Send() {
                                     onChange={handleMessageChange}
                                 />
                                 <p className="absolute right-1 bottom-1 text-xs">
-                                    {message.length}/{messageMaxLength}
+                                    {message.length}/{maxMessageLength}
                                 </p>
                             </div>
                             <div className="flex flex-col">
@@ -156,8 +167,8 @@ export default function Send() {
                                         className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
                                         value={maxViews}
                                         onChange={handleMaxViewsChange}
-                                        min={1}
-                                        max={999}
+                                        min={maxViewsMin}
+                                        max={maxViewsMax}
                                     />
                                 </div>
                                 <div className="flex flex-col">
@@ -174,8 +185,8 @@ export default function Send() {
                                         className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
                                         value={maxDownloads}
                                         onChange={handleMaxDownloadsChange}
-                                        min={1}
-                                        max={999}
+                                        min={maxDownloadsMin}
+                                        max={maxDownloadsMax}
                                     />
                                 </div>
                             </div>
