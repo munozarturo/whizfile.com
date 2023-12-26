@@ -10,9 +10,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
+import whizfileConfig from "@/lib/config/config";
+
 export default function Send() {
     const [title, setTitle] = React.useState("");
     const [message, setMessage] = React.useState("");
+    const [expiryDate, setExpiryDate] = React.useState(""); // for date
+    const [expiryTime, setExpiryTime] = React.useState(""); // for time
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -22,6 +26,14 @@ export default function Send() {
         event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
         setMessage(event.target.value);
+    };
+
+    const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setExpiryDate(event.target.value);
+    };
+
+    const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setExpiryTime(event.target.value);
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +52,7 @@ export default function Send() {
                             <div>
                                 <label
                                     htmlFor="title"
-                                    className="block text-sm font-medium text-primary italic"
+                                    className="block text-sm font-bold text-primary italic"
                                 >
                                     title
                                 </label>
@@ -57,7 +69,7 @@ export default function Send() {
                             <div>
                                 <label
                                     htmlFor="message"
-                                    className="block text-sm font-medium text-primary italic"
+                                    className="block text-sm font-bold text-primary italic"
                                 >
                                     message
                                 </label>
@@ -70,6 +82,35 @@ export default function Send() {
                                     onChange={handleMessageChange}
                                     rows={4} // You can adjust the default number of rows
                                 />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="block text-sm font-bold text-primary italic">
+                                    expire
+                                </label>
+                                <div className="flex flex-row items-center justify-start gap-2">
+                                    <p className="text-primary italic text-sm">
+                                        on
+                                    </p>
+                                    <input
+                                        type="date"
+                                        name="expiryDate"
+                                        id="expiryDate"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        value={expiryDate}
+                                        onChange={handleDateChange}
+                                        aria-labelledby="expiryLabel"
+                                    />
+                                    <p className="text-primary italic">at</p>
+                                    <input
+                                        type="time"
+                                        name="expiryTime"
+                                        id="expiryTime"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        value={expiryTime}
+                                        onChange={handleTimeChange}
+                                        aria-labelledby="expiryLabel"
+                                    />
+                                </div>
                             </div>
                             <input
                                 type="submit"
