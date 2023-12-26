@@ -121,7 +121,7 @@ export default function Send() {
                                 <textarea
                                     name="message"
                                     id="message"
-                                    className="flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar"
+                                    className="flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-none"
                                     placeholder="message"
                                     value={message}
                                     onChange={handleMessageChange}
