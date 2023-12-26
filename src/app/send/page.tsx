@@ -75,7 +75,7 @@ export default function Send() {
                                     name="title"
                                     id="title"
                                     className="block w-full border border-gray-400 rounded-md shadow-sm p-1"
-                                    placeholder="Enter title"
+                                    placeholder="title"
                                     value={title}
                                     onChange={handleTitleChange}
                                 />
@@ -91,10 +91,10 @@ export default function Send() {
                                     name="message"
                                     id="message"
                                     className="block w-full border border-gray-400 rounded-md shadow-sm resize-vertical p-1"
-                                    placeholder="Enter message"
+                                    placeholder="message"
                                     value={message}
                                     onChange={handleMessageChange}
-                                    rows={4} // You can adjust the default number of rows
+                                    rows={4}
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -109,7 +109,7 @@ export default function Send() {
                                         type="date"
                                         name="expiryDate"
                                         id="expiryDate"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
                                         value={expiryDate}
                                         onChange={handleDateChange}
                                         aria-labelledby="expiryLabel"
@@ -119,7 +119,7 @@ export default function Send() {
                                         type="time"
                                         name="expiryTime"
                                         id="expiryTime"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
                                         value={expiryTime}
                                         onChange={handleTimeChange}
                                         aria-labelledby="expiryLabel"
@@ -138,7 +138,7 @@ export default function Send() {
                                         type="number"
                                         name="maxViews"
                                         id="maxViews"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
                                         value={maxViews}
                                         onChange={handleMaxViewsChange}
                                         min={1}
@@ -156,7 +156,7 @@ export default function Send() {
                                         type="number"
                                         name="maxDownloads"
                                         id="maxDownloads"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
                                         value={maxDownloads}
                                         onChange={handleMaxDownloadsChange}
                                         min={1}
