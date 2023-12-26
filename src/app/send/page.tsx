@@ -84,13 +84,18 @@ export default function Send() {
                             send
                         </CardTitle>
                         <div className="w-full h-full flex flex-col gap-3 p-3">
-                            <div className="relative">
-                                <label
-                                    htmlFor="title"
-                                    className="block text-sm font-bold text-primary italic"
-                                >
-                                    title
-                                </label>
+                            <div className="flex flex-col gap-1">
+                                <div className="flex justify-between items-center">
+                                    <label
+                                        htmlFor="title"
+                                        className="text-sm font-bold text-primary italic"
+                                    >
+                                        title
+                                    </label>
+                                    <p className="text-xs">
+                                        {title.length}/{maxTitleLength}
+                                    </p>
+                                </div>
                                 <input
                                     type="text"
                                     name="title"
@@ -100,28 +105,27 @@ export default function Send() {
                                     value={title}
                                     onChange={handleTitleChange}
                                 />
-                                <p className="absolute right-1 bottom-1 text-xs">
-                                    {title.length}/{maxTitleLength}
-                                </p>
                             </div>
-                            <div className="flex flex-col h-full relative">
-                                <label
-                                    htmlFor="message"
-                                    className="block text-sm font-bold text-primary italic"
-                                >
-                                    message
-                                </label>
+                            <div className="flex flex-col h-full">
+                                <div className="flex justify-between items-center">
+                                    <label
+                                        htmlFor="message"
+                                        className="text-sm font-bold text-primary italic"
+                                    >
+                                        message
+                                    </label>
+                                    <p className="text-xs">
+                                        {message.length}/{maxMessageLength}
+                                    </p>
+                                </div>
                                 <textarea
                                     name="message"
                                     id="message"
-                                    className="flex-grow border border-gray-400 rounded-md shadow-sm resize-none p-1"
+                                    className="flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar"
                                     placeholder="message"
                                     value={message}
                                     onChange={handleMessageChange}
                                 />
-                                <p className="absolute right-1 bottom-1 text-xs">
-                                    {message.length}/{maxMessageLength}
-                                </p>
                             </div>
                             <div className="flex flex-col">
                                 <label className="block text-sm font-bold text-primary italic">
