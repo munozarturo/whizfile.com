@@ -103,7 +103,7 @@ export default function Send() {
                                 <textarea
                                     name="message"
                                     id="message"
-                                    className="flex-grow border border-gray-400 rounded-md shadow-sm resize-vertical p-1"
+                                    className="flex-grow border border-gray-400 rounded-md shadow-sm resize-none p-1"
                                     placeholder="message"
                                     value={message}
                                     onChange={handleMessageChange}
