@@ -11,19 +11,21 @@ import {
 } from "@/components/ui/card";
 
 export default function Send() {
-    // State to hold the title input value
     const [title, setTitle] = React.useState("");
+    const [message, setMessage] = React.useState("");
 
-    // Function to handle input changes
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
     };
 
-    // Function to handle form submission
+    const handleMessageChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
+        setMessage(event.target.value);
+    };
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        // Process the form data here
-        console.log("Title:", title);
     };
 
     return (
@@ -46,10 +48,27 @@ export default function Send() {
                                     type="text"
                                     name="title"
                                     id="title"
-                                    className="block w-full border border-gray-400 rounded-md shadow-sm"
+                                    className="block w-full border border-gray-400 rounded-md shadow-sm p-1"
                                     placeholder="Enter title"
                                     value={title}
                                     onChange={handleTitleChange}
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    htmlFor="message"
+                                    className="block text-sm font-medium text-primary italic"
+                                >
+                                    message
+                                </label>
+                                <textarea
+                                    name="message"
+                                    id="message"
+                                    className="block w-full border border-gray-400 rounded-md shadow-sm resize-vertical p-1"
+                                    placeholder="Enter message"
+                                    value={message}
+                                    onChange={handleMessageChange}
+                                    rows={4} // You can adjust the default number of rows
                                 />
                             </div>
                             <input
