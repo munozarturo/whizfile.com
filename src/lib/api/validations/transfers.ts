@@ -19,8 +19,8 @@ const ObjectData = zod.object({
 });
 
 const TransfersReq = zod.object({
-    title: zod.string(),
-    message: zod.string(),
+    title: zod.string().max(whizfileConfig.api.transfer.maxTitleLength),
+    message: zod.string().max(whizfileConfig.api.transfer.maxMessageLength),
     objectData: ObjectData,
     allowDelete: zod.boolean().optional().default(false),
     expireIn: zod

@@ -1,5 +1,7 @@
 interface TransferConfig {
     maxSize: number; // in bytes
+    maxTitleLength: number;
+    maxMessageLength: number;
     expireInMin: number;
     expireInMax: number;
     maxDownloadsMin: number;
@@ -34,6 +36,8 @@ const whizfileConfig: WhizfileConfig = {
         rateLimit: 20,
         transfer: {
             maxSize: 1000000000, // 1GB
+            maxTitleLength: 200,
+            maxMessageLength: 1000,
             expireInMin: 0,
             expireInMax: 60 * 60 * 24 * 7 * 1000, // 7 days in ms
             maxDownloadsMin: 1,
