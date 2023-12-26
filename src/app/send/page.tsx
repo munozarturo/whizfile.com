@@ -10,12 +10,24 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
+import { TransfersReq } from "@/lib/api/validations/transfers";
 import whizfileConfig from "@/lib/config/config";
+
+function formatExpireTime(milliseconds: number) {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    const remainingSeconds = seconds % 60;
+    const remainingMinutes = minutes % 60;
+    const remainingHours = hours % 24;
+
+    return `max in ${days} days ${remainingHours} hours ${remainingMinutes} minutes ${remainingSeconds} seconds`;
+}
 
 export default function Send() {
     // maxSize: number; // in bytes
-    // expireInMin: number;
-    // expireInMax: number;
 
     const {
         maxTitleLength,
@@ -24,12 +36,40 @@ export default function Send() {
         maxDownloadsMax,
         maxViewsMin,
         maxViewsMax,
+        expireInMin,
+        expireInMax,
     } = whizfileConfig.api.transfer;
+
+    const maxExpireInAsStr: string = formatExpireTime(expireInMax);
+    const maxExpireIn: Date = new Date(Date.now() + expireInMax);
+    // Formatting the date to YYYY-MM-DD
+    const maxExpireInDate = maxExpireIn.toISOString().split("T")[0];
+    // Formatting the time to HH:MM
+    const maxExpireInTime = maxExpireIn
+        .toISOString()
+        .split("T")[1]
+        .substring(0, 5);
+
+    const infoTooltipText: {
+        title: string;
+        message: string;
+        expire: string;
+        maxViews: string;
+        maxDownloads: string;
+        allowDelete: string;
+    } = {
+        title: `The title of the transfer (max ${maxTitleLength} characters).`,
+        message: `The message to be sent along with the transfer (max ${maxMessageLength} characters).`,
+        expire: `The date and time that the transfer will expire in (max ${maxExpireInAsStr}).`,
+        maxViews: `The maximum number of views the transfer can reach (between ${maxViewsMin} and ${maxViewsMax}).`,
+        maxDownloads: `The maximum number of downloads the transfer can reach (between ${maxDownloadsMin} and ${maxDownloadsMax}).`,
+        allowDelete: `Whether or not the transfer can be deleted before expiry (available as an option when the transfer is received).`,
+    };
 
     const [title, setTitle] = React.useState("");
     const [message, setMessage] = React.useState("");
-    const [expiryDate, setExpiryDate] = React.useState(""); // for date
-    const [expiryTime, setExpiryTime] = React.useState(""); // for time
+    const [expiryDate, setExpiryDate] = React.useState(maxExpireInDate); // for date
+    const [expiryTime, setExpiryTime] = React.useState(maxExpireInTime); // for time
     const [maxViews, setMaxViews] = React.useState<number>(maxViewsMax);
     const [maxDownloads, setMaxDownloads] =
         React.useState<number>(maxDownloadsMax);
