@@ -52,12 +52,16 @@ export default function Send() {
         .substring(0, 5);
 
     const infoTooltipText: {
+        title: string;
+        message: string;
         expire: string;
         maxViews: string;
         maxDownloads: string;
         allowDelete: string;
     } = {
-        expire: `Choose a date and time for the transfer to expire. The maximum duration is ${maxExpireInAsStr} from now.`,
+        title: `Enter the title for the transfer. Maximum ${maxTitleLength} characters.`,
+        message: `Write a message to accompany the transfer. Maximum ${maxMessageLength} characters.`,
+        expire: `Choose a date and time for the transfer to expire on. The maximum expiry time you can set is ${maxExpireInAsStr} from now.`,
         maxViews: `Set the maximum number of views allowed for the transfer. Between ${maxViewsMin} and ${maxViewsMax} views.`,
         maxDownloads: `Set the maximum number of downloads allowed for the transfer. Between ${maxDownloadsMin} and ${maxDownloadsMax} downloads.`,
         allowDelete: `Choose whether the transfer can be deleted before it expires. This option is available when the transfer is received.`,
@@ -123,12 +127,23 @@ export default function Send() {
                         <div className="w-full h-full flex flex-col gap-3 px-3 pb-3">
                             <div className="flex flex-col gap-1">
                                 <div className="flex justify-between items-center">
-                                    <label
-                                        htmlFor="title"
-                                        className="text-sm font-bold text-primary italic"
-                                    >
-                                        title
-                                    </label>
+                                    <div className="flex flex-row gap-1 justify-start items-center">
+                                        <label
+                                            htmlFor="title"
+                                            className="text-sm font-bold text-primary italic"
+                                        >
+                                            title
+                                        </label>
+                                        <Tooltip
+                                            tooltipText={infoTooltipText.title}
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <p className="text-xs">
                                         {title.length}/{maxTitleLength}
                                     </p>
@@ -145,12 +160,25 @@ export default function Send() {
                             </div>
                             <div className="flex flex-col h-full">
                                 <div className="flex justify-between items-center">
-                                    <label
-                                        htmlFor="message"
-                                        className="text-sm font-bold text-primary italic"
-                                    >
-                                        message{" "}
-                                    </label>
+                                    <div className="flex flex-row gap-1 justify-start items-center">
+                                        <label
+                                            htmlFor="message"
+                                            className="text-sm font-bold text-primary italic"
+                                        >
+                                            message{" "}
+                                        </label>
+                                        <Tooltip
+                                            tooltipText={
+                                                infoTooltipText.message
+                                            }
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <p className="text-xs">
                                         {message.length}/{maxMessageLength}
                                     </p>
@@ -167,7 +195,7 @@ export default function Send() {
                             <div className="flex flex-col">
                                 <div className="flex flex-row gap-1 justify-start items-center">
                                     <label className="block text-sm font-bold text-primary italic">
-                                        expire
+                                        expire on
                                     </label>
                                     <Tooltip
                                         tooltipText={infoTooltipText.expire}
@@ -180,9 +208,6 @@ export default function Send() {
                                     </Tooltip>
                                 </div>
                                 <div className="flex flex-row items-center justify-start gap-2">
-                                    <p className="text-primary italic text-sm">
-                                        on
-                                    </p>
                                     <input
                                         type="date"
                                         name="expiryDate"
