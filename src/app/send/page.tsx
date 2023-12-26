@@ -10,7 +10,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-import { TransfersReq } from "@/lib/api/validations/transfers";
+import { Icons } from "@/components/icons";
+import { Tooltip } from "@/components/tooltip";
 import whizfileConfig from "@/lib/config/config";
 
 function formatExpireTime(milliseconds: number) {
@@ -23,7 +24,7 @@ function formatExpireTime(milliseconds: number) {
     const remainingMinutes = minutes % 60;
     const remainingHours = hours % 24;
 
-    return `max in ${days} days ${remainingHours} hours ${remainingMinutes} minutes ${remainingSeconds} seconds`;
+    return `${days} days ${remainingHours} hours ${remainingMinutes} minutes ${remainingSeconds} seconds`;
 }
 
 export default function Send() {
@@ -66,10 +67,10 @@ export default function Send() {
         allowDelete: `Choose whether the transfer can be deleted before it expires. This option is available when the transfer is received.`,
     };
 
-    const [title, setTitle] = React.useState("");
-    const [message, setMessage] = React.useState("");
-    const [expiryDate, setExpiryDate] = React.useState(maxExpireInDate); // for date
-    const [expiryTime, setExpiryTime] = React.useState(maxExpireInTime); // for time
+    const [title, setTitle] = React.useState<string>("");
+    const [message, setMessage] = React.useState<string>("");
+    const [expiryDate, setExpiryDate] = React.useState<string>(maxExpireInDate); // for date
+    const [expiryTime, setExpiryTime] = React.useState<string>(maxExpireInTime); // for time
     const [maxViews, setMaxViews] = React.useState<number>(maxViewsMax);
     const [maxDownloads, setMaxDownloads] =
         React.useState<number>(maxDownloadsMax);
@@ -126,12 +127,23 @@ export default function Send() {
                         <div className="w-full h-full flex flex-col gap-3 px-3 pb-3">
                             <div className="flex flex-col gap-1">
                                 <div className="flex justify-between items-center">
-                                    <label
-                                        htmlFor="title"
-                                        className="text-sm font-bold text-primary italic"
-                                    >
-                                        title
-                                    </label>
+                                    <div className="flex flex-row gap-1 justify-start items-center">
+                                        <label
+                                            htmlFor="title"
+                                            className="text-sm font-bold text-primary italic"
+                                        >
+                                            title
+                                        </label>
+                                        <Tooltip
+                                            tooltipText={infoTooltipText.title}
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <p className="text-xs">
                                         {title.length}/{maxTitleLength}
                                     </p>
@@ -140,7 +152,7 @@ export default function Send() {
                                     type="text"
                                     name="title"
                                     id="title"
-                                    className="block w-full border border-gray-400 rounded-md shadow-sm p-1"
+                                    className="block w-full border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
                                     placeholder="title"
                                     value={title}
                                     onChange={handleTitleChange}
@@ -148,12 +160,25 @@ export default function Send() {
                             </div>
                             <div className="flex flex-col h-full">
                                 <div className="flex justify-between items-center">
-                                    <label
-                                        htmlFor="message"
-                                        className="text-sm font-bold text-primary italic"
-                                    >
-                                        message
-                                    </label>
+                                    <div className="flex flex-row gap-1 justify-start items-center">
+                                        <label
+                                            htmlFor="message"
+                                            className="text-sm font-bold text-primary italic"
+                                        >
+                                            message{" "}
+                                        </label>
+                                        <Tooltip
+                                            tooltipText={
+                                                infoTooltipText.message
+                                            }
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <p className="text-xs">
                                         {message.length}/{maxMessageLength}
                                     </p>
@@ -161,16 +186,27 @@ export default function Send() {
                                 <textarea
                                     name="message"
                                     id="message"
-                                    className="flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-none"
+                                    className="flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-none text-gray-700"
                                     placeholder="message"
                                     value={message}
                                     onChange={handleMessageChange}
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label className="block text-sm font-bold text-primary italic">
-                                    expire
-                                </label>
+                                <div className="flex flex-row gap-1 justify-start items-center">
+                                    <label className="block text-sm font-bold text-primary italic">
+                                        expire
+                                    </label>
+                                    <Tooltip
+                                        tooltipText={infoTooltipText.expire}
+                                    >
+                                        <Icons.info
+                                            fill="#4539cd"
+                                            width={20}
+                                            height={20}
+                                        />
+                                    </Tooltip>
+                                </div>
                                 <div className="flex flex-row items-center justify-start gap-2">
                                     <p className="text-primary italic text-sm">
                                         on
@@ -179,7 +215,7 @@ export default function Send() {
                                         type="date"
                                         name="expiryDate"
                                         id="expiryDate"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
                                         value={expiryDate}
                                         onChange={handleDateChange}
                                         aria-labelledby="expiryLabel"
@@ -189,7 +225,7 @@ export default function Send() {
                                         type="time"
                                         name="expiryTime"
                                         id="expiryTime"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
                                         value={expiryTime}
                                         onChange={handleTimeChange}
                                         aria-labelledby="expiryLabel"
@@ -198,17 +234,30 @@ export default function Send() {
                             </div>
                             <div className="flex flex-row items-center justify-start gap-4">
                                 <div className="flex flex-col">
-                                    <label
-                                        htmlFor="maxViews"
-                                        className="block text-sm font-bold text-primary italic"
-                                    >
-                                        max views
-                                    </label>
+                                    <div className="flex flex-row gap-1 justify-start items-center">
+                                        <label
+                                            htmlFor="maxViews"
+                                            className="block text-sm font-bold text-primary italic"
+                                        >
+                                            max views
+                                        </label>
+                                        <Tooltip
+                                            tooltipText={
+                                                infoTooltipText.maxViews
+                                            }
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <input
                                         type="number"
                                         name="maxViews"
                                         id="maxViews"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
                                         value={maxViews}
                                         onChange={handleMaxViewsChange}
                                         min={maxViewsMin}
@@ -216,17 +265,30 @@ export default function Send() {
                                     />
                                 </div>
                                 <div className="flex flex-col">
-                                    <label
-                                        htmlFor="maxDownloads"
-                                        className="block text-sm font-bold text-primary italic"
-                                    >
-                                        max downloads
-                                    </label>
+                                    <div className="flex flex-row gap-1 justify-start items-center">
+                                        <label
+                                            htmlFor="maxDownloads"
+                                            className="block text-sm font-bold text-primary italic"
+                                        >
+                                            max downloads
+                                        </label>
+                                        <Tooltip
+                                            tooltipText={
+                                                infoTooltipText.maxDownloads
+                                            }
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <input
                                         type="number"
                                         name="maxDownloads"
                                         id="maxDownloads"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
                                         value={maxDownloads}
                                         onChange={handleMaxDownloadsChange}
                                         min={maxDownloadsMin}
@@ -235,12 +297,25 @@ export default function Send() {
                                 </div>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label
-                                    htmlFor="allowDelete"
-                                    className="text-sm font-bold text-primary italic"
-                                >
-                                    allow delete
-                                </label>
+                                <div className="flex flex-row gap-1 justify-start items-center">
+                                    <label
+                                        htmlFor="allowDelete"
+                                        className="text-sm font-bold text-primary italic"
+                                    >
+                                        allow delete
+                                    </label>
+                                    <Tooltip
+                                        tooltipText={
+                                            infoTooltipText.allowDelete
+                                        }
+                                    >
+                                        <Icons.info
+                                            fill="#4539cd"
+                                            width={20}
+                                            height={20}
+                                        />
+                                    </Tooltip>
+                                </div>
                                 <input
                                     type="checkbox"
                                     name="allowDelete"

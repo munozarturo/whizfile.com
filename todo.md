@@ -3,8 +3,6 @@
 - [x] add new fields to send form
   - [x] allow delete
   - [x] expireIn
-    - [ ] add text that says will expire in "x days, y hours, z minutes, zz seconds, when time is selected"
-    - [ ] set default to 7 days from now, exactly.
   - [x] maxViews
   - [x] maxDownloads
   - [ ] add info tooltip to all the fields
