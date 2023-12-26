@@ -18,7 +18,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="en" className="w-screen h-screen overflow-hidden">
             <body
                 className={`w-screen h-screen flex flex-col ${inter.className} bg-tile-9 bg-repeat bg-origin-content bg-size-tile`}
             >
