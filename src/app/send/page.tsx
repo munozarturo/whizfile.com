@@ -58,12 +58,12 @@ export default function Send() {
         maxDownloads: string;
         allowDelete: string;
     } = {
-        title: `The title of the transfer (max ${maxTitleLength} characters).`,
-        message: `The message to be sent along with the transfer (max ${maxMessageLength} characters).`,
-        expire: `The date and time that the transfer will expire in (max ${maxExpireInAsStr}).`,
-        maxViews: `The maximum number of views the transfer can reach (between ${maxViewsMin} and ${maxViewsMax}).`,
-        maxDownloads: `The maximum number of downloads the transfer can reach (between ${maxDownloadsMin} and ${maxDownloadsMax}).`,
-        allowDelete: `Whether or not the transfer can be deleted before expiry (available as an option when the transfer is received).`,
+        title: `Enter the title for the transfer. Maximum ${maxTitleLength} characters.`,
+        message: `Write a message to accompany the transfer. Maximum ${maxMessageLength} characters.`,
+        expire: `Choose a date and time for the transfer to expire. The maximum duration is ${maxExpireInAsStr} from now.`,
+        maxViews: `Set the maximum number of views allowed for the transfer. Between ${maxViewsMin} and ${maxViewsMax} views.`,
+        maxDownloads: `Set the maximum number of downloads allowed for the transfer. Between ${maxDownloadsMin} and ${maxDownloadsMax} downloads.`,
+        allowDelete: `Choose whether the transfer can be deleted before it expires. This option is available when the transfer is received.`,
     };
 
     const [title, setTitle] = React.useState("");
