@@ -17,6 +17,8 @@ export default function Send() {
     const [message, setMessage] = React.useState("");
     const [expiryDate, setExpiryDate] = React.useState(""); // for date
     const [expiryTime, setExpiryTime] = React.useState(""); // for time
+    const [maxViews, setMaxViews] = React.useState<number>(0);
+    const [maxDownloads, setMaxDownloads] = React.useState<number>(0);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -34,6 +36,18 @@ export default function Send() {
 
     const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setExpiryTime(event.target.value);
+    };
+
+    const handleMaxViewsChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setMaxViews(parseInt(event.target.value, 10) || 0);
+    };
+
+    const handleMaxDownloadsChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setMaxDownloads(parseInt(event.target.value, 10) || 0);
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -109,6 +123,44 @@ export default function Send() {
                                         value={expiryTime}
                                         onChange={handleTimeChange}
                                         aria-labelledby="expiryLabel"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-row items-center justify-start gap-4">
+                                <div className="flex flex-col">
+                                    <label
+                                        htmlFor="maxViews"
+                                        className="block text-sm font-medium text-primary italic"
+                                    >
+                                        max views
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="maxViews"
+                                        id="maxViews"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        value={maxViews}
+                                        onChange={handleMaxViewsChange}
+                                        min={1}
+                                        max={999}
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label
+                                        htmlFor="maxDownloads"
+                                        className="block text-sm font-medium text-primary italic"
+                                    >
+                                        max downloads
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="maxDownloads"
+                                        id="maxDownloads"
+                                        className="block w-fit border border-gray-400 rounded-md shadow-sm"
+                                        value={maxDownloads}
+                                        onChange={handleMaxDownloadsChange}
+                                        min={1}
+                                        max={999}
                                     />
                                 </div>
                             </div>
