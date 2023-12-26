@@ -83,7 +83,7 @@ export default function Send() {
                         <CardTitle className="p-6 text-primary font-extrabold">
                             send
                         </CardTitle>
-                        <div className="w-full h-full flex flex-col gap-3 p-3">
+                        <div className="w-full h-full flex flex-col gap-3 px-3 pb-3">
                             <div className="flex flex-col gap-1">
                                 <div className="flex justify-between items-center">
                                     <label
