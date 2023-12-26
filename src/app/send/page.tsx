@@ -17,9 +17,12 @@ export default function Send() {
     const [message, setMessage] = React.useState("");
     const [expiryDate, setExpiryDate] = React.useState(""); // for date
     const [expiryTime, setExpiryTime] = React.useState(""); // for time
-    const [maxViews, setMaxViews] = React.useState<number>(0);
-    const [maxDownloads, setMaxDownloads] = React.useState<number>(0);
+    const [maxViews, setMaxViews] = React.useState<number>(999);
+    const [maxDownloads, setMaxDownloads] = React.useState<number>(999);
     const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
+
+    const titleMaxLength = 50; // Maximum length for title
+    const messageMaxLength = 500; // Maximum length for message
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -70,7 +73,7 @@ export default function Send() {
                             send
                         </CardTitle>
                         <CardContent className="w-full h-full flex flex-col gap-3">
-                            <div>
+                            <div className="relative">
                                 <label
                                     htmlFor="title"
                                     className="block text-sm font-bold text-primary italic"
@@ -86,8 +89,11 @@ export default function Send() {
                                     value={title}
                                     onChange={handleTitleChange}
                                 />
+                                <p className="absolute right-1 bottom-1 text-xs">
+                                    {title.length}/{titleMaxLength}
+                                </p>
                             </div>
-                            <div>
+                            <div className="flex flex-col h-full relative">
                                 <label
                                     htmlFor="message"
                                     className="block text-sm font-bold text-primary italic"
@@ -97,12 +103,14 @@ export default function Send() {
                                 <textarea
                                     name="message"
                                     id="message"
-                                    className="block w-full border border-gray-400 rounded-md shadow-sm resize-vertical p-1"
+                                    className="flex-grow border border-gray-400 rounded-md shadow-sm resize-vertical p-1"
                                     placeholder="message"
                                     value={message}
                                     onChange={handleMessageChange}
-                                    rows={4}
                                 />
+                                <p className="absolute right-1 bottom-1 text-xs">
+                                    {message.length}/{messageMaxLength}
+                                </p>
                             </div>
                             <div className="flex flex-col">
                                 <label className="block text-sm font-bold text-primary italic">
