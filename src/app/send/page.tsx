@@ -68,6 +68,7 @@ export default function Send() {
         React.useState<number>(maxDownloadsMax);
     const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
     const [files, setFiles] = React.useState<File[]>([]);
+    const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
 
     const recalculateExpiryDateTime = (
         expiryDate: string,
@@ -118,6 +119,10 @@ export default function Send() {
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+    };
+
+    const toggleAdvancedOptions = () => {
+        setShowAdvanced(!showAdvanced);
     };
 
     return (
@@ -199,136 +204,162 @@ export default function Send() {
                                     onChange={handleMessageChange}
                                 />
                             </div>
-                            <div className="flex flex-col">
-                                <div className="flex flex-row gap-1 justify-start items-center">
-                                    <label className="block text-sm font-bold text-primary italic">
-                                        expire on
-                                    </label>
-                                    <Tooltip
-                                        tooltipText={infoTooltipText.expire}
-                                    >
-                                        <Icons.info
-                                            fill="#4539cd"
-                                            width={20}
-                                            height={20}
-                                        />
-                                    </Tooltip>
-                                </div>
-                                <div className="flex flex-row items-center justify-start gap-2">
-                                    <input
-                                        type="date"
-                                        name="expiryDate"
-                                        id="expiryDate"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                        value={expiryDate}
-                                        onChange={handleDateChange}
-                                        aria-labelledby="expiryLabel"
-                                    />
-                                    <p className="text-primary italic">at</p>
-                                    <input
-                                        type="time"
-                                        name="expiryTime"
-                                        id="expiryTime"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                        value={expiryTime}
-                                        onChange={handleTimeChange}
-                                        aria-labelledby="expiryLabel"
+                            <button
+                                onClick={toggleAdvancedOptions}
+                                className="flex flex-row w-fit items-center justify-start text-sm font-bold text-primary italic gap-1 cursor-pointer"
+                            >
+                                advanced options
+                                <div
+                                    className={showAdvanced ? "rotate-180" : ""}
+                                >
+                                    <Icons.chevronDown
+                                        className="rotate-90"
+                                        fill="#4539cd"
+                                        width={24}
+                                        height={24}
                                     />
                                 </div>
-                            </div>
-                            <div className="flex flex-row items-center justify-start gap-4">
-                                <div className="flex flex-col">
-                                    <div className="flex flex-row gap-1 justify-start items-center">
-                                        <label
-                                            htmlFor="maxViews"
-                                            className="block text-sm font-bold text-primary italic"
-                                        >
-                                            max views
-                                        </label>
-                                        <Tooltip
-                                            tooltipText={
-                                                infoTooltipText.maxViews
-                                            }
-                                        >
-                                            <Icons.info
-                                                fill="#4539cd"
-                                                width={20}
-                                                height={20}
+                            </button>
+                            {showAdvanced && (
+                                <>
+                                    <div className="flex flex-col">
+                                        <div className="flex flex-row gap-1 justify-start items-center">
+                                            <label className="block text-sm font-bold text-primary italic">
+                                                expire on
+                                            </label>
+                                            <Tooltip
+                                                tooltipText={
+                                                    infoTooltipText.expire
+                                                }
+                                            >
+                                                <Icons.info
+                                                    fill="#4539cd"
+                                                    width={20}
+                                                    height={20}
+                                                />
+                                            </Tooltip>
+                                        </div>
+                                        <div className="flex flex-row items-center justify-start gap-2">
+                                            <input
+                                                type="date"
+                                                name="expiryDate"
+                                                id="expiryDate"
+                                                className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
+                                                value={expiryDate}
+                                                onChange={handleDateChange}
+                                                aria-labelledby="expiryLabel"
                                             />
-                                        </Tooltip>
-                                    </div>
-                                    <input
-                                        type="number"
-                                        name="maxViews"
-                                        id="maxViews"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                        value={maxViews}
-                                        onChange={handleMaxViewsChange}
-                                        min={maxViewsMin}
-                                        max={maxViewsMax}
-                                    />
-                                </div>
-                                <div className="flex flex-col">
-                                    <div className="flex flex-row gap-1 justify-start items-center">
-                                        <label
-                                            htmlFor="maxDownloads"
-                                            className="block text-sm font-bold text-primary italic"
-                                        >
-                                            max downloads
-                                        </label>
-                                        <Tooltip
-                                            tooltipText={
-                                                infoTooltipText.maxDownloads
-                                            }
-                                        >
-                                            <Icons.info
-                                                fill="#4539cd"
-                                                width={20}
-                                                height={20}
+                                            <p className="text-primary italic">
+                                                at
+                                            </p>
+                                            <input
+                                                type="time"
+                                                name="expiryTime"
+                                                id="expiryTime"
+                                                className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
+                                                value={expiryTime}
+                                                onChange={handleTimeChange}
+                                                aria-labelledby="expiryLabel"
                                             />
-                                        </Tooltip>
+                                        </div>
                                     </div>
-                                    <input
-                                        type="number"
-                                        name="maxDownloads"
-                                        id="maxDownloads"
-                                        className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                        value={maxDownloads}
-                                        onChange={handleMaxDownloadsChange}
-                                        min={maxDownloadsMin}
-                                        max={maxDownloadsMax}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex flex-row items-center gap-2">
-                                <div className="flex flex-row gap-1 justify-start items-center">
-                                    <label
-                                        htmlFor="allowDelete"
-                                        className="text-sm font-bold text-primary italic"
-                                    >
-                                        allow delete
-                                    </label>
-                                    <Tooltip
-                                        tooltipText={
-                                            infoTooltipText.allowDelete
-                                        }
-                                    >
-                                        <Icons.info
-                                            fill="#4539cd"
-                                            width={20}
-                                            height={20}
+                                    <div className="flex flex-row items-center justify-start gap-4">
+                                        <div className="flex flex-col">
+                                            <div className="flex flex-row gap-1 justify-start items-center">
+                                                <label
+                                                    htmlFor="maxViews"
+                                                    className="block text-sm font-bold text-primary italic"
+                                                >
+                                                    max views
+                                                </label>
+                                                <Tooltip
+                                                    tooltipText={
+                                                        infoTooltipText.maxViews
+                                                    }
+                                                >
+                                                    <Icons.info
+                                                        fill="#4539cd"
+                                                        width={20}
+                                                        height={20}
+                                                    />
+                                                </Tooltip>
+                                            </div>
+                                            <input
+                                                type="number"
+                                                name="maxViews"
+                                                id="maxViews"
+                                                className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
+                                                value={maxViews}
+                                                onChange={handleMaxViewsChange}
+                                                min={maxViewsMin}
+                                                max={maxViewsMax}
+                                            />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <div className="flex flex-row gap-1 justify-start items-center">
+                                                <label
+                                                    htmlFor="maxDownloads"
+                                                    className="block text-sm font-bold text-primary italic"
+                                                >
+                                                    max downloads
+                                                </label>
+                                                <Tooltip
+                                                    tooltipText={
+                                                        infoTooltipText.maxDownloads
+                                                    }
+                                                >
+                                                    <Icons.info
+                                                        fill="#4539cd"
+                                                        width={20}
+                                                        height={20}
+                                                    />
+                                                </Tooltip>
+                                            </div>
+                                            <input
+                                                type="number"
+                                                name="maxDownloads"
+                                                id="maxDownloads"
+                                                className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
+                                                value={maxDownloads}
+                                                onChange={
+                                                    handleMaxDownloadsChange
+                                                }
+                                                min={maxDownloadsMin}
+                                                max={maxDownloadsMax}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row items-center gap-2">
+                                        <div className="flex flex-row gap-1 justify-start items-center">
+                                            <label
+                                                htmlFor="allowDelete"
+                                                className="text-sm font-bold text-primary italic"
+                                            >
+                                                allow delete
+                                            </label>
+                                            <Tooltip
+                                                tooltipText={
+                                                    infoTooltipText.allowDelete
+                                                }
+                                            >
+                                                <Icons.info
+                                                    fill="#4539cd"
+                                                    width={20}
+                                                    height={20}
+                                                />
+                                            </Tooltip>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            name="allowDelete"
+                                            id="allowDelete"
+                                            className="rounded text-primary focus:ring-primary"
+                                            checked={allowDelete}
+                                            onChange={handleAllowDeleteChange}
                                         />
-                                    </Tooltip>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    name="allowDelete"
-                                    id="allowDelete"
-                                    className="rounded text-primary focus:ring-primary"
-                                    checked={allowDelete}
-                                    onChange={handleAllowDeleteChange}
-                                />
-                            </div>
+                                    </div>
+                                </>
+                            )}
                             <input
                                 type="submit"
                                 value="get a link"
