@@ -10,6 +10,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
+import DropZone from "@/components/dropzone";
 import { Icons } from "@/components/icons";
 import { Tooltip } from "@/components/tooltip";
 import whizfileConfig from "@/lib/config/config";
@@ -24,7 +25,12 @@ function formatExpireTime(milliseconds: number) {
     const remainingMinutes = minutes % 60;
     const remainingHours = hours % 24;
 
-    return `${days} days ${remainingHours} hours ${remainingMinutes} minutes ${remainingSeconds} seconds`;
+    return `${days !== 0 ? `${days} days` : ""} ${
+        remainingHours !== 0 ? `${remainingHours} hours` : ""
+    }
+    ${remainingMinutes !== 0 ? `${remainingMinutes} minutes` : ""} ${
+        remainingSeconds !== 0 ? `${remainingSeconds} seconds` : ""
+    }`;
 }
 
 export default function Send() {
@@ -75,6 +81,7 @@ export default function Send() {
     const [maxDownloads, setMaxDownloads] =
         React.useState<number>(maxDownloadsMax);
     const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
+    const [files, setFiles] = React.useState<File[]>([]);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -119,7 +126,10 @@ export default function Send() {
     return (
         <main className="w-full h-full flex flex-row justify-center items-center">
             <Card className="w-3/5 h-3/4 flex flex-row">
-                <form onSubmit={handleSubmit} className="w-full h-full ">
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full h-full flex flex-row"
+                >
                     <CardContent className="w-1/2 h-full flex flex-col items-center justify-start">
                         <CardTitle className="p-6 text-primary font-extrabold">
                             send
@@ -329,8 +339,8 @@ export default function Send() {
                             />
                         </div>
                     </CardContent>
-                    <CardContent className="w-1/2 h-full">
-                        {/* Additional content can go here */}
+                    <CardContent className="w-1/2 h-full flex flex-col items-center justify-center p-6 pl-0">
+                        <DropZone files={files} setFiles={setFiles} />
                     </CardContent>
                 </form>
             </Card>
