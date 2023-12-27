@@ -210,7 +210,7 @@ export default function Send() {
                             >
                                 advanced options
                                 <div
-                                    className={showAdvanced ? "rotate-180" : ""}
+                                    className={showAdvanced ? "" : "rotate-180"}
                                 >
                                     <Icons.chevronDown
                                         className="rotate-90"
