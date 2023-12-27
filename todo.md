@@ -6,6 +6,9 @@
   - [x] maxViews
   - [x] maxDownloads
   - [x] add info tooltip to all the fields
+- [ ] make the dropzone work properly
+  - [ ] make it so that a file dropped on any part of the screen is taken.
+  - [ ] make it so that drag and drop works
 - [ ] make ui mobile friendly
 - [ ] make ui play well with different screen sizes
 - [ ] make send form work with new fields and upload strategy

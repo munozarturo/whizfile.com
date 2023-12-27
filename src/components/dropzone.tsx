@@ -50,7 +50,10 @@ const FileCard = React.forwardRef<
                 </p>
                 {isHovered && (
                     <button
-                        onClick={() => onRemove(file)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onRemove(file);
+                        }}
                         className="absolute top-1 right-1"
                         aria-label="Remove file"
                     >
@@ -70,7 +73,7 @@ const DropZone = React.forwardRef<
     }
 >(({ files, setFiles, ...props }, ref) => {
     {
-        /* todo: auto size layout of files, drag and drop broken, on drag is also broken */
+        /* todo: auto size layout of files, drag and drop is very jittery */
     }
 
     const onDrop = React.useCallback(
@@ -122,7 +125,10 @@ const DropZone = React.forwardRef<
                 </div>
             )}
             {files.length > 0 ? (
-                <div className="w-full h-full flex flex-col border-dashed border-primary border-8 rounded-2xl p-2">
+                <div
+                    className="w-full h-full flex flex-col border-dashed border-primary border-8 rounded-2xl p-2"
+                    {...getRootProps()}
+                >
                     {/* Files */}
                     <div className="flex-grow overflow-auto custom-scrollbar">
                         <input {...getInputProps()} />
@@ -178,10 +184,7 @@ const DropZone = React.forwardRef<
                             </Tooltip>
                         </div>
                         {/* Add button */}
-                        <div
-                            className="pr-3 cursor-pointer"
-                            {...getRootProps()}
-                        >
+                        <div className="pr-3 cursor-pointer">
                             <Icons.add
                                 fill="#4539cd"
                                 width={48}
