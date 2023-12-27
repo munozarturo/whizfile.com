@@ -68,10 +68,9 @@ const DropZone = React.forwardRef<
         setFiles: React.Dispatch<React.SetStateAction<File[]>>;
     }
 >(({ files, setFiles, ...props }, ref) => {
-    /*
-     * when a file is uploaded it has a little file card with the name of the file, the size, and an option to remove it
-     *  I want this file card to have a different image for each file type. get some standard library or something.
-     */
+    {
+        /* todo: auto size layout of files, drag and drop broken, on drag is also broken */
+    }
 
     const onDrop = React.useCallback(
         (acceptedFiles: File[]) => {
@@ -126,7 +125,6 @@ const DropZone = React.forwardRef<
                     {/* Files */}
                     <div className="flex-grow overflow-auto custom-scrollbar">
                         <input {...getInputProps()} />
-                        {/* todo: auto size layout of files */}
                         <div className="grid grid-flow-row grid-cols-4 gap-2 p-2">
                             {files.map((f) => (
                                 <div
