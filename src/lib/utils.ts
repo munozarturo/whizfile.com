@@ -1,15 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export function cn(...inputs: ClassValue[]) {
+function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function formatFileSize(
-    bytes: number,
-    si: boolean = false,
-    dp: number = 1
-) {
+function formatFileSize(bytes: number, si: boolean = false, dp: number = 1) {
     const thresh = si ? 1000 : 1024;
 
     if (Math.abs(bytes) < thresh) {
@@ -32,3 +28,23 @@ export function formatFileSize(
 
     return bytes.toFixed(dp) + " " + units[u];
 }
+
+function formatMilliseconds(milliseconds: number) {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    const remainingSeconds = seconds % 60;
+    const remainingMinutes = minutes % 60;
+    const remainingHours = hours % 24;
+
+    return `${days !== 0 ? `${days} days` : ""} ${
+        remainingHours !== 0 ? `${remainingHours} hours` : ""
+    }
+    ${remainingMinutes !== 0 ? `${remainingMinutes} minutes` : ""} ${
+        remainingSeconds !== 0 ? `${remainingSeconds} seconds` : ""
+    }`;
+}
+
+export { cn, formatFileSize, formatMilliseconds };

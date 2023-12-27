@@ -15,24 +15,6 @@ import { Icons } from "@/components/icons";
 import { Tooltip } from "@/components/tooltip";
 import whizfileConfig from "@/lib/config/config";
 
-function formatExpireTime(milliseconds: number) {
-    const seconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    const remainingSeconds = seconds % 60;
-    const remainingMinutes = minutes % 60;
-    const remainingHours = hours % 24;
-
-    return `${days !== 0 ? `${days} days` : ""} ${
-        remainingHours !== 0 ? `${remainingHours} hours` : ""
-    }
-    ${remainingMinutes !== 0 ? `${remainingMinutes} minutes` : ""} ${
-        remainingSeconds !== 0 ? `${remainingSeconds} seconds` : ""
-    }`;
-}
-
 export default function Send() {
     // maxSize: number; // in bytes
 
@@ -47,7 +29,7 @@ export default function Send() {
         expireInMax,
     } = whizfileConfig.api.transfer;
 
-    const maxExpireInAsStr: string = formatExpireTime(expireInMax);
+    const maxExpireInAsStr: string = formatMilliseconds(expireInMax);
     const maxExpireIn: Date = new Date(Date.now() + expireInMax);
     // Formatting the date to YYYY-MM-DD
     const maxExpireInDate = maxExpireIn.toISOString().split("T")[0];
