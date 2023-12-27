@@ -5,14 +5,27 @@ import { formatFileSize } from "@/lib/utils";
 import { useDropzone } from "react-dropzone";
 import whizfileConfig from "@/lib/config/config";
 
-const DropZone = React.forwardRef<
+const FileCard = React.forwardRef<
     HTMLDivElement,
     {
         className?: string;
+        file: File;
+    }
+>(({ className, file }, ref) => {
+    return (
+        <div ref={ref} className={cn("bg-red-500", className)}>
+            {file.name} {file.type} {formatFileSize(file.size)}
+        </div>
+    );
+});
+
+const DropZone = React.forwardRef<
+    HTMLDivElement,
+    {
         files: File[];
         setFiles: React.Dispatch<React.SetStateAction<File[]>>;
     }
->(({ className, files, setFiles, ...props }, ref) => {
+>(({ files, setFiles, ...props }, ref) => {
     /*
      * when a file is uploaded it has a little file card with the name of the file, the size, and an option to remove it
      *  I want this file card to have a different image for each file type. get some standard library or something.
@@ -54,22 +67,24 @@ const DropZone = React.forwardRef<
 
     return (
         <div className="w-full h-full">
-            {
-                // isDragActive acts weird, flickers on drag
-                /* {isDragActive && (
+            {isDragActive && (
                 <div className="fixed inset-0 bg-primary flex flex-col gap-2 justify-center items-center z-50">
                     <Icons.add fill="white" width={96} height={96}></Icons.add>
                     <p className="text-white text-xl font-semibold select-none">
                         drop files here
                     </p>
                 </div>
-            )} */
-            }
+            )}
             {files.length >= 0 ? (
                 <div className="w-full h-full flex flex-col border-dashed border-primary border-8 rounded-2xl">
                     {/* Files */}
-                    <div className="w-full h-full bg-blue-500">
+                    <div className="w-full h-full bg-blue-200">
                         <input {...getInputProps()} />
+                        <div className="flex flex-row gap-2 p-2">
+                            {files.map((f) => (
+                                <FileCard key={f.name} file={f} />
+                            ))}
+                        </div>
                     </div>
                     {/* Progress bar and add button */}
                     <div className="flex flex-row w-full h-16 items-center justify-start">
@@ -93,7 +108,10 @@ const DropZone = React.forwardRef<
                             </div>
                         </div>
                         {/* Add button */}
-                        <div className="pr-3" {...getRootProps()}>
+                        <div
+                            className="pr-3 cursor-pointer"
+                            {...getRootProps()}
+                        >
                             <Icons.add
                                 fill="#4539cd"
                                 width={48}
