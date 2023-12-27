@@ -108,7 +108,7 @@ const DropZone = React.forwardRef<
         (fileSize / whizfileConfig.api.transfer.maxSize) * 100;
 
     const handleRemoveFile = (file: File) => {
-        console.log(file.name);
+        setFiles(files.filter((f) => f !== file));
     };
 
     return (
