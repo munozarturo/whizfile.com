@@ -24,23 +24,6 @@ export default function Navbar() {
                     </span>
                 </Link>
 
-                <div className="flex flex-row space-x-6">
-                    {/* <Link
-          href="/guide"
-          className="group transition duration-300 text-center text-white text-lg font-bold italic"
-        >
-          guide
-          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
-        </Link>
-
-        <Link
-          href="/about"
-          className="group transition duration-300 text-center text-white text-lg font-bold italic"
-        >
-          about
-          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
-        </Link> */}
-                </div>
                 <div className="flex flex-row w-full space-x-6 justify-end">
                     <NavLink
                         active={pathname.startsWith("/send")}
