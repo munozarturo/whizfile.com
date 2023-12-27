@@ -10,11 +10,53 @@ const FileCard = React.forwardRef<
     {
         className?: string;
         file: File;
+        onRemove: Function;
     }
->(({ className, file }, ref) => {
+>(({ className, onRemove, file }, ref) => {
+    const [isHovered, setIsHovered] = React.useState<boolean>(false);
+
+    const truncateFileName = (fileName: string, maxLength: number = 15) => {
+        const extension = fileName.slice(fileName.lastIndexOf("."));
+        if (fileName.length > maxLength) {
+            const namePartLength = maxLength - extension.length - 3; // 3 for '...'
+            if (namePartLength > 0) {
+                return `${fileName.substring(
+                    0,
+                    namePartLength
+                )}...${extension}`;
+            } else {
+                return `...${extension.substring(-maxLength)}`;
+            }
+        }
+
+        return fileName;
+    };
+
     return (
-        <div ref={ref} className={cn("bg-red-500", className)}>
-            {file.name} {file.type} {formatFileSize(file.size)}
+        <div
+            ref={ref}
+            className={cn("relative flex flex-col rounded-xl p-1", className)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div className="flex flex-col items-center justify-start">
+                <Icons.file fill="#4539cd" width={64} height={64} />
+                <p className="text-sm text-primary font-semibold">
+                    {truncateFileName(file.name)}
+                </p>
+                <p className="text-xs text-primary">
+                    {formatFileSize(file.size)}
+                </p>
+                {isHovered && (
+                    <button
+                        onClick={() => onRemove(file)}
+                        className="absolute top-1 right-1"
+                        aria-label="Remove file"
+                    >
+                        <Icons.remove fill="#4539cd" width={24} height={24} />
+                    </button>
+                )}
+            </div>
         </div>
     );
 });
@@ -65,6 +107,10 @@ const DropZone = React.forwardRef<
     const fileSizeUsedPercentage =
         (fileSize / whizfileConfig.api.transfer.maxSize) * 100;
 
+    const handleRemoveFile = (file: File) => {
+        console.log(file.name);
+    };
+
     return (
         <div className="w-full h-full">
             {isDragActive && (
@@ -75,19 +121,28 @@ const DropZone = React.forwardRef<
                     </p>
                 </div>
             )}
-            {files.length >= 0 ? (
-                <div className="w-full h-full flex flex-col border-dashed border-primary border-8 rounded-2xl">
+            {files.length > 0 ? (
+                <div className="w-full h-full flex flex-col border-dashed border-primary border-8 rounded-2xl p-2">
                     {/* Files */}
-                    <div className="w-full h-full bg-blue-200">
+                    <div className="flex-grow overflow-auto custom-scrollbar">
                         <input {...getInputProps()} />
-                        <div className="flex flex-row gap-2 p-2">
+                        {/* todo: auto size layout of files */}
+                        <div className="grid grid-flow-row grid-cols-4 gap-2 p-2">
                             {files.map((f) => (
-                                <FileCard key={f.name} file={f} />
+                                <div
+                                    key={f.name}
+                                    className="flex-grow-0 flex-shrink-0"
+                                >
+                                    <FileCard
+                                        file={f}
+                                        onRemove={handleRemoveFile}
+                                    />
+                                </div>
                             ))}
                         </div>
                     </div>
                     {/* Progress bar and add button */}
-                    <div className="flex flex-row w-full h-16 items-center justify-start">
+                    <div className="flex flex-row w-full items-center justify-between h-16">
                         {/* Progress bar */}
                         <div className="w-full h-full flex flex-row items-center justify-center px-3">
                             <div className="w-full bg-gray-300 rounded-full h-5">
