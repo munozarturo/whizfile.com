@@ -5,7 +5,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-function formatFileSize(bytes: number, si: boolean = false, dp: number = 1) {
+function formatFileSize(bytes: number, si: boolean = true, dp: number = 2) {
     const thresh = si ? 1000 : 1024;
 
     if (Math.abs(bytes) < thresh) {

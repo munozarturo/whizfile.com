@@ -1,5 +1,6 @@
 import { Icons } from "@/components/icons";
 import React from "react";
+import { Tooltip } from "@/components/tooltip";
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@/lib/utils";
 import { useDropzone } from "react-dropzone";
@@ -142,6 +143,7 @@ const DropZone = React.forwardRef<
                     {/* Progress bar and add button */}
                     <div className="flex flex-row w-full items-center justify-between h-16">
                         {/* Progress bar */}
+
                         <div className="w-full h-full flex flex-row items-center justify-center px-3">
                             <div className="w-full bg-gray-300 rounded-full h-5">
                                 <div
@@ -159,6 +161,21 @@ const DropZone = React.forwardRef<
                                     }}
                                 ></div>
                             </div>
+                            <Tooltip
+                                tooltipText={`Transfers have a maximum size of ${formatFileSize(
+                                    whizfileConfig.api.transfer.maxSize
+                                )}. You have used ${formatFileSize(
+                                    fileSize
+                                )} of this maximum transfer size (${fileSizeUsedPercentage.toFixed(
+                                    2
+                                )}%).`}
+                            >
+                                <Icons.info
+                                    fill="#4539cd"
+                                    width={20}
+                                    height={20}
+                                />
+                            </Tooltip>
                         </div>
                         {/* Add button */}
                         <div
