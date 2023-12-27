@@ -13,6 +13,7 @@ import {
 import DropZone from "@/components/dropzone";
 import { Icons } from "@/components/icons";
 import { Tooltip } from "@/components/tooltip";
+import { formatMilliseconds } from "@/lib/utils";
 import whizfileConfig from "@/lib/config/config";
 
 export default function Send() {
