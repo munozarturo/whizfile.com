@@ -60,11 +60,23 @@ export default function Send() {
     const [message, setMessage] = React.useState<string>("");
     const [expiryDate, setExpiryDate] = React.useState<string>(maxExpireInDate); // for date
     const [expiryTime, setExpiryTime] = React.useState<string>(maxExpireInTime); // for time
+    const [expiryDateTime, setExpiryDateTime] = React.useState<Date>(
+        new Date()
+    );
     const [maxViews, setMaxViews] = React.useState<number>(maxViewsMax);
     const [maxDownloads, setMaxDownloads] =
         React.useState<number>(maxDownloadsMax);
     const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
     const [files, setFiles] = React.useState<File[]>([]);
+
+    const recalculateExpiryDateTime = (
+        expiryDate: string,
+        expiryTime: string
+    ) => {
+        const dateTimeString = `${expiryDate}T${expiryTime}`;
+        const newExpiryDateTime = new Date(dateTimeString);
+        setExpiryDateTime(newExpiryDateTime);
+    };
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -78,10 +90,12 @@ export default function Send() {
 
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setExpiryDate(event.target.value);
+        recalculateExpiryDateTime(expiryDate, expiryTime);
     };
 
     const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setExpiryTime(event.target.value);
+        recalculateExpiryDateTime(expiryDate, expiryTime);
     };
 
     const handleMaxViewsChange = (
