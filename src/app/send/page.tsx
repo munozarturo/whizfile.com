@@ -21,8 +21,6 @@ import { useMutation } from "@tanstack/react-query";
 import whizfileConfig from "@/lib/config/config";
 
 export default function Send() {
-    // maxSize: number; // in bytes
-
     const {
         maxTitleLength,
         maxMessageLength,
@@ -30,7 +28,6 @@ export default function Send() {
         maxDownloadsMax,
         maxViewsMin,
         maxViewsMax,
-        expireInMin,
         expireInMax,
     } = whizfileConfig.api.transfer;
 

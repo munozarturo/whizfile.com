@@ -76,6 +76,8 @@ const DropZone = React.forwardRef<
         /* todo: auto size layout of files, drag and drop is very jittery */
     }
 
+    const { maxSize } = whizfileConfig.api.transfer;
+
     const onDrop = React.useCallback(
         (acceptedFiles: File[]) => {
             const updatedFiles = acceptedFiles.map((newFile) => {
@@ -107,8 +109,7 @@ const DropZone = React.forwardRef<
     });
 
     let fileSize = files.reduce((acc, file) => acc + file.size, 0);
-    const fileSizeUsedPercentage =
-        (fileSize / whizfileConfig.api.transfer.maxSize) * 100;
+    const fileSizeUsedPercentage = (fileSize / maxSize) * 100;
 
     const handleRemoveFile = (file: File) => {
         setFiles(files.filter((f) => f !== file));
