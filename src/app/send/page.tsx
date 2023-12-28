@@ -16,7 +16,6 @@ import { AxiosProgressEvent } from "axios";
 import DropZone from "@/components/dropzone";
 import { Icons } from "@/components/icons";
 import JSZip from "jszip";
-import Link from "next/link";
 import { PulseLoader } from "react-spinners";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TransferLink } from "@/components/transfer-link";
@@ -24,6 +23,7 @@ import { TransfersReq } from "@/lib/api/validations/transfers";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useMutation } from "@tanstack/react-query";
 import whizfileConfig from "@/lib/config/config";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
@@ -32,11 +32,6 @@ if (!process.env.NEXT_PUBLIC_BASE_URL) {
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function Send() {
-    // success state
-    // errors for inputs
-    // errors for server
-    // fix dropzone
-
     const {
         maxTitleLength,
         maxMessageLength,
