@@ -49,17 +49,6 @@ function formatMilliseconds(milliseconds: number) {
     }`;
 }
 
-async function createZip(files: File[]): Promise<Blob> {
-    const zip = new JSZip();
-
-    files.forEach((file) => {
-        zip.file(file.name, file);
-    });
-
-    const content: Blob = await zip.generateAsync({ type: "blob" });
-    return content;
-}
-
 function readAsArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -87,4 +76,4 @@ function bufferToHex(buffer: ArrayBuffer): string {
         .join("");
 }
 
-export { cn, formatFileSize, formatMilliseconds, createZip, hashBlob };
+export { cn, formatFileSize, formatMilliseconds, hashBlob };

@@ -15,3 +15,8 @@
 - [ ] form validation
 - [ ] form submission
 - [ ] submission screen
+    // success state
+    // errors for inputs
+    // errors for server
+    // fix auto calculated max expire time
+    // fix dropzone
