@@ -83,29 +83,29 @@ const TransferFormSchema = z
                 )
         ),
         allowDelete: z.boolean(),
-        files: z
-            .array(
-                z.custom((data) => data instanceof File, {
-                    message: "each item must be a file.",
-                })
-            )
-            .min(1, "select at least one file for the transfer.")
-            .refine(
-                (files) => {
-                    const totalSize = files.reduce((acc: number, file) => {
-                        if (file instanceof File) {
-                            return acc + file.size;
-                        }
-                        return acc;
-                    }, 0);
-                    return totalSize <= maxSize;
-                },
-                {
-                    message: `total file size must be less than ${formatFileSize(
-                        maxSize
-                    )}`,
-                }
-            ),
+        // files: z
+        //     .array(
+        //         z.custom((data) => data instanceof File, {
+        //             message: "each item must be a file.",
+        //         })
+        //     )
+        //     .min(1, "select at least one file for the transfer.")
+        //     .refine(
+        //         (files) => {
+        //             const totalSize = files.reduce((acc: number, file) => {
+        //                 if (file instanceof File) {
+        //                     return acc + file.size;
+        //                 }
+        //                 return acc;
+        //             }, 0);
+        //             return totalSize <= maxSize;
+        //         },
+        //         {
+        //             message: `total file size must be less than ${formatFileSize(
+        //                 maxSize
+        //             )}`,
+        //         }
+        //     ),
     })
     .superRefine((fields, context) => {
         const combinedDateTime = new Date(

@@ -239,8 +239,7 @@ export default function Send() {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        const dateTimeString = `${expiryDate}T${expiryTime}`;
-        const expiryDateTime = new Date(dateTimeString);
+        const expiryDateTime = new Date(`${expiryDate}T${expiryTime}`);
 
         mutation.mutate({
             title,
