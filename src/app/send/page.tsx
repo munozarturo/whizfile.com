@@ -10,6 +10,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { formatMilliseconds, hashBlob } from "@/lib/utils";
 
 import { AxiosProgressEvent } from "axios";
@@ -18,11 +19,13 @@ import { Icons } from "@/components/icons";
 import JSZip from "jszip";
 import { PulseLoader } from "react-spinners";
 import { Tooltip } from "@/components/ui/tooltip";
+import { TransferFormSchema } from "@/lib/validations/transfer";
 import { TransferLink } from "@/components/transfer-link";
 import { TransfersReq } from "@/lib/api/validations/transfers";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useMutation } from "@tanstack/react-query";
 import whizfileConfig from "@/lib/config/config";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
@@ -74,14 +77,6 @@ export default function Send() {
         allowDelete: `Choose whether the transfer can be deleted before it expires. This option is available when the transfer is received.`,
     };
 
-    const [title, setTitle] = React.useState<string>("");
-    const [message, setMessage] = React.useState<string>("");
-    const [expiryDate, setExpiryDate] = React.useState<string>(maxExpireInDate); // for date
-    const [expiryTime, setExpiryTime] = React.useState<string>(maxExpireInTime); // for time
-    const [maxViews, setMaxViews] = React.useState<number>(maxViewsMax);
-    const [maxDownloads, setMaxDownloads] =
-        React.useState<number>(maxDownloadsMax);
-    const [allowDelete, setAllowDelete] = React.useState<boolean>(false);
     const [files, setFiles] = React.useState<File[]>([]);
     const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
     const [progressState, setProgressState] = React.useState<{
@@ -91,41 +86,43 @@ export default function Send() {
 
     const [transferId, setTransferId] = React.useState<string | null>(null);
 
-    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(event.target.value);
-    };
+    type ValidationSchemaType = z.infer<typeof TransferFormSchema>;
 
-    const handleMessageChange = (
-        event: React.ChangeEvent<HTMLTextAreaElement>
-    ) => {
-        setMessage(event.target.value);
-    };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        reset,
+    } = useForm<ValidationSchemaType>({
+        resolver: zodResolver(TransferFormSchema),
+        defaultValues: {
+            title: "",
+            message: "",
+            expiryDate: maxExpireInDate,
+            expiryTime: maxExpireInTime,
+            maxViews: whizfileConfig.api.transfer.maxViewsMax,
+            maxDownloads: whizfileConfig.api.transfer.maxDownloadsMax,
+            allowDelete: false,
+        },
+    });
 
-    const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setExpiryDate(event.target.value);
-    };
+    const titleValue = watch("title");
+    const messageValue = watch("message");
 
-    const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setExpiryTime(event.target.value);
-    };
+    function mergeExpiryErrors() {
+        let errorMessage = "";
 
-    const handleMaxViewsChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setMaxViews(parseInt(event.target.value, 10) || 0);
-    };
+        if (errors.expiryDate) {
+            errorMessage += errors.expiryDate.message + " ";
+        }
 
-    const handleMaxDownloadsChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setMaxDownloads(parseInt(event.target.value, 10) || 0);
-    };
+        if (errors.expiryTime) {
+            errorMessage += errors.expiryTime.message;
+        }
 
-    const handleAllowDeleteChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setAllowDelete(event.target.checked);
-    };
+        return errorMessage.trim(); // Removes extra spaces if only one error exists
+    }
 
     const mutation = useMutation({
         mutationFn: async (transferUpload: {
@@ -236,24 +233,24 @@ export default function Send() {
         },
     });
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const onSubmit: SubmitHandler<ValidationSchemaType> = (
+        data: ValidationSchemaType
+    ) => {
+        const expiryDateTime = new Date(
+            `${data.expiryDate}T${data.expiryTime}`
+        );
 
-        const expiryDateTime = new Date(`${expiryDate}T${expiryTime}`);
+        console.log(data, files);
 
         mutation.mutate({
-            title,
-            message,
-            allowDelete,
-            maxViews,
-            maxDownloads,
+            title: data.title,
+            message: data.message,
+            allowDelete: data.allowDelete,
+            maxViews: data.maxViews,
+            maxDownloads: data.maxDownloads,
             expireIn: Number(expiryDateTime) - Date.now(),
             files,
         });
-    };
-
-    const toggleAdvancedOptions = () => {
-        setShowAdvanced(!showAdvanced);
     };
 
     if (mutation.isSuccess) {
@@ -277,14 +274,8 @@ export default function Send() {
                         ></TransferLink>
                         <button
                             onClick={() => {
-                                setTitle("");
-                                setMessage("");
-                                setExpiryDate(maxExpireInDate);
-                                setExpiryTime(maxExpireInTime);
-                                setMaxViews(maxViewsMax);
-                                setMaxDownloads(maxDownloadsMax);
-                                setAllowDelete(false);
                                 setFiles([]);
+                                reset();
                                 mutation.reset();
                             }}
                             className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
@@ -336,20 +327,7 @@ export default function Send() {
                         transfer...
                     </h2>
                     <button
-                        onClick={() => {
-                            const dateTimeString = `${expiryDate}T${expiryTime}`;
-                            const expiryDateTime = new Date(dateTimeString);
-
-                            mutation.mutate({
-                                title,
-                                message,
-                                allowDelete,
-                                maxViews,
-                                maxDownloads,
-                                expireIn: Number(expiryDateTime) - Date.now(),
-                                files,
-                            });
-                        }}
+                        onClick={handleSubmit(onSubmit)}
                         className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                     >
                         try again
@@ -362,15 +340,15 @@ export default function Send() {
             <main className="w-full h-full flex flex-row justify-center items-center">
                 <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
                     <CardTitle className="p-6 text-primary font-extrabold">
-                        send
+                        send 2
                     </CardTitle>
                     <form
-                        onSubmit={handleSubmit}
+                        onSubmit={handleSubmit(onSubmit)}
                         className="w-full h-full flex flex-row"
                     >
                         <CardContent className="w-1/2 h-full flex flex-col items-center justify-start px-6 pr-3">
                             <div className="w-full h-full flex flex-col gap-3">
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col">
                                     <div className="flex justify-between items-center">
                                         <div className="flex flex-row gap-1 justify-start items-center">
                                             <label
@@ -391,19 +369,31 @@ export default function Send() {
                                                 />
                                             </Tooltip>
                                         </div>
-                                        <p className="text-xs">
-                                            {title.length}/{maxTitleLength}
+                                        <p
+                                            className={`text-xs font-semibold italic text-primary ${
+                                                titleValue.length >
+                                                maxTitleLength
+                                                    ? "text-red-500"
+                                                    : ""
+                                            }`}
+                                        >
+                                            {titleValue.length}/{maxTitleLength}
                                         </p>
                                     </div>
                                     <input
                                         type="text"
-                                        name="title"
                                         id="title"
-                                        className="block w-full border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
+                                        className={`block w-full border border-gray-400 rounded-md shadow-sm p-1 text-gray-700 ${
+                                            errors.title ? "border-red-500" : ""
+                                        }`}
                                         placeholder="title"
-                                        value={title}
-                                        onChange={handleTitleChange}
+                                        {...register("title")}
                                     />
+                                    {errors.title && (
+                                        <span className="text-xs font-semibold italic text-red-500">
+                                            {errors.title.message}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex flex-col h-full">
                                     <div className="flex justify-between items-center">
@@ -426,22 +416,39 @@ export default function Send() {
                                                 />
                                             </Tooltip>
                                         </div>
-                                        <p className="text-xs">
-                                            {message.length}/{maxMessageLength}
+                                        <p
+                                            className={`text-xs font-semibold italic text-primary ${
+                                                messageValue.length >
+                                                maxMessageLength
+                                                    ? "text-red-500"
+                                                    : ""
+                                            }`}
+                                        >
+                                            {messageValue.length}/
+                                            {maxMessageLength}
                                         </p>
                                     </div>
                                     <textarea
-                                        name="message"
                                         id="message"
-                                        className="flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-none text-gray-700"
+                                        className={`flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-none text-gray-700 ${
+                                            errors.message
+                                                ? "border-red-500"
+                                                : ""
+                                        }`}
                                         placeholder="message"
-                                        value={message}
-                                        onChange={handleMessageChange}
+                                        {...register("message")}
                                     />
+                                    {errors.message && (
+                                        <span className="text-xs font-semibold italic text-red-500">
+                                            {errors.message.message}
+                                        </span>
+                                    )}
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={toggleAdvancedOptions}
+                                    onClick={() =>
+                                        setShowAdvanced(!showAdvanced)
+                                    }
                                     className="flex flex-row w-fit items-center justify-start text-sm font-bold text-primary italic gap-1 cursor-pointer"
                                 >
                                     advanced options
@@ -480,26 +487,36 @@ export default function Send() {
                                             <div className="flex flex-row items-center justify-start gap-2">
                                                 <input
                                                     type="date"
-                                                    name="expiryDate"
                                                     id="expiryDate"
-                                                    className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                                    value={expiryDate}
-                                                    onChange={handleDateChange}
+                                                    className={`block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700 ${
+                                                        errors.expiryDate
+                                                            ? "border-red-500"
+                                                            : ""
+                                                    }`}
                                                     aria-labelledby="expiryLabel"
+                                                    {...register("expiryDate")}
                                                 />
                                                 <p className="text-primary italic">
                                                     at
                                                 </p>
                                                 <input
                                                     type="time"
-                                                    name="expiryTime"
                                                     id="expiryTime"
-                                                    className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                                    value={expiryTime}
-                                                    onChange={handleTimeChange}
+                                                    className={`block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700 ${
+                                                        errors.expiryDate
+                                                            ? "border-red-500"
+                                                            : ""
+                                                    }`}
                                                     aria-labelledby="expiryLabel"
+                                                    {...register("expiryTime")}
                                                 />
                                             </div>
+                                            {(errors.expiryDate ||
+                                                errors.expiryTime) && (
+                                                <span className="text-xs font-semibold italic text-red-500">
+                                                    {mergeExpiryErrors()}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex flex-row items-center justify-start gap-4">
                                             <div className="flex flex-col">
@@ -524,16 +541,30 @@ export default function Send() {
                                                 </div>
                                                 <input
                                                     type="number"
-                                                    name="maxViews"
                                                     id="maxViews"
-                                                    className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                                    value={maxViews}
-                                                    onChange={
-                                                        handleMaxViewsChange
-                                                    }
+                                                    className={`block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700 ${
+                                                        errors.maxViews
+                                                            ? "border-red-500"
+                                                            : ""
+                                                    }`}
                                                     min={maxViewsMin}
                                                     max={maxViewsMax}
+                                                    {...register("maxViews")}
                                                 />
+                                                {errors.maxViews && (
+                                                    <span className="text-xs font-semibold italic text-red-500">
+                                                        {
+                                                            errors.maxViews
+                                                                .message
+                                                        }
+                                                    </span>
+                                                )}
+                                                {errors.maxDownloads &&
+                                                    !errors.maxViews && (
+                                                        <span className="text-xs font-semibold italic text-transparent select-none">
+                                                            null
+                                                        </span>
+                                                    )}
                                             </div>
                                             <div className="flex flex-col">
                                                 <div className="flex flex-row gap-1 justify-start items-center">
@@ -557,16 +588,32 @@ export default function Send() {
                                                 </div>
                                                 <input
                                                     type="number"
-                                                    name="maxDownloads"
                                                     id="maxDownloads"
-                                                    className="block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700"
-                                                    value={maxDownloads}
-                                                    onChange={
-                                                        handleMaxDownloadsChange
-                                                    }
+                                                    className={`block w-fit border border-gray-400 rounded-md shadow-sm p-1 text-gray-700 ${
+                                                        errors.maxDownloads
+                                                            ? "border-red-500"
+                                                            : ""
+                                                    }`}
                                                     min={maxDownloadsMin}
                                                     max={maxDownloadsMax}
+                                                    {...register(
+                                                        "maxDownloads"
+                                                    )}
                                                 />
+                                                {errors.maxDownloads && (
+                                                    <span className="text-xs font-semibold italic text-red-500">
+                                                        {
+                                                            errors.maxDownloads
+                                                                .message
+                                                        }
+                                                    </span>
+                                                )}
+                                                {errors.maxViews &&
+                                                    !errors.maxDownloads && (
+                                                        <span className="text-xs font-semibold italic text-transparent select-none">
+                                                            null
+                                                        </span>
+                                                    )}
                                             </div>
                                         </div>
                                         <div className="flex flex-row items-center gap-2">
@@ -591,14 +638,15 @@ export default function Send() {
                                             </div>
                                             <input
                                                 type="checkbox"
-                                                name="allowDelete"
                                                 id="allowDelete"
                                                 className="rounded text-primary focus:ring-primary"
-                                                checked={allowDelete}
-                                                onChange={
-                                                    handleAllowDeleteChange
-                                                }
+                                                {...register("allowDelete")}
                                             />
+                                            {errors.allowDelete && (
+                                                <span className="text-xs font-semibold italic text-red-500">
+                                                    {errors.allowDelete.message}
+                                                </span>
+                                            )}
                                         </div>
                                     </>
                                 )}
@@ -610,7 +658,10 @@ export default function Send() {
                             </div>
                         </CardContent>
                         <CardContent className="w-1/2 h-full flex flex-col items-center justify-center px-6 pl-3">
-                            <DropZone files={files} setFiles={setFiles} />
+                            <DropZone
+                                files={files}
+                                setFiles={setFiles}
+                            ></DropZone>
                         </CardContent>
                     </form>
                 </Card>
