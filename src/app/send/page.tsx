@@ -16,6 +16,7 @@ import { AxiosProgressEvent } from "axios";
 import DropZone from "@/components/dropzone";
 import { Icons } from "@/components/icons";
 import JSZip from "jszip";
+import Link from "next/link";
 import { PulseLoader } from "react-spinners";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TransferLink } from "@/components/transfer-link";
@@ -261,46 +262,6 @@ export default function Send() {
         setShowAdvanced(!showAdvanced);
     };
 
-    React.useEffect(() => {
-        setTransferId("cH1Mqp");
-    }, [setTransferId]);
-
-    return (
-        <main className="w-full h-full flex flex-row justify-center items-center">
-            <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
-                <CardHeader className="h-fit w-full">
-                    <CardTitle as="h1" className="text-primary text-center">
-                        transfer sent
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="w-full h-full flex flex-col items-center justify-center gap-5">
-                    <TransferLink
-                        className="text-lg text-gray-500 font-semibold italic outline rounded-lg p-1"
-                        tooltipText="click to copy"
-                        copyText={`${BASE_URL}/receive/${transferId}`}
-                        displayText={`${BASE_URL}/receive/${transferId}`}
-                    ></TransferLink>
-                    <button
-                        onClick={() => {
-                            setTitle("");
-                            setMessage("");
-                            setExpiryDate(maxExpireInDate);
-                            setExpiryTime(maxExpireInTime);
-                            setMaxViews(maxViewsMax);
-                            setMaxDownloads(maxDownloadsMax);
-                            setAllowDelete(false);
-                            setFiles([]);
-                            mutation.reset();
-                        }}
-                        className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
-                    >
-                        send another?
-                    </button>
-                </CardContent>
-            </Card>
-        </main>
-    );
-
     if (mutation.isSuccess) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
@@ -310,8 +271,16 @@ export default function Send() {
                             transfer sent
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="w-full h-full flex flex-col items-center justify-center">
-                        {transferId}
+                    <CardContent className="w-full h-full flex flex-col items-center justify-center gap-5">
+                        <div className="flex flex-col items-center justify-center">
+                            <p>your transfer has been sent!</p>
+                        </div>
+                        <TransferLink
+                            className="text-lg text-gray-500 font-semibold italic outline rounded-lg p-1"
+                            tooltipText="click to copy"
+                            copyText={`${BASE_URL}/receive/${transferId}`}
+                            displayText={`${BASE_URL}/receive/${transferId}`}
+                        ></TransferLink>
                         <button
                             onClick={() => {
                                 setTitle("");
@@ -326,7 +295,7 @@ export default function Send() {
                             }}
                             className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                         >
-                            send another
+                            send another?
                         </button>
                     </CardContent>
                 </Card>
