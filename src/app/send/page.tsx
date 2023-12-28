@@ -254,6 +254,41 @@ export default function Send() {
         setShowAdvanced(!showAdvanced);
     };
 
+    React.useEffect(() => {
+        setTransferId("cH1Mqp");
+    }, [setTransferId]);
+
+    return (
+        <main className="w-full h-full flex flex-row justify-center items-center">
+            <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                <CardHeader className="h-fit w-full">
+                    <CardTitle as="h1" className="text-primary text-center">
+                        transfer sent
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="w-full h-full flex flex-col items-center justify-center">
+                    {transferId}
+                    <button
+                        onClick={() => {
+                            setTitle("");
+                            setMessage("");
+                            setExpiryDate(maxExpireInDate);
+                            setExpiryTime(maxExpireInTime);
+                            setMaxViews(maxViewsMax);
+                            setMaxDownloads(maxDownloadsMax);
+                            setAllowDelete(false);
+                            setFiles([]);
+                            mutation.reset();
+                        }}
+                        className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                    >
+                        send another
+                    </button>
+                </CardContent>
+            </Card>
+        </main>
+    );
+
     if (mutation.isSuccess) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
@@ -430,10 +465,8 @@ export default function Send() {
                                     />
                                 </div>
                                 <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        toggleAdvancedOptions();
-                                    }}
+                                    type="button"
+                                    onClick={toggleAdvancedOptions}
                                     className="flex flex-row w-fit items-center justify-start text-sm font-bold text-primary italic gap-1 cursor-pointer"
                                 >
                                     advanced options
