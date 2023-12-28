@@ -340,7 +340,7 @@ export default function Send() {
             <main className="w-full h-full flex flex-row justify-center items-center">
                 <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
                     <CardTitle className="p-6 text-primary font-extrabold">
-                        send 2
+                        send
                     </CardTitle>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
