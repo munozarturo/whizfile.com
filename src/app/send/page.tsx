@@ -228,6 +228,8 @@ export default function Send() {
                 status: "completing transfer",
                 progress: 100,
             });
+
+            mutation.isSuccess = true;
         },
     });
 
