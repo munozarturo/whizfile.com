@@ -17,7 +17,7 @@ import DropZone from "@/components/dropzone";
 import { Icons } from "@/components/icons";
 import JSZip from "jszip";
 import { PulseLoader } from "react-spinners";
-import { Tooltip } from "@/components/tooltip";
+import { Tooltip } from "@/components/ui/tooltip";
 import { TransfersReq } from "@/lib/api/validations/transfers";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useMutation } from "@tanstack/react-query";

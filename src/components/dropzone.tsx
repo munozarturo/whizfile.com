@@ -1,6 +1,6 @@
 import { Icons } from "@/components/icons";
 import React from "react";
-import { Tooltip } from "@/components/tooltip";
+import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@/lib/utils";
 import { useDropzone } from "react-dropzone";
