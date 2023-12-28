@@ -18,10 +18,17 @@ import { Icons } from "@/components/icons";
 import JSZip from "jszip";
 import { PulseLoader } from "react-spinners";
 import { Tooltip } from "@/components/ui/tooltip";
+import { TransferLink } from "@/components/transfer-link";
 import { TransfersReq } from "@/lib/api/validations/transfers";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useMutation } from "@tanstack/react-query";
 import whizfileConfig from "@/lib/config/config";
+
+if (!process.env.NEXT_PUBLIC_BASE_URL) {
+    throw new Error("`NEXT_PUBLIC_BASE_URL` not defined.");
+}
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function Send() {
     // success state
@@ -266,8 +273,13 @@ export default function Send() {
                         transfer sent
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="w-full h-full flex flex-col items-center justify-center">
-                    {transferId}
+                <CardContent className="w-full h-full flex flex-col items-center justify-center gap-5">
+                    <TransferLink
+                        className="text-lg text-gray-500 font-semibold italic outline rounded-lg p-1"
+                        tooltipText="click to copy"
+                        copyText={`${BASE_URL}/receive/${transferId}`}
+                        displayText={`${BASE_URL}/receive/${transferId}`}
+                    ></TransferLink>
                     <button
                         onClick={() => {
                             setTitle("");
@@ -282,7 +294,7 @@ export default function Send() {
                         }}
                         className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                     >
-                        send another
+                        send another?
                     </button>
                 </CardContent>
             </Card>
