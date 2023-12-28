@@ -189,7 +189,7 @@ export default function ReceiveTransferId(context: {
                         <p className="text-sm font-bold text-primary italic">
                             message
                         </p>
-                        <p className="block w-full text-gray-700">
+                        <p className="block w-full text-gray-700 overflow-y-auto word-wrap break-word">
                             {transfer.message}
                         </p>
                         <div className="flex flex-row items-center justify-start gap-2">
@@ -227,15 +227,6 @@ export default function ReceiveTransferId(context: {
                             </div>
                         </div>
                         <div className="flex flex-col">
-                            <p className="text-sm font-bold text-primary italic">
-                                object
-                            </p>
-                            <p className="text-sm font-bold text-primary italic">
-                                hash
-                            </p>
-                            <p className="block w-full text-gray-700">
-                                {transfer.objectData.fileHash}
-                            </p>
                             <p className="text-sm font-bold text-primary italic">
                                 size
                             </p>
