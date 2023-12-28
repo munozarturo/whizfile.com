@@ -27,7 +27,6 @@ export default function Send() {
     // success state
     // errors for inputs
     // errors for server
-    // fix auto calculated max expire time
     // fix dropzone
 
     const {
@@ -41,14 +40,20 @@ export default function Send() {
     } = whizfileConfig.api.transfer;
 
     const maxExpireInAsStr: string = formatMilliseconds(expireInMax);
-    const maxExpireIn: Date = new Date(Date.now() + expireInMax);
+    const maxExpireIn = new Date(Date.now() + expireInMax);
+
     // Formatting the date to YYYY-MM-DD
-    const maxExpireInDate = maxExpireIn.toISOString().split("T")[0];
+    const maxExpireInDate = [
+        maxExpireIn.getFullYear(),
+        String(maxExpireIn.getMonth() + 1).padStart(2, "0"), // Months are 0-based
+        String(maxExpireIn.getDate()).padStart(2, "0"),
+    ].join("-");
+
     // Formatting the time to HH:MM
-    const maxExpireInTime = maxExpireIn
-        .toISOString()
-        .split("T")[1]
-        .substring(0, 5);
+    const maxExpireInTime = [
+        String(maxExpireIn.getHours()).padStart(2, "0"),
+        String(maxExpireIn.getMinutes()).padStart(2, "0"),
+    ].join(":");
 
     const infoTooltipText: {
         title: string;
