@@ -20,3 +20,4 @@
     // errors for server
     // fix auto calculated max expire time
     // fix dropzone
+- [ ] fix requests not being logged 
