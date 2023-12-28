@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import * as zod from "zod";
 
 import {
     Card,
@@ -9,11 +10,14 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { createZip, formatMilliseconds, hashBlob } from "@/lib/utils";
 
 import DropZone from "@/components/dropzone";
 import { Icons } from "@/components/icons";
 import { Tooltip } from "@/components/tooltip";
-import { formatMilliseconds } from "@/lib/utils";
+import { TransfersReq } from "@/lib/api/validations/transfers";
+import axiosInstance from "@/lib/api/axios-instance";
+import { useMutation } from "@tanstack/react-query";
 import whizfileConfig from "@/lib/config/config";
 
 export default function Send() {
@@ -60,9 +64,6 @@ export default function Send() {
     const [message, setMessage] = React.useState<string>("");
     const [expiryDate, setExpiryDate] = React.useState<string>(maxExpireInDate); // for date
     const [expiryTime, setExpiryTime] = React.useState<string>(maxExpireInTime); // for time
-    const [expiryDateTime, setExpiryDateTime] = React.useState<Date>(
-        new Date()
-    );
     const [maxViews, setMaxViews] = React.useState<number>(maxViewsMax);
     const [maxDownloads, setMaxDownloads] =
         React.useState<number>(maxDownloadsMax);
@@ -70,14 +71,7 @@ export default function Send() {
     const [files, setFiles] = React.useState<File[]>([]);
     const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
 
-    const recalculateExpiryDateTime = (
-        expiryDate: string,
-        expiryTime: string
-    ) => {
-        const dateTimeString = `${expiryDate}T${expiryTime}`;
-        const newExpiryDateTime = new Date(dateTimeString);
-        setExpiryDateTime(newExpiryDateTime);
-    };
+    const [transferId, setTransferId] = React.useState<string | null>(null);
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);
@@ -91,12 +85,10 @@ export default function Send() {
 
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setExpiryDate(event.target.value);
-        recalculateExpiryDateTime(expiryDate, expiryTime);
     };
 
     const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setExpiryTime(event.target.value);
-        recalculateExpiryDateTime(expiryDate, expiryTime);
     };
 
     const handleMaxViewsChange = (
@@ -117,8 +109,73 @@ export default function Send() {
         setAllowDelete(event.target.checked);
     };
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const mutation = useMutation({
+        mutationFn: async (transferUpload: {
+            title: string;
+            message: string;
+            allowDelete: boolean;
+            maxViews: number;
+            maxDownloads: number;
+            expireIn: number;
+            archive: Blob;
+        }) => {
+            const archive: Blob = await createZip(files);
+            const archiveHash: string | undefined = await hashBlob(archive);
+            if (!archiveHash) throw new Error();
+
+            const data: zod.infer<typeof TransfersReq> = {
+                title: transferUpload.title,
+                message: transferUpload.message,
+                allowDelete: transferUpload.allowDelete,
+                maxViews: transferUpload.maxViews,
+                maxDownloads: transferUpload.maxDownloads,
+                expireIn: transferUpload.expireIn,
+                objectData: {
+                    size: archive.size,
+                    fileHash: archiveHash,
+                },
+            };
+
+            const transferResp = await axiosInstance.post(
+                "/api/transfers",
+                data
+            );
+
+            const transferData: {
+                transferId: string;
+                method: string;
+                url: string;
+            } = {
+                transferId: transferResp.data.data.transferId,
+                method: transferResp.data.data.upload.method,
+                url: transferResp.data.data.upload.url,
+            };
+
+            const putResp = await axiosInstance.put(transferData.url, archive, {
+                headers: { "Content-Type": archive.type },
+            });
+
+            setTransferId(transferData.transferId);
+        },
+    });
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        const dateTimeString = `${expiryDate}T${expiryTime}`;
+        const expiryDateTime = new Date(dateTimeString);
+
+        const archive: Blob = await createZip(files);
+
+        mutation.mutate({
+            title,
+            message,
+            allowDelete,
+            maxViews,
+            maxDownloads,
+            expireIn: Number(expiryDateTime) - Date.now(),
+            archive,
+        });
     };
 
     const toggleAdvancedOptions = () => {
@@ -205,7 +262,10 @@ export default function Send() {
                                 />
                             </div>
                             <button
-                                onClick={toggleAdvancedOptions}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    toggleAdvancedOptions();
+                                }}
                                 className="flex flex-row w-fit items-center justify-start text-sm font-bold text-primary italic gap-1 cursor-pointer"
                             >
                                 advanced options

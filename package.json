@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.454.0",
     "@aws-sdk/s3-request-presigner": "^3.477.0",
+    "@hookform/resolvers": "^3.3.3",
     "@radix-ui/themes": "^2.0.1",
     "@tanstack/react-query": "^5.8.4",
     "axios": "^1.6.2",
@@ -23,6 +24,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
+    "react-hook-form": "^7.49.2",
     "react-spinners": "^0.13.8",
     "tailwind-merge": "^1.14.0",
     "zod": "^3.22.4"

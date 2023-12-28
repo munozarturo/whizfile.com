@@ -1,4 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
+import { BinaryLike, createHash } from "crypto";
+import JSZip from "jszip";
 import { twMerge } from "tailwind-merge";
 
 function cn(...inputs: ClassValue[]) {
@@ -47,4 +49,42 @@ function formatMilliseconds(milliseconds: number) {
     }`;
 }
 
-export { cn, formatFileSize, formatMilliseconds };
+async function createZip(files: File[]): Promise<Blob> {
+    const zip = new JSZip();
+
+    files.forEach((file) => {
+        zip.file(file.name, file);
+    });
+
+    const content: Blob = await zip.generateAsync({ type: "blob" });
+    return content;
+}
+
+function readAsArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            if (reader.result instanceof ArrayBuffer) {
+                resolve(reader.result);
+            } else {
+                reject(new Error("Result was not an ArrayBuffer"));
+            }
+        };
+        reader.onerror = (e) => reject(e);
+        reader.readAsArrayBuffer(blob);
+    });
+}
+
+async function hashBlob(blob: Blob): Promise<string | undefined> {
+    const arrayBuffer = await readAsArrayBuffer(blob);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+    return bufferToHex(hashBuffer);
+}
+
+function bufferToHex(buffer: ArrayBuffer): string {
+    return Array.from(new Uint8Array(buffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+export { cn, formatFileSize, formatMilliseconds, createZip, hashBlob };
