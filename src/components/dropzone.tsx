@@ -64,6 +64,7 @@ const FileCard = React.forwardRef<
         </div>
     );
 });
+FileCard.displayName = "FileCard";
 
 const DropZone = React.forwardRef<
     HTMLDivElement,
