@@ -102,9 +102,8 @@ export default function ReceiveTransferId(context: {
             const response = await axiosInstance.get(
                 objectResponse.data.data.download.url,
                 {
+                    responseType: "blob",
                     onDownloadProgress: (e: AxiosProgressEvent) => {
-                        console.log("progress", e.estimated);
-
                         const percentCompleted = Math.round(
                             (e.loaded * 100) / (e.total || 100)
                         );

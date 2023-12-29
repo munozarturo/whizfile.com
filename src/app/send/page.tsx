@@ -228,8 +228,6 @@ export default function Send() {
                 status: "completing transfer",
                 progress: 100,
             });
-
-            mutation.isSuccess = true;
         },
     });
 
@@ -240,8 +238,6 @@ export default function Send() {
             `${data.expiryDate}T${data.expiryTime}`
         );
 
-        console.log(data, files);
-
         mutation.mutate({
             title: data.title,
             message: data.message,
@@ -251,9 +247,11 @@ export default function Send() {
             expireIn: Number(expiryDateTime) - Date.now(),
             files,
         });
+
+        mutation.isSuccess = true;
     };
 
-    if (mutation.isSuccess) {
+    if (mutation.isSuccess || transferId) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
                 <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
@@ -277,6 +275,7 @@ export default function Send() {
                                 setFiles([]);
                                 reset();
                                 mutation.reset();
+                                setTransferId(null);
                             }}
                             className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                         >
@@ -314,27 +313,29 @@ export default function Send() {
             </main>
         );
     } else if (mutation.isError) {
-        <main className="w-full h-full flex flex-row justify-center items-center">
-            <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
-                <CardHeader className="h-fit w-full">
-                    <CardTitle as="h1" className="text-primary text-center">
-                        transfer error
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="w-full h-full flex flex-col gap-2 items-center justify-center">
-                    <h2>
-                        uh oh! it looks like there was an error processing your
-                        transfer...
-                    </h2>
-                    <button
-                        onClick={handleSubmit(onSubmit)}
-                        className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
-                    >
-                        try again
-                    </button>
-                </CardContent>
-            </Card>
-        </main>;
+        return (
+            <main className="w-full h-full flex flex-row justify-center items-center">
+                <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                    <CardHeader className="h-fit w-full">
+                        <CardTitle as="h1" className="text-primary text-center">
+                            transfer error
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="w-full h-full flex flex-col gap-2 items-center justify-center">
+                        <h2>
+                            uh oh! it looks like there was an error processing
+                            your transfer...
+                        </h2>
+                        <button
+                            onClick={handleSubmit(onSubmit)}
+                            className="h-fit w-fit bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                        >
+                            try again
+                        </button>
+                    </CardContent>
+                </Card>
+            </main>
+        );
     } else {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
