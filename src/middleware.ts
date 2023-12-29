@@ -30,47 +30,51 @@ if (!SECRET_KEY) {
 }
 
 export async function middleware(req: NextRequest) {
-    let source = req.ip ?? req.headers.get("x-real-ip");
-    const forwardedFor = req.headers.get("x-forwarded-for");
-    if (!source && forwardedFor) {
-        source = forwardedFor.split(",").at(0) ?? "unknown";
-    }
+    try {
+        let source = req.ip ?? req.headers.get("x-real-ip");
+        const forwardedFor = req.headers.get("x-forwarded-for");
+        if (!source && forwardedFor) {
+            source = forwardedFor.split(",").at(0) ?? "unknown";
+        }
 
-    const requestTimestamp: number = Date.now();
+        const requestTimestamp: number = Date.now();
 
-    const requestMetadata: zod.infer<typeof RequestsReq> = RequestsReq.parse({
-        timestamp: requestTimestamp,
-        method: req.method,
-        source: source || "unknown",
-        target: req.url,
-    });
+        const requestMetadata: zod.infer<typeof RequestsReq> =
+            RequestsReq.parse({
+                timestamp: requestTimestamp,
+                method: req.method,
+                source: source || "unknown",
+                target: req.url,
+            });
 
-    console.log("middleware", requestMetadata);
-
-    const postRequest = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/requests`, {
-        method: "POST",
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `${SECRET_KEY}`,
-        },
-        body: JSON.stringify(requestMetadata),
-    });
-
-    console.log("log req", postRequest);
-
-    const body = await postRequest.json();
-
-    if (body.requests === "limit-exceeded") {
-        return NextResponse.json(
-            handleResponse("Request rate limit exceeded."),
+        const postRequest = await fetch(
+            `${NEXT_PUBLIC_BASE_URL}/api/requests`,
             {
-                status: 429,
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `${SECRET_KEY}`,
+                },
+                body: JSON.stringify(requestMetadata),
             }
         );
-    }
 
-    return NextResponse.next();
+        const body = await postRequest.json();
+
+        if (body.requests === "limit-exceeded") {
+            return NextResponse.json(
+                handleResponse("Request rate limit exceeded."),
+                {
+                    status: 429,
+                }
+            );
+        }
+    } catch (e: any) {
+        console.log(e);
+    } finally {
+        return NextResponse.next();
+    }
 }
 
 export const config = {
