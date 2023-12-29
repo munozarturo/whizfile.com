@@ -156,6 +156,8 @@ export async function POST(req: NextRequest) {
             Key: objectId,
             Metadata: {
                 expire: (document.timestamp + document.expireIn).toString(),
+                hash: document.objectData.fileHash,
+                size: document.objectData.size.toString(),
             },
         });
         presignedUploadUrl = await getSignedUrl(s3Client, command, {
