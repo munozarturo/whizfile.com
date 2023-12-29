@@ -81,15 +81,30 @@ export default function ReceiveTransferId(context: {
             setIsDownloading(true);
 
             setProgressState({
+                status: "fecthing object data",
+                progress: 0,
+            });
+
+            const objectResponse = await axiosInstance.get(
+                `/api/objects/${transferId}`
+            );
+
+            setProgressState({
+                status: "fecthing object data",
+                progress: 100,
+            });
+
+            setProgressState({
                 status: "downloading transfer",
                 progress: 0,
             });
 
             const response = await axiosInstance.get(
-                `/api/objects/${transferId}`,
+                objectResponse.data.data.download.url,
                 {
-                    responseType: "blob",
                     onDownloadProgress: (e: AxiosProgressEvent) => {
+                        console.log("progress", e.estimated);
+
                         const percentCompleted = Math.round(
                             (e.loaded * 100) / (e.total || 100)
                         );
@@ -101,6 +116,11 @@ export default function ReceiveTransferId(context: {
                     },
                 }
             );
+
+            setProgressState({
+                status: "opening download",
+                progress: 0,
+            });
 
             const url = window.URL.createObjectURL(response.data);
             const link = document.createElement("a");
@@ -115,6 +135,11 @@ export default function ReceiveTransferId(context: {
             if (link.parentNode) {
                 link.parentNode.removeChild(link);
             }
+
+            setProgressState({
+                status: "opening download",
+                progress: 100,
+            });
 
             setIsDownloading(false);
         } catch (error) {
