@@ -8,13 +8,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { formatFileSize, formatMilliseconds } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { AxiosProgressEvent } from "axios";
 import Link from "next/link";
 import { PulseLoader } from "react-spinners";
 import React from "react";
 import axiosInstance from "@/lib/api/axios-instance";
-import { useQuery } from "@tanstack/react-query";
 
 type Transfer = {
     title: string;
@@ -146,7 +146,25 @@ export default function ReceiveTransferId(context: {
         }
     };
 
-    if (isLoading || isDownloading) {
+    const deleteTransfer = useMutation({
+        mutationFn: async (transfer: { transferId: string }) => {
+            setProgressState({
+                status: "deleting transfer",
+                progress: 0,
+            });
+
+            const resp = await axiosInstance.delete(
+                `/api/transfers/${transfer.transferId}`
+            );
+
+            setProgressState({
+                status: "deleting transfer",
+                progress: 100,
+            });
+        },
+    });
+
+    if (isLoading || isDownloading || deleteTransfer.isPending) {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
@@ -181,9 +199,68 @@ export default function ReceiveTransferId(context: {
                 </main>
             </>
         );
+    } else if (deleteTransfer.isSuccess) {
+        return (
+            <>
+                <main className="w-full h-full flex flex-row justify-center items-center">
+                    <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                        <CardHeader className="h-fit w-full">
+                            <CardTitle
+                                as="h1"
+                                className="text-primary text-center"
+                            >
+                                transfer deleted
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <h2>transfer deleted succesfully.</h2>
+                        </CardContent>
+                        <CardFooter>
+                            <Link
+                                href="/."
+                                className="group transition duration-300 text-center text-white text-lg font-bold italic bg-primary p-2 rounded-xl"
+                            >
+                                take me home
+                            </Link>
+                        </CardFooter>
+                    </Card>
+                </main>
+            </>
+        );
     } else if (isSuccess) {
         const transferId: string = data.data.transferId;
         const transfer: Transfer = data.data.transfer;
+
+        <div className="flex flex-row items-center justify-start gap-2">
+            <div className="flex flex-col">
+                <p className="text-sm font-bold text-primary italic">views</p>
+                <p className="block w-full text-gray-700">{transfer.views}</p>
+            </div>
+            <div className="flex flex-col">
+                <p className="text-sm font-bold text-primary italic">
+                    max views
+                </p>
+                <p className="block w-full text-gray-700">
+                    {transfer.maxViews}
+                </p>
+            </div>
+            <div className="flex flex-col">
+                <p className="text-sm font-bold text-primary italic">
+                    downloads
+                </p>
+                <p className="block w-full text-gray-700">
+                    {transfer.downloads}
+                </p>
+            </div>
+            <div className="flex flex-col">
+                <p className="text-sm font-bold text-primary italic">
+                    max downloads
+                </p>
+                <p className="block w-full text-gray-700">
+                    {transfer.maxDownloads}
+                </p>
+            </div>
+        </div>;
 
         return (
             <>
@@ -194,24 +271,12 @@ export default function ReceiveTransferId(context: {
                         </CardTitle>
                         <CardContent className="w-full h-full flex flex-col">
                             <p className="text-sm font-bold text-primary italic">
-                                status
-                            </p>
-                            <p className="block w-full text-gray-700">
-                                {transfer.status}
-                            </p>
-                            <p className="text-sm font-bold text-primary italic">
                                 sent on
                             </p>
                             <p className="block w-full text-gray-700">
                                 {new Date(transfer.timestamp)
                                     .toString()
                                     .toLowerCase()}
-                            </p>
-                            <p className="text-sm font-bold text-primary italic">
-                                expires in
-                            </p>
-                            <p className="block w-full text-gray-700">
-                                {formatMilliseconds(expiresInLive)}
                             </p>
                             <p className="text-sm font-bold text-primary italic">
                                 title
@@ -225,40 +290,12 @@ export default function ReceiveTransferId(context: {
                             <p className="block w-full text-gray-700 overflow-y-auto word-wrap break-word">
                                 {transfer.message}
                             </p>
-                            <div className="flex flex-row items-center justify-start gap-2">
-                                <div className="flex flex-col">
-                                    <p className="text-sm font-bold text-primary italic">
-                                        views
-                                    </p>
-                                    <p className="block w-full text-gray-700">
-                                        {transfer.views}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col">
-                                    <p className="text-sm font-bold text-primary italic">
-                                        max views
-                                    </p>
-                                    <p className="block w-full text-gray-700">
-                                        {transfer.maxViews}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col">
-                                    <p className="text-sm font-bold text-primary italic">
-                                        downloads
-                                    </p>
-                                    <p className="block w-full text-gray-700">
-                                        {transfer.downloads}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col">
-                                    <p className="text-sm font-bold text-primary italic">
-                                        max downloads
-                                    </p>
-                                    <p className="block w-full text-gray-700">
-                                        {transfer.maxDownloads}
-                                    </p>
-                                </div>
-                            </div>
+                            <p className="text-sm font-bold text-primary italic">
+                                expires in
+                            </p>
+                            <p className="block w-full text-gray-700">
+                                {formatMilliseconds(expiresInLive)}
+                            </p>
                             <div className="flex flex-col">
                                 <p className="text-sm font-bold text-primary italic">
                                     size
@@ -276,7 +313,9 @@ export default function ReceiveTransferId(context: {
                             {transfer.allowDelete && (
                                 <button
                                     onClick={async () =>
-                                        await downloadTransfer()
+                                        deleteTransfer.mutate({
+                                            transferId: transferId,
+                                        })
                                     }
                                     className="h-fit w-full bg-red-500 rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                                 >
