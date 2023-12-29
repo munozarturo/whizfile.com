@@ -45,6 +45,8 @@ export async function middleware(req: NextRequest) {
         target: req.url,
     });
 
+    console.log("middleware", requestMetadata);
+
     const postRequest = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/requests`, {
         method: "POST",
         headers: {
@@ -54,6 +56,8 @@ export async function middleware(req: NextRequest) {
         },
         body: JSON.stringify(requestMetadata),
     });
+
+    console.log("log req", postRequest);
 
     const body = await postRequest.json();
 
