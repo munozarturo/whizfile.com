@@ -7,5 +7,4 @@
   - [ ] make ui play well with different screen sizes
   - [ ] make receive show all information available and work with the new API.
   - [ ] errors for server
-- [ ] change objects api to return s3 download link
 - [ ] messages loose whitespaces
