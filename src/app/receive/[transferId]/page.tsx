@@ -231,6 +231,13 @@ export default function ReceiveTransferId(context: {
         const transferId: string = data.data.transferId;
         const transfer: Transfer = data.data.transfer;
 
+        <>
+            <p className="text-sm font-bold text-primary italic">sent on</p>
+            <p className="block w-full text-gray-700">
+                {new Date(transfer.timestamp).toString().toLowerCase()}
+            </p>
+        </>;
+
         <div className="flex flex-row items-center justify-start gap-2">
             <div className="flex flex-col">
                 <p className="text-sm font-bold text-primary italic">views</p>
@@ -269,40 +276,43 @@ export default function ReceiveTransferId(context: {
                         <CardTitle className="p-6 text-primary font-extrabold">
                             transfer
                         </CardTitle>
-                        <CardContent className="w-full h-full flex flex-col">
-                            <p className="text-sm font-bold text-primary italic">
-                                sent on
-                            </p>
-                            <p className="block w-full text-gray-700">
-                                {new Date(transfer.timestamp)
-                                    .toString()
-                                    .toLowerCase()}
-                            </p>
-                            <p className="text-sm font-bold text-primary italic">
-                                title
-                            </p>
-                            <p className="block w-full text-gray-700">
-                                {transfer.title}
-                            </p>
-                            <p className="text-sm font-bold text-primary italic">
-                                message
-                            </p>
-                            <p className="block w-full text-gray-700 overflow-y-auto word-wrap break-word">
-                                {transfer.message}
-                            </p>
-                            <p className="text-sm font-bold text-primary italic">
-                                expires in
-                            </p>
-                            <p className="block w-full text-gray-700">
-                                {formatMilliseconds(expiresInLive)}
-                            </p>
-                            <div className="flex flex-col">
+                        <CardContent className="w-full h-full flex flex-col gap-2">
+                            <div className="flex flex-col w-full h-full">
                                 <p className="text-sm font-bold text-primary italic">
-                                    size
+                                    title
                                 </p>
                                 <p className="block w-full text-gray-700">
-                                    {formatFileSize(transfer.objectData.size)}
+                                    {transfer.title}
                                 </p>
+                                <p className="text-sm font-bold text-primary italic">
+                                    message
+                                </p>
+                                <p className="block w-full h-full text-gray-700 overflow-y-auto word-wrap break-word">
+                                    {transfer.message
+                                        .split("\n")
+                                        .map((line, index) => (
+                                            <React.Fragment key={index}>
+                                                {line}
+                                                <br />
+                                            </React.Fragment>
+                                        ))}
+                                </p>
+                                <p className="text-sm font-bold text-primary italic">
+                                    expires in
+                                </p>
+                                <p className="block w-full text-gray-700">
+                                    {formatMilliseconds(expiresInLive)}
+                                </p>
+                                <div className="flex flex-col">
+                                    <p className="text-sm font-bold text-primary italic">
+                                        size
+                                    </p>
+                                    <p className="block w-full text-gray-700">
+                                        {formatFileSize(
+                                            transfer.objectData.size
+                                        )}
+                                    </p>
+                                </div>
                             </div>
                             <button
                                 onClick={async () => await downloadTransfer()}
