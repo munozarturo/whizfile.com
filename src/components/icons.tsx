@@ -24,8 +24,8 @@ export const Icons = {
     ),
     download: (props: LucideProps) => (
         <svg
-            width="36"
-            height="36"
+            width={props.width || "36"}
+            height={props.height || "36"}
             viewBox="0 0 36 36"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -179,6 +179,47 @@ export const Icons = {
             />
             <path
                 d="M13 3V7C13 7.94281 13 8.41421 13.2929 8.70711C13.5858 9 14.0572 9 15 9H19"
+                stroke={props.fill || "white"}
+                strokeWidth="2"
+            />
+        </svg>
+    ),
+    import: (props: LucideProps) => (
+        <svg
+            width={props.width || "36"}
+            height={props.height || "36"}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M12 14L11.2929 14.7071L12 15.4142L12.7071 14.7071L12 14ZM13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44771 11 5L13 5ZM6.29289 9.70711L11.2929 14.7071L12.7071 13.2929L7.70711 8.29289L6.29289 9.70711ZM12.7071 14.7071L17.7071 9.70711L16.2929 8.29289L11.2929 13.2929L12.7071 14.7071ZM13 14L13 5L11 5L11 14L13 14Z"
+                fill={props.fill || "white"}
+            />
+            <path
+                d="M5 16L5 17C5 18.1046 5.89543 19 7 19L17 19C18.1046 19 19 18.1046 19 17V16"
+                stroke={props.fill || "white"}
+                stroke-width="2"
+            />
+        </svg>
+    ),
+    view: (props: LucideProps) => (
+        <svg
+            width={props.width || "36"}
+            height={props.height || "36"}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <circle
+                cx="12"
+                cy="12"
+                r="3"
+                stroke={props.fill || "white"}
+                strokeWidth="2"
+            />
+            <path
+                d="M20.188 10.9343C20.5762 11.4056 20.7703 11.6412 20.7703 12C20.7703 12.3588 20.5762 12.5944 20.188 13.0657C18.7679 14.7899 15.6357 18 12 18C8.36427 18 5.23206 14.7899 3.81197 13.0657C3.42381 12.5944 3.22973 12.3588 3.22973 12C3.22973 11.6412 3.42381 11.4056 3.81197 10.9343C5.23206 9.21014 8.36427 6 12 6C15.6357 6 18.7679 9.21014 20.188 10.9343Z"
                 stroke={props.fill || "white"}
                 strokeWidth="2"
             />
