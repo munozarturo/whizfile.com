@@ -216,7 +216,7 @@ export default function Receive() {
                                 />
                             </div>
                             {errors.transferId && (
-                                <span className="text-xs font-semibold italic text-red-500">
+                                <span className="text-md font-semibold italic text-red-500">
                                     {errors.transferId.message}
                                 </span>
                             )}
