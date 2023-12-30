@@ -15,6 +15,7 @@ import { PulseLoader } from "react-spinners";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { z } from "zod";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error(
@@ -86,6 +87,21 @@ export default function Receive() {
 
     const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
 
+    const TransferQuerySchema = z.object({
+        transferId: z.preprocess(
+            (input) => {
+                if (typeof input === "string") {
+                    const { urlTransferId } = parseTransferUrl(input);
+                    return urlTransferId;
+                }
+                return input;
+            },
+            z.string().refine((s) => /^[a-zA-Z0-9]{0,6}$/.test(s), {
+                message: "transfer id must be 6 alphanumeric characters.",
+            })
+        ),
+    });
+
     if (isLoading) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
@@ -127,7 +143,7 @@ export default function Receive() {
                             <h2>
                                 uh oh! it looks like a transfer with the id{" "}
                                 <span className="text-xl text-primary font-bold">
-                                    {transferId}
+                                    {urlTransferId}
                                 </span>{" "}
                                 does not exist...
                             </h2>
@@ -154,6 +170,10 @@ export default function Receive() {
                             className="text-primary text-4xl text-center"
                         >
                             find a transfer
+                            <div className="flex flex-col items-start justify-start">
+                                <p className="text-sm">tId: {urlTransferId}</p>
+                                <p className="text-sm">uPf: {urlPrefix}</p>
+                            </div>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col w-full h-full items-center justify-center ">
