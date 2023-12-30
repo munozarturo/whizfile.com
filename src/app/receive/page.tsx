@@ -46,7 +46,7 @@ export default function Receive() {
             return fetchTransfer(urlTransferId);
         },
         enabled: false,
-        retry: false;
+        retry: false,
     });
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
