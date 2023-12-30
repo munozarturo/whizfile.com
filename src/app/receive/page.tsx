@@ -13,9 +13,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { PulseLoader } from "react-spinners";
 import axiosInstance from "@/lib/api/axios-instance";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
     throw new Error(
@@ -30,10 +32,77 @@ const BASE_URL_NO_HTTP = BASE_URL.startsWith("http://")
     ? BASE_URL.replace("https://", "")
     : BASE_URL;
 
+function parseTransferUrl(url: string): {
+    urlPrefix: string;
+    urlTransferId: string;
+} {
+    const transferIdRegex = /^[a-zA-Z0-9]{0,6}$/;
+    const fullUrlPattern =
+        /^(https?:\/\/)?whizfile\.com\/receive\/([a-zA-Z0-9]{0,6})$/;
+
+    let urlPrefix = url;
+    let urlTransferId = "";
+
+    if (url.match(transferIdRegex)) {
+        urlPrefix = "";
+        urlTransferId = url;
+    } else if (url.startsWith(`${BASE_URL}/receive/`)) {
+        urlPrefix = `${BASE_URL}/receive/`;
+        urlTransferId = url.replace(`${BASE_URL}/receive/`, "");
+    } else if (url.startsWith(`${BASE_URL_NO_HTTP}/receive/`)) {
+        urlPrefix = `${BASE_URL_NO_HTTP}/receive/`;
+        urlTransferId = url.replace(`${BASE_URL_NO_HTTP}/receive/`, "");
+    }
+
+    return {
+        urlPrefix: urlPrefix,
+        urlTransferId: urlTransferId,
+    };
+}
+
 export default function Receive() {
     const router = useRouter();
     const [tryAgain, setTryAgain] = useState<boolean>(false);
-    const [transferId, setTransferId] = useState<string>("");
+
+    const TransferQuerySchema = z.object({
+        transferId: z.preprocess(
+            (input) => {
+                if (typeof input === "string") {
+                    const { urlTransferId } = parseTransferUrl(input);
+                    return urlTransferId;
+                }
+                return input;
+            },
+            z.string().refine((s) => /^[a-zA-Z0-9]{6}$/.test(s), {
+                message: "transfer id must contain 6 alphanumeric characters.",
+            })
+        ),
+    });
+
+    type ValidationSchemaType = z.infer<typeof TransferQuerySchema>;
+
+    const onSubmit = async (data: ValidationSchemaType) => {
+        setTryAgain(false);
+        const { data: newData } = await refetch();
+        const { urlPrefix, urlTransferId } = parseTransferUrl(data.transferId);
+        if (newData) {
+            router.push(`/receive/${urlTransferId}`);
+        }
+    };
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+    } = useForm<ValidationSchemaType>({
+        resolver: zodResolver(TransferQuerySchema),
+        defaultValues: {
+            transferId: "",
+        },
+    });
+
+    const transferId = watch("transferId");
 
     const { data, error, refetch, isError, isLoading } = useQuery({
         queryKey: ["transfer", transferId],
@@ -47,60 +116,7 @@ export default function Receive() {
         retry: false,
     });
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        setTryAgain(false);
-
-        const { data: newData } = await refetch();
-        const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
-
-        if (newData) {
-            router.push(`/receive/${urlTransferId}`);
-        }
-    };
-
-    const parseTransferUrl = (url: string) => {
-        const transferIdRegex = /^[a-zA-Z0-9]{0,6}$/;
-        const fullUrlPattern =
-            /^(https?:\/\/)?whizfile\.com\/receive\/([a-zA-Z0-9]{0,6})$/;
-
-        let urlPrefix = url;
-        let urlTransferId = "";
-
-        if (url.match(transferIdRegex)) {
-            urlPrefix = "";
-            urlTransferId = url;
-        } else if (url.startsWith(`${BASE_URL}/receive/`)) {
-            urlPrefix = `${BASE_URL}/receive/`;
-            urlTransferId = url.replace(`${BASE_URL}/receive/`, "");
-        } else if (url.startsWith(`${BASE_URL_NO_HTTP}/receive/`)) {
-            urlPrefix = `${BASE_URL_NO_HTTP}/receive/`;
-            urlTransferId = url.replace(`${BASE_URL_NO_HTTP}/receive/`, "");
-        }
-
-        return {
-            urlPrefix: urlPrefix,
-            urlTransferId: urlTransferId,
-        };
-    };
-
     const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
-
-    const TransferQuerySchema = z.object({
-        transferId: z.preprocess(
-            (input) => {
-                if (typeof input === "string") {
-                    const { urlTransferId } = parseTransferUrl(input);
-                    return urlTransferId;
-                }
-                return input;
-            },
-            z.string().refine((s) => /^[a-zA-Z0-9]{0,6}$/.test(s), {
-                message: "transfer id must be 6 alphanumeric characters.",
-            })
-        ),
-    });
 
     if (isLoading) {
         return (
@@ -170,16 +186,12 @@ export default function Receive() {
                             className="text-primary text-4xl text-center"
                         >
                             find a transfer
-                            <div className="flex flex-col items-start justify-start">
-                                <p className="text-sm">tId: {urlTransferId}</p>
-                                <p className="text-sm">uPf: {urlPrefix}</p>
-                            </div>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col w-full h-full items-center justify-center ">
                         <form
-                            onSubmit={handleSubmit}
-                            className="flex flex-col w-full h-full gap-4"
+                            onSubmit={handleSubmit(onSubmit)}
+                            className="flex flex-col w-full h-full gap-2"
                         >
                             <div className="w-full h-fit flex flex-row p-2 border-2 border-primary rounded-md relative">
                                 <div className="absolute flex flex-row pointer-events-none w-full h-fit">
@@ -196,15 +208,16 @@ export default function Receive() {
                                 </div>
                                 <input
                                     type="text"
-                                    value={transferId}
-                                    onChange={(e) =>
-                                        setTransferId(e.target.value)
-                                    }
                                     spellCheck="false"
+                                    {...register("transferId")}
                                     className="w-full text-3xl font-bold italic text-transparent focus:outline-none "
                                 />
                             </div>
-
+                            {errors.transferId && (
+                                <span className="text-xs font-semibold italic text-red-500">
+                                    {errors.transferId.message}
+                                </span>
+                            )}
                             <input
                                 type="submit"
                                 value="search"
