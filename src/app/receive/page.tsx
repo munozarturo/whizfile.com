@@ -108,7 +108,9 @@ export default function Receive() {
         queryKey: ["transfer", transferId],
         queryFn: async () => {
             const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
-            const res = await axiosInstance.get(`/api/transfer/${transferId}`);
+            const res = await axiosInstance.get(
+                `/api/transfer/${urlTransferId}`
+            );
 
             return res.data;
         },
