@@ -81,15 +81,6 @@ export default function Receive() {
 
     type ValidationSchemaType = z.infer<typeof TransferQuerySchema>;
 
-    const onSubmit = async (data: ValidationSchemaType) => {
-        setTryAgain(false);
-        const { data: newData } = await refetch();
-        const { urlPrefix, urlTransferId } = parseTransferUrl(data.transferId);
-        if (newData) {
-            router.push(`/receive/${urlTransferId}`);
-        }
-    };
-
     const {
         register,
         handleSubmit,
@@ -102,14 +93,23 @@ export default function Receive() {
         },
     });
 
+    const onSubmit = async (data: ValidationSchemaType) => {
+        setTryAgain(false);
+        const { data: newData } = await refetch();
+        const { urlPrefix, urlTransferId } = parseTransferUrl(data.transferId);
+        if (newData) {
+            router.push(`/receive/${urlTransferId}`);
+        }
+    };
+
     const transferId = watch("transferId");
 
-    const { data, error, refetch, isError, isLoading } = useQuery({
+    const { data, error, refetch, isError, isLoading, isSuccess } = useQuery({
         queryKey: ["transfer", transferId],
         queryFn: async () => {
             const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
             const res = await axiosInstance.get(
-                `/api/transfer/${urlTransferId}`
+                `/api/transfers/${urlTransferId}`
             );
 
             return res.data;
@@ -120,7 +120,7 @@ export default function Receive() {
 
     const { urlPrefix, urlTransferId } = parseTransferUrl(transferId);
 
-    if (isLoading) {
+    if (isLoading || isSuccess) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
                 <Card className="w-3/5 h-fit flex flex-col">
@@ -140,6 +140,9 @@ export default function Receive() {
                                 speedMultiplier={0.5}
                             />
                         </div>
+                        {isSuccess && (
+                            <p>redirecting you to your transfer...</p>
+                        )}
                     </CardContent>
                 </Card>
             </main>

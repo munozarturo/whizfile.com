@@ -7,4 +7,7 @@
   - [ ] make ui mobile friendly
   - [ ] make ui play well with different screen sizes
   - [ ] make receive show all information available and work with the new API.
-  - [ ] errors for server
+- [ ] finish receive page
+  - [ ] improve ui and layout
+  - [ ] make mobile friendly
+  - [ ] make ui play well with different screen sizes
