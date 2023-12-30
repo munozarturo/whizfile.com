@@ -9,11 +9,11 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { PulseLoader } from "react-spinners";
 import axiosInstance from "@/lib/api/axios-instance";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
