@@ -11,9 +11,11 @@ import { formatFileSize, formatMilliseconds } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { AxiosProgressEvent } from "axios";
+import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { PulseLoader } from "react-spinners";
 import React from "react";
+import { Tooltip } from "@/components/ui/tooltip";
 import axiosInstance from "@/lib/api/axios-instance";
 
 type Transfer = {
@@ -230,44 +232,41 @@ export default function ReceiveTransferId(context: {
     } else if (isSuccess) {
         const transferId: string = data.data.transferId;
         const transfer: Transfer = data.data.transfer;
+        const sentOn = new Date(transfer.timestamp);
 
-        <>
-            <p className="text-sm font-bold text-primary italic">sent on</p>
-            <p className="block w-full text-gray-700">
-                {new Date(transfer.timestamp).toString().toLowerCase()}
-            </p>
-        </>;
+        const tooltipText = {
+            sentOn: `transfer sent on: ${new Date(
+                transfer.timestamp
+            ).toString()}`,
+            views: `viewed ${transfer.views} out of ${transfer.maxViews} times. transfer will be deleted after ${transfer.maxViews} views.`,
+            downloads: `downloaded ${transfer.downloads} out of ${transfer.maxDownloads} times. transfer will be deleted after ${transfer.maxDownloads} downloads.`,
+            delete: "this transfer can be manually deleted. once deleted, it cannot be accessed again.",
+            expiresIn: `expires on ${new Date(
+                transfer.expireIn + transfer.timestamp
+            )}. ${formatMilliseconds(expiresInLive)} from now.`,
+            title: `title of the transfer.`,
+            message: `message of the transfer.`,
+            file: `the size of the files sent in this transfer.`,
+        };
 
-        <div className="flex flex-row items-center justify-start gap-2">
-            <div className="flex flex-col">
-                <p className="text-sm font-bold text-primary italic">views</p>
-                <p className="block w-full text-gray-700">{transfer.views}</p>
-            </div>
-            <div className="flex flex-col">
-                <p className="text-sm font-bold text-primary italic">
-                    max views
-                </p>
-                <p className="block w-full text-gray-700">
-                    {transfer.maxViews}
-                </p>
-            </div>
-            <div className="flex flex-col">
-                <p className="text-sm font-bold text-primary italic">
-                    downloads
-                </p>
-                <p className="block w-full text-gray-700">
-                    {transfer.downloads}
-                </p>
-            </div>
-            <div className="flex flex-col">
-                <p className="text-sm font-bold text-primary italic">
-                    max downloads
-                </p>
-                <p className="block w-full text-gray-700">
-                    {transfer.maxDownloads}
-                </p>
-            </div>
-        </div>;
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const sentOnString = `${monthNames[
+            sentOn.getMonth()
+        ].toLowerCase()} ${sentOn.getDate()}`;
 
         return (
             <>
@@ -277,16 +276,106 @@ export default function ReceiveTransferId(context: {
                             transfer
                         </CardTitle>
                         <CardContent className="w-full h-full flex flex-col gap-2">
-                            <div className="flex flex-col w-full h-full">
-                                <p className="text-sm font-bold text-primary italic">
-                                    title
-                                </p>
+                            <div className="flex flex-col">
+                                <div className="flex flex-row w-full items-center justify-between">
+                                    <div className="flex flex-row gap-1">
+                                        <p className="text-sm font-bold text-primary italic">
+                                            title
+                                        </p>
+                                        <Tooltip
+                                            tooltipText={tooltipText.title}
+                                        >
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
+                                    <div className="w-fit flex flex-row gap-3">
+                                        <div className="flex flex-row">
+                                            <Tooltip
+                                                tooltipText={tooltipText.sentOn}
+                                                className="flex flex-row gap-1"
+                                            >
+                                                <p className="text-sm font-bold text-primary italic">
+                                                    sent&nbsp;on&nbsp;
+                                                </p>
+                                                <p className="block w-full text-sm text-gray-700">
+                                                    {sentOnString}
+                                                </p>
+                                            </Tooltip>
+                                        </div>
+                                        <Tooltip
+                                            tooltipText={tooltipText.views}
+                                        >
+                                            <div className="flex flex-row items-center">
+                                                <Icons.view
+                                                    fill="#4539cd"
+                                                    width={24}
+                                                    height={24}
+                                                />
+                                                <p className="text-sm font-bold text-primary italic">
+                                                    {transfer.views}/
+                                                    {transfer.maxViews}
+                                                </p>
+                                            </div>
+                                        </Tooltip>
+                                        <Tooltip
+                                            tooltipText={tooltipText.downloads}
+                                        >
+                                            <div className="flex flex-row items-center">
+                                                <Icons.import
+                                                    fill="#4539cd"
+                                                    width={24}
+                                                    height={24}
+                                                />
+                                                <p className="text-sm font-bold text-primary italic">
+                                                    {transfer.downloads}/
+                                                    {transfer.maxDownloads}
+                                                </p>
+                                            </div>
+                                        </Tooltip>
+                                        {transfer.allowDelete && (
+                                            <Tooltip
+                                                tooltipText={tooltipText.delete}
+                                            >
+                                                <button
+                                                    onClick={async () =>
+                                                        deleteTransfer.mutate({
+                                                            transferId:
+                                                                transferId,
+                                                        })
+                                                    }
+                                                    className="h-fit w-fit bg-red-500 rounded-xl p-1 text-secondary italic font-extrabold text-sm flex flex-row items-center"
+                                                >
+                                                    <Icons.remove
+                                                        width={24}
+                                                        height={24}
+                                                    />
+                                                    delete
+                                                </button>
+                                            </Tooltip>
+                                        )}
+                                    </div>
+                                </div>
                                 <p className="block w-full text-gray-700">
                                     {transfer.title}
                                 </p>
-                                <p className="text-sm font-bold text-primary italic">
-                                    message
-                                </p>
+                            </div>
+                            <div className="flex flex-col h-full">
+                                <div className="flex flex-row gap-1">
+                                    <p className="text-sm font-bold text-primary italic">
+                                        message
+                                    </p>
+                                    <Tooltip tooltipText={tooltipText.message}>
+                                        <Icons.info
+                                            fill="#4539cd"
+                                            width={20}
+                                            height={20}
+                                        />
+                                    </Tooltip>
+                                </div>
                                 <p className="block w-full h-full text-gray-700 overflow-y-auto word-wrap break-word">
                                     {transfer.message
                                         .split("\n")
@@ -297,16 +386,40 @@ export default function ReceiveTransferId(context: {
                                             </React.Fragment>
                                         ))}
                                 </p>
-                                <p className="text-sm font-bold text-primary italic">
-                                    expires in
-                                </p>
+                            </div>
+                            <div className="flex flex-col">
+                                <div className="flex flex-row gap-1">
+                                    <p className="text-sm font-bold text-primary italic">
+                                        expires in
+                                    </p>
+                                    <Tooltip
+                                        tooltipText={tooltipText.expiresIn}
+                                    >
+                                        <Icons.info
+                                            fill="#4539cd"
+                                            width={20}
+                                            height={20}
+                                        />
+                                    </Tooltip>
+                                </div>
                                 <p className="block w-full text-gray-700">
                                     {formatMilliseconds(expiresInLive)}
                                 </p>
+                            </div>
+                            <div className="flex flex-col ">
                                 <div className="flex flex-col">
-                                    <p className="text-sm font-bold text-primary italic">
-                                        size
-                                    </p>
+                                    <div className="flex flex-row gap-1">
+                                        <p className="text-sm font-bold text-primary italic">
+                                            file
+                                        </p>
+                                        <Tooltip tooltipText={tooltipText.file}>
+                                            <Icons.info
+                                                fill="#4539cd"
+                                                width={20}
+                                                height={20}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <p className="block w-full text-gray-700">
                                         {formatFileSize(
                                             transfer.objectData.size
@@ -320,18 +433,6 @@ export default function ReceiveTransferId(context: {
                             >
                                 download
                             </button>
-                            {transfer.allowDelete && (
-                                <button
-                                    onClick={async () =>
-                                        deleteTransfer.mutate({
-                                            transferId: transferId,
-                                        })
-                                    }
-                                    className="h-fit w-full bg-red-500 rounded-xl p-2 text-secondary italic font-extrabold text-xl"
-                                >
-                                    delete
-                                </button>
-                            )}
                         </CardContent>
                     </Card>
                 </main>
