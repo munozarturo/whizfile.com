@@ -1,13 +1,14 @@
 # Todo
 
-- [ ] make the dropzone work properly
-  - [ ] make the dropzone work with form validation
-  - [ ] make it so that a file dropped on any part of the screen is taken.
-- [ ] finish send page
-  - [ ] make ui mobile friendly
-  - [ ] make ui play well with different screen sizes
-  - [ ] make receive show all information available and work with the new API.
-- [ ] finish receive page
-  - [ ] improve ui and layout
+- [ ] send
+  - [ ] make UI work with different screen sizes
   - [ ] make mobile friendly
-  - [ ] make ui play well with different screen sizes
+  - [ ] dropzone
+    - [ ] make the dropzone work with validation
+    - [ ] fix dropzone to accept dropped files and show full screen drop prompt when dragging
+- [ ] receive
+  - [ ] make UI work with different screen sizes
+  - [ ] make mobile friendly
+- [ ] receive/{transferId}
+  - [ ] make UI work with different screen sizes
+  - [ ] make mobile friendly
