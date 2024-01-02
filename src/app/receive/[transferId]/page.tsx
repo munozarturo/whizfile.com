@@ -170,7 +170,7 @@ export default function ReceiveTransferId(context: {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
-                    <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                    <Card className="flex flex-col items-center justify-center">
                         <CardHeader className="h-fit w-full">
                             <CardTitle
                                 as="h1"
@@ -180,7 +180,7 @@ export default function ReceiveTransferId(context: {
                                 transfer...
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="w-full h-full flex flex-row items-center justify-center">
+                        <CardContent className="w-full sm:h-full flex flex-row items-center justify-center">
                             <div className="w-full h-full flex flex-col items-center justify-center gap-5">
                                 <PulseLoader
                                     color="#4539cd"
@@ -214,7 +214,7 @@ export default function ReceiveTransferId(context: {
                                 transfer deleted
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="text-center">
                             <h2>transfer deleted succesfully.</h2>
                         </CardContent>
                         <CardFooter>
@@ -271,12 +271,75 @@ export default function ReceiveTransferId(context: {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
-                    <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                    <Card className="flex flex-col items-center justify-center">
                         <CardTitle className="p-6 text-primary font-extrabold">
                             transfer
                         </CardTitle>
                         <CardContent className="w-full h-full flex flex-col gap-2">
                             <div className="flex flex-col">
+                                <div className="flex sm:hidden w-full flex-row gap-3 justify-between items-center">
+                                    <div className="flex flex-row">
+                                        <Tooltip
+                                            tooltipText={tooltipText.sentOn}
+                                            className="flex flex-row gap-1"
+                                        >
+                                            <p className="text-sm font-bold text-primary italic">
+                                                sent&nbsp;on&nbsp;
+                                            </p>
+                                            <p className="block w-full text-sm text-gray-700">
+                                                {sentOnString}
+                                            </p>
+                                        </Tooltip>
+                                    </div>
+                                    <Tooltip tooltipText={tooltipText.views}>
+                                        <div className="flex flex-row items-center">
+                                            <Icons.view
+                                                fill="#4539cd"
+                                                width={24}
+                                                height={24}
+                                            />
+                                            <p className="text-sm font-bold text-primary italic">
+                                                {transfer.views}/
+                                                {transfer.maxViews}
+                                            </p>
+                                        </div>
+                                    </Tooltip>
+                                    <Tooltip
+                                        tooltipText={tooltipText.downloads}
+                                    >
+                                        <div className="flex flex-row items-center">
+                                            <Icons.import
+                                                fill="#4539cd"
+                                                width={24}
+                                                height={24}
+                                            />
+                                            <p className="text-sm font-bold text-primary italic">
+                                                {transfer.downloads}/
+                                                {transfer.maxDownloads}
+                                            </p>
+                                        </div>
+                                    </Tooltip>
+                                    {transfer.allowDelete && (
+                                        <Tooltip
+                                            tooltipText={tooltipText.delete}
+                                        >
+                                            <button
+                                                onClick={async () =>
+                                                    deleteTransfer.mutate({
+                                                        transferId: transferId,
+                                                    })
+                                                }
+                                                className="h-fit w-fit bg-red-500 rounded-xl p-1 text-secondary italic font-extrabold text-sm flex flex-row items-center"
+                                            >
+                                                <Icons.remove
+                                                    width={24}
+                                                    height={24}
+                                                />
+                                                delete
+                                            </button>
+                                        </Tooltip>
+                                    )}
+                                </div>
                                 <div className="flex flex-row w-full items-center justify-between">
                                     <div className="flex flex-row gap-1">
                                         <p className="text-sm font-bold text-primary italic">
@@ -292,7 +355,7 @@ export default function ReceiveTransferId(context: {
                                             />
                                         </Tooltip>
                                     </div>
-                                    <div className="w-fit flex flex-row gap-3">
+                                    <div className="hidden sm:flex w-fit flex-row gap-3">
                                         <div className="flex flex-row">
                                             <Tooltip
                                                 tooltipText={tooltipText.sentOn}
@@ -442,7 +505,7 @@ export default function ReceiveTransferId(context: {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
-                    <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                    <Card className="flex flex-col items-center justify-center">
                         <CardHeader className="h-fit w-full">
                             <CardTitle
                                 as="h1"
@@ -472,7 +535,7 @@ export default function ReceiveTransferId(context: {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
-                    <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                    <Card className="flex flex-col items-center justify-center">
                         <CardHeader className="h-fit w-full">
                             <CardTitle
                                 as="h1"
