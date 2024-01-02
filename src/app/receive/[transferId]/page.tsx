@@ -271,7 +271,7 @@ export default function ReceiveTransferId(context: {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
-                    <Card className="flex flex-col items-center justify-center overflow-y-scroll">
+                    <Card className="flex flex-col items-center justify-center overflow-y-scroll custom-scrollbar">
                         <CardTitle className="p-6 text-primary font-extrabold">
                             transfer
                         </CardTitle>
@@ -426,7 +426,7 @@ export default function ReceiveTransferId(context: {
                                     {transfer.title}
                                 </p>
                             </div>
-                            <div className="flex flex-col h-fit">
+                            <div className="flex flex-col h-fit sm:h-full">
                                 <div className="flex flex-row gap-1">
                                     <p className="text-sm font-bold text-primary italic">
                                         message
@@ -439,7 +439,7 @@ export default function ReceiveTransferId(context: {
                                         />
                                     </Tooltip>
                                 </div>
-                                <p className="block w-full h-fit text-gray-700 overflow-y-auto word-wrap break-word">
+                                <p className="block w-full h-fit sm:h-full text-gray-700 overflow-y-auto word-wrap break-word">
                                     {transfer.message
                                         .split("\n")
                                         .map((line, index) => (
