@@ -30,7 +30,7 @@ const Tooltip = React.forwardRef<
         >
             {children}
             {isTooltipVisible && (
-                <span className="absolute bottom-full mb-2 w-64 p-2 bg-black text-white text-sm rounded-md shadow-lg z-10 -translate-x-1/2 left-1/2">
+                <span className="absolute bottom-full mb-2 w-64 p-2 bg-black text-white text-sm rounded-md shadow-lg z-10 sm:-translate-x-1/2 sm:left-1/2">
                     {tooltipText}
                 </span>
             )}

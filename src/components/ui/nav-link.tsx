@@ -22,7 +22,7 @@ const NavLink = React.forwardRef<
                 <span className="relative">
                     {text}
                     <span
-                        className={`block transition-all duration-500 h-0.5 bg-white ${
+                        className={`block transition-all duration-500 h-0.5 bg-secondary ${
                             active
                                 ? "max-w-full"
                                 : "max-w-0 group-hover:max-w-full"

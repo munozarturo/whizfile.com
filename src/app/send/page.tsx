@@ -339,15 +339,15 @@ export default function Send() {
     } else {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                <Card className="flex flex-col items-center justify-center">
                     <CardTitle className="p-6 text-primary font-extrabold">
                         send
                     </CardTitle>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="w-full h-full flex flex-row"
+                        className="w-full h-5/6 overflow-visible sm:overflow-visible sm:h-full flex flex-col sm:flex-row"
                     >
-                        <CardContent className="w-1/2 h-full flex flex-col items-center justify-start px-6 pr-3">
+                        <CardContent className="w-full sm:w-1/2 h-full flex flex-col items-center justify-start sm:px-6 sm:pr-3">
                             <div className="w-full h-full flex flex-col gap-3">
                                 <div className="flex flex-col">
                                     <div className="flex justify-between items-center">
@@ -431,7 +431,7 @@ export default function Send() {
                                     </div>
                                     <textarea
                                         id="message"
-                                        className={`flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-none text-gray-700 ${
+                                        className={`flex-grow border border-gray-400 rounded-md shadow-sm p-1 custom-scrollbar resize-y sm:resize-none text-gray-700 ${
                                             errors.message
                                                 ? "border-red-500"
                                                 : ""
@@ -651,19 +651,28 @@ export default function Send() {
                                         </div>
                                     </>
                                 )}
-                                <input
-                                    type="submit"
-                                    value="get a link"
-                                    className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
-                                />
+                                <div className="hidden sm:flex">
+                                    <input
+                                        type="submit"
+                                        value="get a link"
+                                        className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                                    />
+                                </div>
                             </div>
                         </CardContent>
-                        <CardContent className="w-1/2 h-full flex flex-col items-center justify-center px-6 pl-3">
+                        <CardContent className="w-full sm:w-1/2 h-full flex flex-col items-center justify-center sm:px-6 sm:pl-3">
                             <DropZone
                                 files={files}
                                 setFiles={setFiles}
                             ></DropZone>
                         </CardContent>
+                        <div className="flex sm:hidden px-3">
+                            <input
+                                type="submit"
+                                value="get a link"
+                                className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                            />
+                        </div>
                     </form>
                 </Card>
             </main>
