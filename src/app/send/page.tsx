@@ -254,13 +254,13 @@ export default function Send() {
     if (mutation.isSuccess || transferId) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                <Card className="flex flex-col items-center justify-center">
                     <CardHeader className="h-fit w-full">
                         <CardTitle as="h1" className="text-primary text-center">
                             transfer sent
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="w-full h-full flex flex-col items-center justify-center gap-5">
+                    <CardContent className="w-full flex flex-col items-center justify-center gap-5">
                         <div className="flex flex-col items-center justify-center">
                             <p>your transfer has been sent!</p>
                         </div>
@@ -288,13 +288,13 @@ export default function Send() {
     } else if (mutation.isPending) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                <Card className="flex flex-col items-center justify-center">
                     <CardHeader className="h-fit w-full">
                         <CardTitle as="h1" className="text-primary text-center">
                             transfering...
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="w-full h-full flex flex-row items-center justify-center">
+                    <CardContent className="w-full flex flex-row items-center justify-center">
                         <div className="w-full h-full flex flex-col items-center justify-center gap-5">
                             <PulseLoader
                                 color="#4539cd"
@@ -315,7 +315,7 @@ export default function Send() {
     } else if (mutation.isError) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-3/4 flex flex-col items-center justify-center">
+                <Card className="flex flex-col items-center justify-center">
                     <CardHeader className="h-fit w-full">
                         <CardTitle as="h1" className="text-primary text-center">
                             transfer error

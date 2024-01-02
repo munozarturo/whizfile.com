@@ -123,7 +123,10 @@ export default function Receive() {
     if (isLoading || isSuccess) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-fit flex flex-col">
+                <Card
+                    className="flex flex-col items-center justify-center"
+                    height="fit"
+                >
                     <CardHeader className="h-fit w-full">
                         <CardTitle
                             as="h1"
@@ -132,8 +135,8 @@ export default function Receive() {
                             find a transfer
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col w-full h-full items-center justify-center ">
-                        <div className="w-full h-full flex flex-col items-center justify-center">
+                    <CardContent className="flex flex-col w-full items-center justify-center ">
+                        <div className="w-full flex flex-col items-center justify-center">
                             <PulseLoader
                                 color="#4539cd"
                                 size={20}
@@ -150,8 +153,11 @@ export default function Receive() {
     } else if (isError && !tryAgain) {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-fit flex flex-col">
-                    <CardHeader className="h-fit w-full">
+                <Card
+                    className="flex flex-col items-center justify-center"
+                    height="fit"
+                >
+                    <CardHeader className="h-fit">
                         <CardTitle
                             as="h1"
                             className="text-primary text-4xl text-center"
@@ -159,8 +165,8 @@ export default function Receive() {
                             find a transfer
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col w-full h-full items-center justify-center ">
-                        <div className="w-full h-full flex flex-col items-center justify-center space-y-2">
+                    <CardContent className="flex flex-col w-full items-center justify-center ">
+                        <div className="w-full flex flex-col items-center justify-center space-y-2 text-center">
                             <h2>
                                 uh oh! it looks like a transfer with the id{" "}
                                 <span className="text-xl text-primary font-bold">
@@ -184,8 +190,8 @@ export default function Receive() {
     } else {
         return (
             <main className="w-full h-full flex flex-row justify-center items-center">
-                <Card className="w-3/5 h-fit flex flex-col">
-                    <CardHeader className="h-fit w-full">
+                <Card className="h-fit flex flex-col" height="fit">
+                    <CardHeader className="w-full">
                         <CardTitle
                             as="h1"
                             className="text-primary text-4xl text-center"
@@ -193,19 +199,19 @@ export default function Receive() {
                             find a transfer
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col w-full h-full items-center justify-center ">
+                    <CardContent className="flex flex-col w-full h-fit items-center justify-center ">
                         <form
                             onSubmit={handleSubmit(onSubmit)}
-                            className="flex flex-col w-full h-full gap-2"
+                            className="flex flex-col w-full h-fit gap-2"
                         >
                             <div className="w-full h-fit flex flex-row p-2 border-2 border-primary rounded-md relative">
                                 <div className="absolute flex flex-row pointer-events-none w-full h-fit">
-                                    <span className="pointer-events-none w-fit text-3xl font-bold italic text-gray-500 focus:outline-none">
+                                    <span className="pointer-events-none w-fit text-lg sm:text-3xl font-bold italic text-gray-500 focus:outline-none">
                                         {transferId === ""
                                             ? `${BASE_URL}/receive/`
                                             : urlPrefix}
                                     </span>
-                                    <span className="pointer-events-none w-fit text-3xl font-bold italic text-primary focus:outline-none">
+                                    <span className="pointer-eventslg-none w-fit text-lg sm:text-3xl font-bold italic text-primary focus:outline-none">
                                         {transferId === ""
                                             ? "xxxxxx"
                                             : urlTransferId}
@@ -215,11 +221,11 @@ export default function Receive() {
                                     type="text"
                                     spellCheck="false"
                                     {...register("transferId")}
-                                    className="w-full text-3xl font-bold italic text-transparent focus:outline-none "
+                                    className="w-full text-lg sm:text-3xl font-bold italic text-transparent focus:outline-none "
                                 />
                             </div>
                             {errors.transferId && (
-                                <span className="text-md font-semibold italic text-red-500">
+                                <span className="text-sm sm:text-md font-semibold italic text-red-500">
                                     {errors.transferId.message}
                                 </span>
                             )}
