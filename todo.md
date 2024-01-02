@@ -12,3 +12,4 @@
 - [ ] receive/{transferId}
   - [ ] make UI work with different screen sizes
   - [ ] make mobile friendly
+- [ ] transfer query screen doesn't match whizfile unless it starts with `www.`

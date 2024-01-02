@@ -8,32 +8,42 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
-const Navbar = React.forwardRef<
+const MobileNavbarTop = React.forwardRef<
     HTMLDivElement,
     React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
     const pathname = usePathname();
 
     return (
-        <div
-            ref={ref}
-            className={cn(className, "w-full h-18 px-4 pt-4")}
-            {...props}
-        >
-            <nav className="w-full h-16 flex flex-row bg-primary px-24 justify-start items-center space-x-12 shadow-2xl rounded-xl">
+        <div className={cn("w-full h-16", className)}>
+            <nav className="w-full h-full flex flex-row bg-primary justify-start items-center shadow-2xl rounded-b-2xl px-6">
                 <Link href="./">
                     <span>
                         <Image
                             src="/brand/logo_raw.svg"
-                            width={154.67}
-                            height={48}
+                            width={(154.67 * 3) / 4}
+                            height={(48 * 3) / 4}
                             alt={"Logo"}
                             priority
                         ></Image>
                     </span>
                 </Link>
+            </nav>
+        </div>
+    );
+});
+MobileNavbarTop.displayName = "NavbarMobileTop";
 
-                <div className="flex flex-row w-full space-x-6 justify-end">
+const MobileNavbarBottom = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+    const pathname = usePathname();
+
+    return (
+        <div className={cn("w-full h-16", className)}>
+            <nav className="w-full h-full flex flex-row bg-primary justify-center items-center shadow-2xl rounded-t-2xl">
+                <div className="flex flex-row w-3/4 justify-around">
                     <NavLink
                         active={pathname.startsWith("/send")}
                         href={"/send"}
@@ -51,6 +61,6 @@ const Navbar = React.forwardRef<
         </div>
     );
 });
-Navbar.displayName = "Navbar";
+MobileNavbarBottom.displayName = "NavbarMobileBottom";
 
-export default Navbar;
+export { MobileNavbarTop, MobileNavbarBottom };

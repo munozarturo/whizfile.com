@@ -1,5 +1,10 @@
 import "./globals.css";
 
+import {
+    MobileNavbarBottom,
+    MobileNavbarTop,
+} from "@/components/mobile-navbar";
+
 import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import Navbar from "@/components/navbar";
@@ -20,11 +25,13 @@ export default function RootLayout({
     return (
         <html lang="en" className="w-screen h-screen overflow-hidden">
             <body
-                className={`w-screen h-screen flex flex-col ${inter.className} bg-tile-3 bg-repeat bg-origin-content bg-size-tile`}
+                className={`w-screen h-screen flex flex-col ${inter.className} bg-white sm:bg-tile-3 bg-repeat bg-origin-content bg-size-tile`}
             >
                 <Providers>
-                    <Navbar />
+                    <MobileNavbarTop className="flex sm:hidden"></MobileNavbarTop>
+                    <Navbar className="hidden sm:flex" />
                     {children}
+                    <MobileNavbarBottom className="flex sm:hidden"></MobileNavbarBottom>
                 </Providers>
             </body>
         </html>
