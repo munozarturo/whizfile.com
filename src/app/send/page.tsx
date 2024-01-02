@@ -651,13 +651,13 @@ export default function Send() {
                                         </div>
                                     </>
                                 )}
-                                <div className="hidden sm:flex">
-                                    <input
-                                        type="submit"
-                                        value="get a link"
-                                        className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
-                                    />
-                                </div>
+                                {/* <div className="hidden sm:flex"> */}
+                                <input
+                                    type="submit"
+                                    value="get a link"
+                                    className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
+                                />
+                                {/* </div> */}
                             </div>
                         </CardContent>
                         <CardContent className="w-full sm:w-1/2 h-full flex flex-col items-center justify-center sm:px-6 sm:pl-3">
@@ -666,13 +666,13 @@ export default function Send() {
                                 setFiles={setFiles}
                             ></DropZone>
                         </CardContent>
-                        <div className="flex sm:hidden px-3">
+                        {/* <div className="flex sm:hidden px-3">
                             <input
                                 type="submit"
                                 value="get a link"
                                 className="cursor-pointer h-fit w-full bg-primary rounded-xl p-2 text-secondary italic font-extrabold text-xl"
                             />
-                        </div>
+                        </div> */}
                     </form>
                 </Card>
             </main>
