@@ -271,7 +271,7 @@ export default function ReceiveTransferId(context: {
         return (
             <>
                 <main className="w-full h-full flex flex-row justify-center items-center">
-                    <Card className="flex flex-col items-center justify-center overflow-y-scroll custom-scrollbar">
+                    <Card className="flex flex-col items-center justify-center">
                         <CardTitle className="p-6 text-primary font-extrabold">
                             transfer
                         </CardTitle>
