@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source srcset="https://www.munozarturo.com/assets/whizfile/logo-long.svg">
-    <img alt="whizfile" src="https://www.munozarturo.com/assets/whizfile/logo-long.svg" width="50%" height="40%">
+    <source srcset="https://www.munozarturo.com/assets/whizfile/logo-github.svg">
+    <img alt="whizfile" src="https://www.munozarturo.com/assets/whizfile/logo-github.svg" width="50%" height="40%">
   </picture>
 </p>
 
