@@ -1,9 +1,9 @@
-<p align="center">
+<div align="center">
   <picture>
     <source srcset="https://www.munozarturo.com/assets/whizfile/logo-github.svg">
     <img alt="whizfile" src="https://www.munozarturo.com/assets/whizfile/logo-github.svg" width="50%" height="40%">
   </picture>
-</p>
+</div>
 
 # whizfile.com
 
